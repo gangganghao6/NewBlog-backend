@@ -27,3 +27,4 @@ dist-ssr
 keys
 *.js
 *.txt
+prisma/migrations
