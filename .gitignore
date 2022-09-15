@@ -28,3 +28,4 @@ keys
 *.js
 *.txt
 prisma/migrations
+src/database

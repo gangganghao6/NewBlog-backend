@@ -17,29 +17,23 @@ const prisma = new PrismaClient()
 await prisma.$queryRaw`PRAGMA journal_mode=WAL`
 const currentDate = dayjs(new Date()).format('YYYY-MM-DD')
 
-interface LocalConfig {
-  projectPath: string
-  port: number
-  isDev: boolean
-}
-
-const localConfig: LocalConfig = JSON.parse(
-  fs.readFileSync(path.join(path.resolve(), 'localConfig.json'), {
-    encoding: 'utf8'
-  })
-)
 const fastify = Fastify({
-  logger: localConfig.isDev
-    ? true
-    : {
-        level: 'info',
-        file: `./log/${currentDate}.txt`
-      },
+  logger:
+    process.env.ISDEV === 'true'
+      ? true
+      : {
+          level: 'info',
+          file: `./log/${currentDate}.txt`
+        },
   http2: true,
   https: {
     allowHTTP1: true,
-    cert: fs.readFileSync(path.join(localConfig.projectPath, 'keys/cert.crt')),
-    key: fs.readFileSync(path.join(localConfig.projectPath, 'keys/cert.key'))
+    cert: fs.readFileSync(
+      path.join(process.env.PROJECT_PATH as string, 'keys/cert.crt')
+    ),
+    key: fs.readFileSync(
+      path.join(process.env.PROJECT_PATH as string, 'keys/cert.key')
+    )
   }
 })
 await fastify.register(cors, {
@@ -66,7 +60,7 @@ await fastify.register(base, { prefix: '/api/base', prisma })
 const start = async (): Promise<void> => {
   try {
     await fastify.listen({
-      port: localConfig.port,
+      port: parseInt(process.env.PORT as string),
       host: '0.0.0.0'
     })
   } catch (err) {
