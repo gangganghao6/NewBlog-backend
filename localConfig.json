@@ -1,4 +1,5 @@
 {
   "projectPath": "E:\\前端项目\\新博客-前端",
-  "port": 8080
+  "port": 8080,
+  "isDev": true
 }

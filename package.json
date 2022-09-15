@@ -1,7 +1,22 @@
 {
   "dependencies": {
+    "@fastify/compress": "^6.1.1",
+    "@fastify/cookie": "^8.1.0",
     "@fastify/cors": "^8.1.0",
+    "@fastify/middie": "^8.0.0",
+    "@fastify/multipart": "^7.1.2",
+    "@fastify/routes": "^5.0.0",
+    "@fastify/session": "^10.0.0",
+    "@fastify/static": "^6.5.0",
+    "@fastify/websocket": "^7.0.1",
+    "@prisma/client": "^4.3.1",
+    "@types/json-schema": "^7.0.11",
+    "dayjs": "^1.11.5",
+    "dotenv": "^16.0.2",
     "fastify": "^4.5.3",
+    "prisma": "^4.3.1",
+    "sharp": "0.30.7",
+    "sqlite3": "^5.1.0",
     "ts-node": "^10.9.1"
   },
   "type": "module",
@@ -10,12 +25,15 @@
     "prepare": "husky install",
     "dev": "ts-node-esm src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "run": "node dist/index.js"
+    "run": "node dist/index.js",
+    "prisma": "prisma format&&npx prisma migrate dev --name init"
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
     "@types/node": "^18.7.13",
+    "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.36.1",
+    "@typescript-eslint/parser": "^5.36.1",
     "eslint": "^8.23.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard-with-typescript": "^22.0.0",

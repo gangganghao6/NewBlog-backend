@@ -1,0 +1,7 @@
+-- CreateTable
+CREATE TABLE "Image" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "created_time" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,0 +1,8 @@
+-- CreateTable
+CREATE TABLE "Todolist" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "title" TEXT NOT NULL,
+    "created_time" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "is_done" BOOLEAN NOT NULL DEFAULT false,
+    "is_done_time" DATETIME NOT NULL
+);

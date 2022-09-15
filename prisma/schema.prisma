@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Image {
+  id           Int       @id @default(autoincrement())
+  name         String
+  url          String
+  created_time DateTime  @default(now())
+  Video        Video?    @relation(references: [id], fields: [VideoId])
+  VideoId      Int?      @unique
+  BaseInfo     BaseInfo? @relation(references: [id], fields: [BaseInfoId])
+  BaseInfoId   Int?      @unique
+  User         User?     @relation(references: [id], fields: [UserId])
+  UserId       Int?      @unique
+  BlogPost     Blog?     @relation("blogPost", references: [id], fields: [BlogPostId])
+  BlogPostId   Int?      @unique
+  Project      Project?  @relation(references: [id], fields: [ProjectId])
+  ProjectId    Int?      @unique
+  Chat         Chat?     @relation(references: [id], fields: [ChatId])
+  ChatId       Int?      @unique
+  Shuoshuo     Shuoshuo? @relation(references: [id], fields: [ShuoshuoId])
+  ShuoshuoId   Int?
+  BlogImages   Blog?     @relation("blogImages", references: [id], fields: [BlogImagesId])
+  BlogImagesId Int?
+}
+
+model Video {
+  id           Int       @id @default(autoincrement())
+  name         String
+  url          String
+  length       Int
+  created_time DateTime  @default(now())
+  post         Image?
+  Chat         Chat?     @relation(references: [id], fields: [ChatId])
+  ChatId       Int?      @unique
+  Shuoshuo     Shuoshuo? @relation(references: [id], fields: [ShuoshuoId])
+  ShuoshuoId   Int?      @unique
+}
+
+model BaseInfo {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  start_time         DateTime @default(now())
+  blogs_count        Int      @default(0)
+  comments_count     Int      @default(0)
+  visits_count       Int      @default(0)
+  last_modified_time DateTime @default(now())
+  account            String
+  password           String
+  email              String
+  head_image         Image?
+}
+
+model User {
+  id            Int         @id @default(autoincrement())
+  name          String
+  email         String
+  created_time  DateTime    @default(now())
+  is_banned     Boolean     @default(false)
+  is_subscribed Boolean     @default(false)
+  UserVisit     UserVisit[]
+  Comment       Comment[]
+  Pay           Pay[]
+  Chat          Chat[]
+  avatar        Image?
+}
+
+model UserVisit {
+  id         Int      @id @default(autoincrement())
+  ip         String
+  user_agent String
+  visit_time DateTime @default(now())
+  user       User     @relation(references: [id], fields: [UserId])
+  UserId     Int      @unique
+}
+
+model Comment {
+  id           Int       @id @default(autoincrement())
+  comment      String
+  created_time DateTime  @default(now())
+  user         User      @relation(references: [id], fields: [UserId])
+  UserId       Int       @unique
+  Blog         Blog?     @relation(references: [id], fields: [BlogId])
+  BlogId       Int?
+  File         File?     @relation(fields: [fileId], references: [id])
+  fileId       Int?
+  Shuoshuo     Shuoshuo? @relation(references: [id], fields: [ShuoshuoId])
+  ShuoshuoId   Int?
+}
+
+model Blog {
+  id                 Int       @id @default(autoincrement())
+  title              String
+  content            String
+  type               String
+  created_time       DateTime  @default(now())
+  last_modified_time DateTime  @default(now())
+  visited_count      Int       @default(0)
+  comments_count     Int       @default(0)
+  pays_count         Int       @default(0)
+  post               Image?    @relation("blogPost")
+  images             Image[]   @relation("blogImages")
+  comments           Comment[]
+}
+
+model Shuoshuo {
+  id                 Int       @id @default(autoincrement())
+  comments           Comment[]
+  images             Image[]
+  video              Video?
+  media_type         String
+  content            String
+  created_time       DateTime  @default(now())
+  last_modified_time DateTime  @default(now())
+  visited_count      Int       @default(0)
+  comments_count     Int       @default(0)
+}
+
+model Pay {
+  id           Int      @id @default(autoincrement())
+  type         String
+  money        Float    @default(0.0)
+  order_id     String   @default(cuid())
+  order_url    String
+  created_time DateTime @default(now())
+  pay_success  Boolean  @default(false)
+  is_close     Boolean  @default(false)
+  pay_type     String
+  user         User     @relation(references: [id], fields: [UserId])
+  UserId       Int
+}
+
+model File {
+  id             Int       @id @default(autoincrement())
+  type           String
+  name           String
+  size           Int
+  url            String
+  created_time   DateTime  @default(now())
+  download_count Int       @default(0)
+  comments_count Int       @default(0)
+  comments       Comment[]
+  Chat           Chat?     @relation(references: [id], fields: [ChatId])
+  ChatId         Int?      @unique
+}
+
+model Github {
+  id                 Int      @id @default(autoincrement())
+  readme             String
+  page_url           String
+  title              String
+  description        String
+  created_time       DateTime
+  last_modified_time DateTime
+  languages          String
+  stars_count        Int
+  forks_count        Int
+  watchers_count     Int
+}
+
+model Todolist {
+  id           Int       @id @default(autoincrement())
+  title        String
+  created_time DateTime  @default(now())
+  is_done      Boolean   @default(false)
+  is_done_time DateTime?
+}
+
+model Personal {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  sex                 String
+  birthday            DateTime
+  wechat              String
+  qq                  String
+  github              String
+  university          String
+  university_end_time DateTime
+  home                String
+  readme              String
+}
+
+model Experience {
+  id          Int      @id @default(autoincrement())
+  company     String
+  duty        String
+  description String
+  time_start  DateTime
+  time_end    DateTime
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  duty        String
+  description String
+  time_start  DateTime
+  time_end    DateTime
+  github_url  String?
+  demo_url    String?
+  image       Image?
+}
+
+model Chat {
+  id           Int      @id @default(autoincrement())
+  ip           String
+  location     String
+  user         User     @relation(references: id, fields: UserId)
+  UserId       Int
+  created_time DateTime
+  content      String
+  image        Image?
+  video        Video?
+  file         File?
+  type         String
+}
