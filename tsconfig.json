@@ -34,7 +34,10 @@
     // 指定使用哪种模块解析策略，默认为 Classic,
   },
   "include": [
-    "src"
+    "src/**/*"
+  ],
+  "files": [
+    "src/.d.ts"
   ]
-  // 指定需要编译文件，默认当前目录下除了 exclude 之外的所有.ts, .d.ts,.tsx 文件
+  // 指定需要编译文件，默认当前目录下除了 exclude 之外的所有.ts, .d.ts,.tsx 文件,
 }

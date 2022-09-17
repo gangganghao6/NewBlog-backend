@@ -1,23 +1,19 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
-function beforeSend(fastify: any): void {
-  fastify.addHook(
+async function beforeSend(fastify: any): Promise<void> {
+  await fastify.addHook(
     'onSend',
     async (req: FastifyRequest, res: FastifyReply, payload: string) => {
-      return JSON.stringify({
-        data: JSON.parse(payload),
-        status: res.statusCode,
-        message: 'success'
-      })
+      return payload
     }
   )
 }
 
-function beforeRequest(fastify: any): void {
-  fastify.addHook(
+async function beforeRequest(fastify: any): Promise<void> {
+  await fastify.addHook(
     'onRequest',
     async (req: FastifyRequest, res: FastifyReply) => {
-      console.log(req.cookies)
+      console.log(req.session.user)
     }
   )
 }

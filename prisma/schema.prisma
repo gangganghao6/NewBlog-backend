@@ -88,8 +88,6 @@ model Comment {
   UserId       Int       @unique
   Blog         Blog?     @relation(references: [id], fields: [BlogId])
   BlogId       Int?
-  File         File?     @relation(fields: [fileId], references: [id])
-  fileId       Int?
   Shuoshuo     Shuoshuo? @relation(references: [id], fields: [ShuoshuoId])
   ShuoshuoId   Int?
 }
@@ -129,6 +127,7 @@ model Pay {
   order_id     String   @default(cuid())
   order_url    String
   created_time DateTime @default(now())
+  close_time   DateTime @default(now())
   pay_success  Boolean  @default(false)
   is_close     Boolean  @default(false)
   pay_type     String
@@ -137,17 +136,15 @@ model Pay {
 }
 
 model File {
-  id             Int       @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   type           String
   name           String
   size           Int
   url            String
-  created_time   DateTime  @default(now())
-  download_count Int       @default(0)
-  comments_count Int       @default(0)
-  comments       Comment[]
-  Chat           Chat?     @relation(references: [id], fields: [ChatId])
-  ChatId         Int?      @unique
+  created_time   DateTime @default(now())
+  download_count Int      @default(0)
+  Chat           Chat?    @relation(references: [id], fields: [ChatId])
+  ChatId         Int?     @unique
 }
 
 model Github {

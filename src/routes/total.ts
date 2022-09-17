@@ -6,11 +6,7 @@ export default async function (
   options: any,
   done: any
 ): Promise<any> {
-  await fastify.register(info, {
-    prisma: options.prisma
-  })
-  await fastify.register(comments, {
-    prisma: options.prisma
-  })
-  // done()
+  await fastify.register(info)
+  await fastify.register(comments)
+  done()
 }

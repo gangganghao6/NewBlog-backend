@@ -1,68 +1,98 @@
 import Fastify from 'fastify'
 import dotenv from 'dotenv'
-import * as fs from 'fs'
-import * as path from 'path'
-import cors from '@fastify/cors'
+import fs from 'fs'
+import path from 'path'
 import dayjs from 'dayjs'
-import middie from '@fastify/middie'
-import fastifyCookie from '@fastify/cookie'
 import { PrismaClient } from '@prisma/client'
-// import multipart from '@fastify/multipart'
+import fastifyCors from '@fastify/cors'
+import fastifyCookie from '@fastify/cookie'
+import fastifyMultipart from '@fastify/multipart'
+import fastifySession from '@fastify/session'
+import fastifyStatic from '@fastify/static'
+import fastifyRoutes from '@fastify/routes'
+import fastifyCompress from '@fastify/compress'
+import fastifyWebsocket from '@fastify/websocket'
 import { beforeSend, beforeRequest } from './interceptor/interceptor.js'
-import base from './routes/total.js'
+import { generateRoutesLogs } from './utils.js'
+import { registRoutes, registStatic } from './routes.js'
 
 dotenv.config()
-
+const currentDate = dayjs(new Date()).format('YYYY-MM-DD')
+const logStream = fs.createWriteStream(`./log/${currentDate}.txt`, {
+  encoding: 'utf8'
+})
+const FasitfyConfig = {
+  logger: {
+    level: 'info',
+    stream: process.env.ISDEV === 'true' ? process.stdout : logStream,
+    serializers: {
+      req(request: any) {
+        return {
+          method: request.method,
+          url: request.url,
+          userAgent: request.headers['user-agent'],
+          cookie: request.headers.cookie,
+          hostname: request.hostname,
+          remoteAddress: request.ip,
+          remotePort: request.socket.remotePort
+        }
+      }
+    }
+  }
+  // http2: true,
+  // https: {
+  //   allowHTTP1: true,
+  //   cert: fs.readFileSync(
+  //     path.join(process.env.PROJECT_PATH as string, 'keys/cert.crt')
+  //   ),
+  //   key: fs.readFileSync(
+  //     path.join(process.env.PROJECT_PATH as string, 'keys/cert.key')
+  //   )
+  // }
+}
+const fastify = Fastify(FasitfyConfig)
 const prisma = new PrismaClient()
 await prisma.$queryRaw`PRAGMA journal_mode=WAL`
-const currentDate = dayjs(new Date()).format('YYYY-MM-DD')
+fastify.prisma = prisma
 
-const fastify = Fastify({
-  logger:
-    process.env.ISDEV === 'true'
-      ? true
-      : {
-          level: 'info',
-          file: `./log/${currentDate}.txt`
-        },
-  http2: true,
-  https: {
-    allowHTTP1: true,
-    cert: fs.readFileSync(
-      path.join(process.env.PROJECT_PATH as string, 'keys/cert.crt')
-    ),
-    key: fs.readFileSync(
-      path.join(process.env.PROJECT_PATH as string, 'keys/cert.key')
-    )
-  }
-})
-await fastify.register(cors, {
+await fastify.register(fastifyCors, {
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 })
 
-await fastify.register(middie, {
-  hook: 'onRequest' // default
+await fastify.register(fastifyCompress, {
+  global: true,
+  encodings: ['deflate', 'gzip']
 })
-await fastify.register(fastifyCookie, {
-  secret: 'my-secret', // for cookies signature
-  hook: 'onRequest', // set to false to disable cookie autoparsing or set autoparsing on any of the following hooks: 'onRequest', 'preParsing', 'preHandler', 'preValidation'. default: 'onRequest'
-  parseOptions: {} // options for parsing cookies，
+await fastify.register(fastifyStatic, {
+  root: path.join(process.env.PROJECT_PATH as string, 'public'),
+  prefix: '/public/' // optional: default '/'
 })
-beforeRequest(fastify)
-beforeSend(fastify)
+await fastify.register(fastifyCookie)
+await fastify.register(fastifySession, {
+  // request.session.destroy(next) request.session.user = {name: 'max'}
+  secret: 'a secret with minimum length of 32 characters',
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 30
+  }
+})
+await fastify.register(fastifyRoutes)
+await fastify.register(fastifyMultipart) // await req.file()
+await fastify.register(fastifyWebsocket) // fastify.get('/', { websocket: true }, (connection, req) => {
 
-await fastify.register(base, { prefix: '/api/base', prisma })
+await beforeRequest(fastify)
+await beforeSend(fastify)
 
-/**
- * Run the server!
- */
+await registStatic(fastify)
+await registRoutes(fastify)
+
 const start = async (): Promise<void> => {
   try {
     await fastify.listen({
       port: parseInt(process.env.PORT as string),
       host: '0.0.0.0'
     })
+    generateRoutesLogs(fastify)
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)

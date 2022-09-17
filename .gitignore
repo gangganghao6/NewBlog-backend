@@ -26,6 +26,6 @@ dist-ssr
 # https keys
 keys
 *.js
-*.txt
 prisma/migrations
-src/database
+database
+log
