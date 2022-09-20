@@ -22,10 +22,14 @@ export interface BaseInfo {
   comments_count: number
   visits_count: number
   last_modified_time: Date
+  head_image: Image
+}
+
+export interface Root {
+  id: number
   account: string
   password?: string
   email: string
-  head_image: Image
 }
 
 export interface User {

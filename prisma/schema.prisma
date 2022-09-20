@@ -51,10 +51,14 @@ model BaseInfo {
   comments_count     Int      @default(0)
   visits_count       Int      @default(0)
   last_modified_time DateTime @default(now())
-  account            String
-  password           String
-  email              String
   head_image         Image?
+}
+
+model Root {
+  id       Int    @id @default(autoincrement())
+  account  String
+  password String
+  email    String
 }
 
 model User {

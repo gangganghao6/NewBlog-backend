@@ -1,11 +1,11 @@
 import base from './routes/total.js'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
-async function registRoutes(fastify: any): Promise<void> {
+async function registRoutes(fastify: FastifyInstance): Promise<void> {
   await fastify.register(base, { prefix: '/api/base' })
 }
 
-async function registStatic(fastify: any): Promise<void> {
+async function registStatic(fastify: FastifyInstance): Promise<void> {
   await fastify.get(
     '/frontend',
     async (req: FastifyRequest, res: FastifyReply) => {

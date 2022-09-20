@@ -1,8 +1,7 @@
 import Fastify from 'fastify'
 import dotenv from 'dotenv'
-import fs from 'fs'
 import path from 'path'
-import dayjs from 'dayjs'
+// import dayjs from 'dayjs'
 import { PrismaClient } from '@prisma/client'
 import fastifyCors from '@fastify/cors'
 import fastifyCookie from '@fastify/cookie'
@@ -12,32 +11,29 @@ import fastifyStatic from '@fastify/static'
 import fastifyRoutes from '@fastify/routes'
 import fastifyCompress from '@fastify/compress'
 import fastifyWebsocket from '@fastify/websocket'
-import { beforeSend, beforeRequest } from './interceptor/interceptor.js'
-import { generateRoutesLogs } from './utils.js'
+import registeInterceptor from './interceptor/interceptor.js'
+import { generateRoutesLogs, createLogStream } from './utils.js'
 import { registRoutes, registStatic } from './routes.js'
 
 dotenv.config()
-const currentDate = dayjs(new Date()).format('YYYY-MM-DD')
-const logStream = fs.createWriteStream(`./log/${currentDate}.txt`, {
-  encoding: 'utf8'
-})
+
 const FasitfyConfig = {
   logger: {
     level: 'info',
-    stream: process.env.ISDEV === 'true' ? process.stdout : logStream,
-    serializers: {
-      req(request: any) {
-        return {
-          method: request.method,
-          url: request.url,
-          userAgent: request.headers['user-agent'],
-          cookie: request.headers.cookie,
-          hostname: request.hostname,
-          remoteAddress: request.ip,
-          remotePort: request.socket.remotePort
-        }
-      }
-    }
+    stream: createLogStream()
+    //   serializers: {
+    //     req(request: FastifyRequest) {
+    //       return {
+    //         method: request.method,
+    //         url: request.url,
+    //         userAgent: request.headers['user-agent'],
+    //         cookie: request.headers.cookie,
+    //         hostname: request.hostname,
+    //         remoteAddress: request.ip,
+    //         remotePort: request.socket.remotePort
+    //       }
+    //     }
+    //   }
   }
   // http2: true,
   // https: {
@@ -80,8 +76,7 @@ await fastify.register(fastifyRoutes)
 await fastify.register(fastifyMultipart) // await req.file()
 await fastify.register(fastifyWebsocket) // fastify.get('/', { websocket: true }, (connection, req) => {
 
-await beforeRequest(fastify)
-await beforeSend(fastify)
+await registeInterceptor(fastify)
 
 await registStatic(fastify)
 await registRoutes(fastify)

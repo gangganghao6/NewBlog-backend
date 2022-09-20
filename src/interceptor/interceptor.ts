@@ -1,6 +1,18 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
-async function beforeSend(fastify: any): Promise<void> {
+async function registeInterceptor(fastify: FastifyInstance): Promise<void> {
+  await fastify.addHook(
+    'onRequest',
+    async (req: FastifyRequest, res: FastifyReply) => {
+      // console.log(req.session.user)
+    }
+  )
+  // await fastify.addHook(
+  //   'onError',
+  //   async (req: FastifyRequest, res: FastifyReply, err: FastifyError) => {
+  //     void res.send(err.message)
+  //   }
+  // )
   await fastify.addHook(
     'onSend',
     async (req: FastifyRequest, res: FastifyReply, payload: string) => {
@@ -9,13 +21,4 @@ async function beforeSend(fastify: any): Promise<void> {
   )
 }
 
-async function beforeRequest(fastify: any): Promise<void> {
-  await fastify.addHook(
-    'onRequest',
-    async (req: FastifyRequest, res: FastifyReply) => {
-      console.log(req.session.user)
-    }
-  )
-}
-
-export { beforeSend, beforeRequest }
+export default registeInterceptor

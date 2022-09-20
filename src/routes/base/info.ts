@@ -1,90 +1,40 @@
 import { BaseInfo } from '../../types/model'
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { createRequestReturn } from '../../utils'
+import { getBaseInfo, postBaseInfo, putBaseInfo } from './infoFn'
 
-export default function (fastify: any, options: any, done: any): void {
-  fastify.get('/info', {}, async (req: any, res: any) => {
-    const result: BaseInfo | null = await fastify.prisma.baseInfo.findFirst({
-      where: {
-        id: 1
-      },
-      include: {
-        head_image: {
-          select: {
-            id: true,
-            name: true,
-            url: true,
-            created_time: true
-          }
-        }
-      }
-    })
-    delete result?.password
+export default function (
+  fastify: FastifyInstance,
+  options = {},
+  done: any
+): void {
+  fastify.get('/info', {}, async (req: FastifyRequest, res: FastifyReply) => {
+    const result: BaseInfo = await getBaseInfo(fastify)
     if (result === null) {
-      throw new Error('您还没有初始化博客信息')
-    }
-    return {
-      status: 200,
-      data: result,
-      message: ''
+      return createRequestReturn(500, null, '您还未初始化博客信息')
+    } else {
+      return createRequestReturn(200, result, '')
     }
   })
-  fastify.post('/info', {}, async (req: any, res: any) => {
+  fastify.post('/info', {}, async (req: FastifyRequest, res: FastifyReply) => {
     const data: BaseInfo = req.body
-    let result: BaseInfo = await fastify.prisma.baseInfo.findFirst({
-      where: {
-        id: 1
-      }
-    })
-    if (result === null) {
-      await fastify.prisma.baseInfo.create({
-        data: {
-          name: data.name,
-          account: data.account,
-          password: data.password,
-          email: data.email,
-          head_image: {
-            create: {
-              name: data.head_image.name,
-              url: data.head_image.url
-            }
-          }
-        }
-      })
-      result = await fastify.prisma.baseInfo.findFirst({
-        where: {
-          id: 1
-        }
-      })
-    }
-    delete result.password
-    return {
-      status: 200,
-      data: result,
-      message: ''
+    try {
+      const result: BaseInfo = await postBaseInfo(fastify, data)
+      return createRequestReturn(200, result, '')
+    } catch (e) {
+      return createRequestReturn(500, null, e.message)
     }
   })
-  fastify.put('/info', {}, async (req: any, res: any) => {
+  fastify.put('/info', {}, async (req: FastifyRequest, res: FastifyReply) => {
     let data: BaseInfo | any = req.body
     if ('head_image' in data) {
       data = { ...data, head_image: { create: data.head_image } }
     }
-    const result = await fastify.prisma.baseInfo.update({
-      where: { id: 1 },
-      data,
-      include: {
-        head_image: {
-          select: {
-            id: true,
-            name: true,
-            url: true,
-            created_time: true
-          }
-        }
-      }
-    })
-    return {
-      status: 200,
-      data: result,
-      message: ''
+    try {
+      const result = await putBaseInfo(fastify, data)
+      return createRequestReturn(200, result, '')
+    } catch (e) {
+      return createRequestReturn(500, null, e.message)
     }
   })
   done()
