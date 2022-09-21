@@ -1,4 +1,4 @@
-import base from './routes/total.js'
+import base from './routes/total'
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 async function registRoutes(fastify: FastifyInstance): Promise<void> {

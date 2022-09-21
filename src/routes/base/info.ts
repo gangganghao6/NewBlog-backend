@@ -17,23 +17,23 @@ export default function (
     }
   })
   fastify.post('/info', {}, async (req: FastifyRequest, res: FastifyReply) => {
-    const data: BaseInfo = req.body
+    const data: BaseInfo = req.body as BaseInfo
     try {
       const result: BaseInfo = await postBaseInfo(fastify, data)
       return createRequestReturn(200, result, '')
-    } catch (e) {
+    } catch (e: any) {
       return createRequestReturn(500, null, e.message)
     }
   })
   fastify.put('/info', {}, async (req: FastifyRequest, res: FastifyReply) => {
-    let data: BaseInfo | any = req.body
+    let data: any = req.body
     if ('head_image' in data) {
       data = { ...data, head_image: { create: data.head_image } }
     }
     try {
       const result = await putBaseInfo(fastify, data)
       return createRequestReturn(200, result, '')
-    } catch (e) {
+    } catch (e: any) {
       return createRequestReturn(500, null, e.message)
     }
   })

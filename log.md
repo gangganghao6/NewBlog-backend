@@ -12,6 +12,8 @@
 
 ### 2022年9月17日：创建ts interface，编写/base/info逻辑代码，修改拦截器逻辑，`暂时弃用https`
 
-### 2022年9月18日：全面弃用prisma级联，改为自己维护对应id
+### 2022年9月18日：全面弃用prisma级联，改为自己维护对应id。编写双向流覆盖日志输入流
 
 ### 2022年9月20日：恢复级联，将controller与service分离
+
+### 2022年9月21日：编写info、comments、root代码逻辑，修改schema.prisma

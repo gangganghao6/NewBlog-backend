@@ -1,12 +1,13 @@
-import info from './base/info.js'
-import comments from './base/comments.js'
+import info from './base/info'
+import comments from './base/comments'
+import { FastifyInstance } from 'fastify'
+import root from './base/root'
 
 export default async function (
-  fastify: any,
-  options: any,
-  done: any
+  fastify: FastifyInstance,
+  options: { prefix: string }
 ): Promise<any> {
   await fastify.register(info)
   await fastify.register(comments)
-  done()
+  await fastify.register(root, { prefix: '/root' })
 }

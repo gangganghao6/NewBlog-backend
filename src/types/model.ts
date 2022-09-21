@@ -28,7 +28,7 @@ export interface BaseInfo {
 export interface Root {
   id: number
   account: string
-  password?: string
+  password: string
   email: string
 }
 
@@ -56,6 +56,10 @@ export interface Comment {
   id: number
   comment: string
   created_time: Date
+  user_id: number
+  shuoshuo_id: number
+  personal_id: number
+  type: string
 }
 
 export interface Blog {

@@ -68,10 +68,10 @@ model User {
   created_time  DateTime    @default(now())
   is_banned     Boolean     @default(false)
   is_subscribed Boolean     @default(false)
-  UserVisit     UserVisit[]
-  Comment       Comment[]
-  Pay           Pay[]
-  Chat          Chat[]
+  userVisit     UserVisit[]
+  //  Comment       Comment[]
+  //  pays           Pay[]
+  chats         Chat[]
   avatar        Image?
 }
 
@@ -88,12 +88,15 @@ model Comment {
   id           Int       @id @default(autoincrement())
   comment      String
   created_time DateTime  @default(now())
-  user         User      @relation(references: [id], fields: [UserId])
-  UserId       Int       @unique
+  //  user         User      @relation(references: [id], fields: [UserId])
+  //  UserId       Int       @unique
+  user_id      Int?
   Blog         Blog?     @relation(references: [id], fields: [BlogId])
   BlogId       Int?
   Shuoshuo     Shuoshuo? @relation(references: [id], fields: [ShuoshuoId])
   ShuoshuoId   Int?
+  Personal     Personal? @relation(references: [id], fields: [PersonalId])
+  PersonalId   Int?
 }
 
 model Blog {
@@ -135,8 +138,9 @@ model Pay {
   pay_success  Boolean  @default(false)
   is_close     Boolean  @default(false)
   pay_type     String
-  user         User     @relation(references: [id], fields: [UserId])
-  UserId       Int
+  //  user         User     @relation(references: [id], fields: [UserId])
+  //  UserId       Int
+  user_id      Int
 }
 
 model File {
@@ -174,7 +178,7 @@ model Todolist {
 }
 
 model Personal {
-  id                  Int      @id @default(autoincrement())
+  id                  Int       @id @default(autoincrement())
   name                String
   sex                 String
   birthday            DateTime
@@ -185,6 +189,7 @@ model Personal {
   university_end_time DateTime
   home                String
   readme              String
+  comments            Comment[]
 }
 
 model Experience {

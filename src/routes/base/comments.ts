@@ -1,18 +1,39 @@
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { deleteComments, postComments } from './commentsFn'
+import { Comment } from '../../types/model'
+import { createRequestReturn } from '../../utils'
+
 export default function (
-  fastify: any,
-  { prisma }: { prisma: any },
+  fastify: FastifyInstance,
+  config: never,
   done: any
 ): void {
-  // fastify.get('/info', async (req: any, res: any) => {
-  //   await prisma.Image.create({
-  //     data: {
-  //       name: 'test.png',
-  //       url: 'https://pic1.zhimg.com/50/v2-fa5cd5d62e3b337fc1aea686fa035bc4_b.jpg'
-  //     }
-  //   })
-  //   const result = await prisma.Image.findMany({})
-  //   await res.setCookie('test.png', '111')
-  //   return result
-  // })
+  fastify.post('/comments', async (req: FastifyRequest, res: FastifyReply) => {
+    const data = req.body as Comment
+    try {
+      const result = await postComments(fastify, data)
+      return createRequestReturn(200, result, '')
+    } catch (e) {
+      return createRequestReturn(500, null, '数据格式错误')
+    }
+  })
+  fastify.delete(
+    '/comments',
+    async (req: FastifyRequest, res: FastifyReply) => {
+      const data = req.body as {
+        id: number
+        blog_id?: string
+        shuoshuo_id: string
+        personal_id: string
+        type: 'personal' | 'shuoshuo' | 'blog'
+      }
+      try {
+        const result = await deleteComments(fastify, data)
+        return createRequestReturn(200, result, '')
+      } catch (e) {
+        return createRequestReturn(500, null, '数据格式错误')
+      }
+    }
+  )
   done()
 }
