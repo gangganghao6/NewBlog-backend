@@ -13,6 +13,7 @@
     "dayjs": "^1.11.5",
     "dotenv": "^16.0.2",
     "fastify": "^4.5.3",
+    "get-video-duration": "^4.1.0",
     "prisma": "^4.3.1",
     "sharp": "0.30.7",
     "sqlite3": "^5.1.0",

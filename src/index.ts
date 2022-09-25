@@ -61,7 +61,7 @@ await fastify.register(fastifyCompress, {
   encodings: ['deflate', 'gzip']
 })
 await fastify.register(fastifyStatic, {
-  root: path.join(process.env.PROJECT_PATH as string, 'public'),
+  root: path.join(process.env.PROJECT_PATH, 'public'),
   prefix: '/public/' // optional: default '/'
 })
 await fastify.register(fastifyCookie)
@@ -84,7 +84,7 @@ await registRoutes(fastify)
 const start = async (): Promise<void> => {
   try {
     await fastify.listen({
-      port: parseInt(process.env.PORT as string),
+      port: process.env.PORT,
       host: '0.0.0.0'
     })
     generateRoutesLogs(fastify)

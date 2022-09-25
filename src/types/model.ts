@@ -1,15 +1,15 @@
 export interface Image {
-  id: string
+  id: number
   name: string
   url: string
   created_time: Date
 }
 
 export interface Video {
-  id: string
+  id: number
   name: string
   url: string
-  length: number
+  duration: number
   created_time: Date
   post: Image
 }

@@ -17,3 +17,5 @@
 ### 2022年9月20日：恢复级联，将controller与service分离
 
 ### 2022年9月21日：编写info、comments、root代码逻辑，修改schema.prisma
+
+### 2022年9月25日：编写files分片上传接口，解决`process.env.*`的ts报错问题，分离重构部分路由接口，修改部分model

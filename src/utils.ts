@@ -24,7 +24,7 @@ function generateRoutesLogs(fastify: any): void {
     })
     .filter((item: any) => item !== null)
   fs.writeFileSync(
-    `${process.env.PROJECT_PATH as string}\\log\\routes.json`,
+    `${process.env.PROJECT_PATH}\\log\\routes.json`,
     JSON.stringify(routes)
   )
 }
@@ -43,14 +43,14 @@ function createRequestReturn(
 
 function createLogStream(): Duplex {
   const currentDate = dayjs(new Date()).format('YYYY-MM-DD')
-  if (!fs.existsSync(`${process.env.PROJECT_PATH as string}/log`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH as string}/log`)
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}/log`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}/log`)
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH as string}/log/normal`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH as string}/log/normal`)
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}/log/normal`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}/log/normal`)
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH as string}/log/error`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH as string}/log/error`)
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}/log/error`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}/log/error`)
   }
   const logStream = fs.createWriteStream(`./log/normal/${currentDate}.txt`, {
     encoding: 'utf8'

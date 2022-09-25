@@ -22,6 +22,6 @@ module.exports = {
   ],
   'rules': {
     'prettier/prettier': 'error',
-    'dot-notation': 0
+    'dot-notation': 'off'
   }
 }

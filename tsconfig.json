@@ -12,6 +12,9 @@
     "lib": [
       "ESNext"
     ],
+    "types": [
+      "node"
+    ],
     // 编译需要包含的 API，默认为 target 的默认值
     "outDir": "dist",
     // 编译输出文件夹路径，默认为源文件同级目录

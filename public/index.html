@@ -5,9 +5,100 @@
   <title>Title</title>
 </head>
 <body>
+<input type='file' id='upload'></input>
 <script type='text/javascript'>
-  const result = fetch('http://192.168.5.10:8080/api/base/info').then(res => res.json()).then((res) => {
-    console.log(res)
+
+  const upload = document.getElementById('upload')
+  // upload.addEventListener('change', function(e) {
+  //   const file = e.target.files[0]
+  //   const formdata = new FormData()
+  //   formdata.append('image', file)
+  //   formdata.append('url', JSON.stringify({ wojiu: 'hehe' }))
+  //   fetch('http://localhost:80/api/files/image', {
+  //     method: 'POST',
+  //     body: formdata,
+  //     headers: {
+  //       contentType: 'multipart/form-data'
+  //     }
+  //   }).then(res => res.json()).then((res) => {
+  //     console.log(res)
+  //   })
+  // })
+  function getUUID (len, radix) {
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('')
+    const uuid = []
+    let i
+    radix = radix || chars.length
+    if (len) {
+      for (i = 0; i < len; i++) uuid[i] = chars[0 | Math.random() * radix]
+    } else {
+      let r
+      uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-'
+      uuid[14] = '4'
+      for (i = 0; i < 36; i++) {
+        if (!uuid[i]) {
+          r = 0 | Math.random() * 16
+          uuid[i] = chars[(i === 19) ? (r & 0x3) | 0x8 : r]
+        }
+      }
+    }
+    return uuid.join('')
+  }
+
+  let finalData
+
+  const MEDIA_TYPE = {
+    IMAGES: 'images',
+    VIDEOS: 'videos',
+    FILES: 'files'
+  }
+
+  upload.addEventListener('change', async (e) => {
+    const file = e.target.files[0]
+    const fileType = file.name.split('.').at(-1)
+    const fileSize = file.size
+    const eachSize = 2 * 1024 * 1024
+    const totalSlices = Math.ceil(fileSize / eachSize)
+    const uuid = getUUID(16, 16)
+    const mediaClass = MEDIA_TYPE.FILES
+
+    let currentSlices = 1
+    let missions = []
+    for (; currentSlices <= totalSlices; currentSlices++) {
+      const fileSlice = file.slice((currentSlices - 1) * eachSize, currentSlices * eachSize)
+      const formdata = new FormData()
+      formdata.append('file', fileSlice)
+      formdata.append('current_slices', JSON.stringify({ current_slices: currentSlices }))
+      formdata.append('total_slices', JSON.stringify({ total_slices: totalSlices }))
+      formdata.append('file_type', JSON.stringify({ file_type: fileType }))
+      formdata.append('uuid', JSON.stringify({ uuid }))
+      formdata.append('media_class', JSON.stringify({ media_class: mediaClass }))
+      missions.push(fetch('http://localhost/api/files/file_chunk', {
+        method: 'POST',
+        headers: {
+          contentType: 'multipart/form-data'
+        },
+        body: formdata
+      }).then((res) => res.json()))
+      // const result = await (await ).json()
+      // if (result.code !== 200) {
+      //   alert(result.message)
+      //   return
+      // }
+    }
+    let tempResults = await Promise.all(missions)
+    if (tempResults.some(result => result.code !== 200)) {
+      alert('上传发生错误')
+    }
+    const result = await (await fetch('http://localhost/api/files/file_merge', {
+      method: 'POST',
+      body: JSON.stringify({
+        uuid,
+        media_class: mediaClass,
+        file_type: fileType
+      })
+    })).json()
+    console.log(result)
   })
 </script>
 </body>
