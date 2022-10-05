@@ -16,7 +16,12 @@ import { generateRoutesLogs, createLogStream } from './utils.js'
 import { registRoutes, registStatic } from './routes.js'
 
 dotenv.config()
-
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
+// eslint-disable-next-line no-extend-native
+BigInt.prototype.toJSON = function () {
+  return this.toString()
+}
 const FasitfyConfig = {
   logger: {
     level: 'info',

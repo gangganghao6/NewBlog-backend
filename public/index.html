@@ -66,13 +66,21 @@
     let missions = []
     for (; currentSlices <= totalSlices; currentSlices++) {
       const fileSlice = file.slice((currentSlices - 1) * eachSize, currentSlices * eachSize)
+      const info = {
+        current_slices: currentSlices,
+        total_slices: totalSlices,
+        file_type: fileType,
+        uuid: uuid,
+        media_class: mediaClass
+      }
       const formdata = new FormData()
       formdata.append('file', fileSlice)
-      formdata.append('current_slices', JSON.stringify({ current_slices: currentSlices }))
-      formdata.append('total_slices', JSON.stringify({ total_slices: totalSlices }))
-      formdata.append('file_type', JSON.stringify({ file_type: fileType }))
-      formdata.append('uuid', JSON.stringify({ uuid }))
-      formdata.append('media_class', JSON.stringify({ media_class: mediaClass }))
+      formdata.append('info', JSON.stringify(info))
+      // formdata.append('current_slices', JSON.stringify({ current_slices: currentSlices }))
+      // formdata.append('total_slices', JSON.stringify({ total_slices: totalSlices }))
+      // formdata.append('file_type', JSON.stringify({ file_type: fileType }))
+      // formdata.append('uuid', JSON.stringify({ uuid }))
+      // formdata.append('media_class', JSON.stringify({ media_class: mediaClass }))
       missions.push(fetch('http://localhost/api/files/file_chunk', {
         method: 'POST',
         headers: {

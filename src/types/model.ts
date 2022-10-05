@@ -1,21 +1,23 @@
 export interface Image {
-  id: number
+  size: number
+  id: string
   name: string
   url: string
   created_time: Date
 }
 
 export interface Video {
-  id: number
+  id: string
   name: string
   url: string
+  size: number
   duration: number
   created_time: Date
   post: Image
 }
 
 export interface BaseInfo {
-  id: number
+  id: string
   name: string
   start_time: Date
   blogs_count: number
@@ -26,14 +28,14 @@ export interface BaseInfo {
 }
 
 export interface Root {
-  id: number
+  id: string
   account: string
   password: string
   email: string
 }
 
 export interface User {
-  id: number
+  id: string
   name: string
   email: string
   created_time: Date
@@ -42,28 +44,28 @@ export interface User {
   comments?: Comment[]
   pays?: Pay[]
   chats?: Chat[]
-  avatar: Image
+  user_visit: UserVisit[]
 }
 
 export interface UserVisit {
-  id: number
+  id: string
   ip: string
   user_agent: string
   visit_time: Date
 }
 
 export interface Comment {
-  id: number
+  id: string
   comment: string
   created_time: Date
-  user_id: number
-  shuoshuo_id: number
-  personal_id: number
-  type: string
+  user_id: string
+  shuoshuo_id: string
+  personal_id: string
+  blog_id: string
 }
 
 export interface Blog {
-  id: number
+  id: string
   title: string
   content: string
   type: string
@@ -78,7 +80,7 @@ export interface Blog {
 }
 
 export interface Shuoshuo {
-  id: number
+  id: string
   comments?: Comment[]
   images?: Image[]
   video?: Video
@@ -91,7 +93,7 @@ export interface Shuoshuo {
 }
 
 export interface Pay {
-  id: number
+  id: string
   pay_type: 'alipay' | 'wechat'
   money: number
   order_id: string
@@ -105,16 +107,17 @@ export interface Pay {
 }
 
 export interface File {
-  id: number
+  id: string
   type: string
   size: number
   url: string
   created_time: Date
   download_count: number
+  media_class: string
 }
 
 export interface Github {
-  id: number
+  id: string
   readme: string
   page_url: string
   title: string
@@ -128,7 +131,7 @@ export interface Github {
 }
 
 export interface Todolist {
-  id: number
+  id: string
   title: string
   created_time: Date
   is_Done: boolean
@@ -136,7 +139,7 @@ export interface Todolist {
 }
 
 export interface Personal {
-  id: number
+  id: string
   name: string
   sex: string
   birthday: Date
@@ -150,7 +153,7 @@ export interface Personal {
 }
 
 export interface Experience {
-  id: number
+  id: string
   company: string
   duty: string
   description: string
@@ -159,7 +162,7 @@ export interface Experience {
 }
 
 export interface Project {
-  id: number
+  id: string
   name: string
   duty: string
   description: string
@@ -171,7 +174,7 @@ export interface Project {
 }
 
 export interface Chat {
-  id: number
+  id: string
   ip: string
   location: string
   created_time: Date

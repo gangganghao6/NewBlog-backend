@@ -13,6 +13,7 @@ specifiers:
   '@tsconfig/node16': ^1.0.3
   '@types/json-schema': ^7.0.11
   '@types/node': ^18.7.13
+  '@types/uuid': ^8.3.4
   '@types/ws': ^8.5.3
   '@typescript-eslint/eslint-plugin': ^5.36.1
   '@typescript-eslint/parser': ^5.36.1
@@ -34,6 +35,7 @@ specifiers:
   sqlite3: ^5.1.0
   tsx: ^3.9.0
   typescript: ^4.8.2
+  uuid: ^9.0.0
 
 dependencies:
   '@fastify/compress': 6.1.1
@@ -46,6 +48,7 @@ dependencies:
   '@fastify/websocket': 7.0.1
   '@prisma/client': 4.3.1_prisma@4.3.1
   '@types/json-schema': 7.0.11
+  '@types/uuid': 8.3.4
   dayjs: 1.11.5
   dotenv: 16.0.2
   fastify: 4.5.3
@@ -54,6 +57,7 @@ dependencies:
   sharp: 0.30.7
   sqlite3: 5.1.0
   tsx: 3.9.0
+  uuid: 9.0.0
 
 devDependencies:
   '@tsconfig/node16': 1.0.3
@@ -437,6 +441,10 @@ packages:
   /@types/node/18.7.14:
     resolution: {integrity: sha512-6bbDaETVi8oyIARulOE9qF1/Qdi/23z6emrUh0fNJRUmjznqrixD4MpGDdgOFk5Xb0m2H6Xu42JGdvAxaJR/wA==}
     dev: true
+
+  /@types/uuid/8.3.4:
+    resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
+    dev: false
 
   /@types/ws/8.5.3:
     resolution: {integrity: sha512-6YOoWjruKj1uLf3INHH7D3qTXwFfEsg1kf3c0uDdSBJwfa/llkwIjrAGV7j7mVgGNbzTQ3HiHKKDXl6bJPD97w==}
@@ -3460,6 +3468,11 @@ packages:
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+    dev: false
+
+  /uuid/9.0.0:
+    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
+    hasBin: true
     dev: false
 
   /webidl-conversions/3.0.1:

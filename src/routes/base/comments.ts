@@ -14,7 +14,7 @@ export default function (
       const result = await postComments(fastify, data)
       return createRequestReturn(200, result, '')
     } catch (e) {
-      return createRequestReturn(500, null, '数据格式错误')
+      return createRequestReturn(500, null, (e as Error).message)
     }
   })
   fastify.delete(
@@ -25,13 +25,12 @@ export default function (
         blog_id?: string
         shuoshuo_id: string
         personal_id: string
-        type: 'personal' | 'shuoshuo' | 'blog'
       }
       try {
         const result = await deleteComments(fastify, data)
         return createRequestReturn(200, result, '')
       } catch (e) {
-        return createRequestReturn(500, null, '数据格式错误')
+        return createRequestReturn(500, null, (e as Error).message)
       }
     }
   )

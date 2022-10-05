@@ -1,9 +1,18 @@
-import { BaseRoute, FilesRoute } from './routes/total'
+import {
+  BaseRoute,
+  BlogsRoute,
+  FilesRoute,
+  ShareFilesRoute,
+  UsersRoute
+} from './routes/total'
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 async function registRoutes(fastify: FastifyInstance): Promise<void> {
   await fastify.register(BaseRoute, { prefix: '/api/base' })
   await fastify.register(FilesRoute, { prefix: '/api/files' })
+  await fastify.register(ShareFilesRoute, { prefix: '/api/share_files' })
+  await fastify.register(BlogsRoute, { prefix: '/api/blogs' })
+  await fastify.register(UsersRoute, { prefix: '/api/users' })
 }
 
 async function registStatic(fastify: FastifyInstance): Promise<void> {

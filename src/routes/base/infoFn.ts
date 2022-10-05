@@ -1,28 +1,19 @@
 import { FastifyInstance } from 'fastify'
 import { BaseInfo } from '../../types/model'
-import { Prisma } from '@prisma/client'
+import { v4 } from 'uuid'
 
-export async function getBaseInfo(fastify: FastifyInstance): Promise<any> {
-  const baseInfoInclude = Prisma.validator<Prisma.BaseInfoInclude>()({
-    head_image: {
-      select: {
-        id: true,
-        name: true,
-        url: true,
-        created_time: true
-      }
+export async function getBaseInfo(
+  fastify: FastifyInstance,
+  baseInfo: any
+): Promise<any> {
+  const headImage = await fastify.prisma.image.findFirst({
+    where: {
+      baseinfo_id: baseInfo.id
     }
   })
-  const result = await fastify.prisma.baseInfo.findFirst({
-    where: {
-      id: 1
-    },
-    include: baseInfoInclude
-  })
-  if (result === null) {
-    return null
-  } else {
-    return result
+  return {
+    ...baseInfo,
+    head_image: headImage
   }
 }
 
@@ -30,50 +21,62 @@ export async function postBaseInfo(
   fastify: FastifyInstance,
   data: BaseInfo
 ): Promise<any> {
-  const exist = await getBaseInfo(fastify)
-  if (exist === null) {
-    try {
-      const baseInfoCreate = Prisma.validator<Prisma.BaseInfoCreateInput>()({
-        name: data.name,
-        head_image: {
-          create: {
-            name: data.head_image.name,
-            url: data.head_image.url
-          }
-        }
-      })
-      return await fastify.prisma.baseInfo.create({
-        data: baseInfoCreate,
-        include: {
-          head_image: true
-        }
-      })
-    } catch (e) {
-      throw new Error('数据格式错误')
-    }
-  } else {
-    throw new Error('博客已初始化')
+  const headImageId = v4()
+  const baseInfoId = v4()
+  const mission = []
+  mission.push(
+    fastify.prisma.image.create({
+      data: {
+        id: headImageId,
+        name: data.head_image.name,
+        url: data.head_image.url,
+        baseinfo_id: baseInfoId,
+        size: data.head_image.size
+      }
+    })
+  )
+  mission.push(
+    fastify.prisma.baseInfo.create({
+      data: {
+        id: baseInfoId,
+        name: data.name
+      }
+    })
+  )
+  const result = await fastify.prisma.$transaction(mission)
+  return {
+    head_image: result[0],
+    base_info: result[1]
   }
 }
 
 export async function putBaseInfo(
   fastify: FastifyInstance,
-  data: BaseInfo
+  data: any,
+  baseInfo: any
 ): Promise<any> {
-  const exist = await getBaseInfo(fastify)
-  if (exist === null) {
-    throw new Error('您还未初始化博客信息')
-  } else {
-    try {
-      return await fastify.prisma.baseInfo.update({
-        where: { id: 1 },
-        data,
-        include: {
-          head_image: true
+  const mission = []
+  if ('head_image' in data) {
+    mission.push(
+      fastify.prisma.image.updateMany({
+        where: {
+          baseinfo_id: baseInfo.id
+        },
+        data: data.head_image
+      })
+    )
+  }
+  if ('name' in data) {
+    mission.push(
+      fastify.prisma.baseInfo.update({
+        where: {
+          id: baseInfo.id
+        },
+        data: {
+          name: data.name
         }
       })
-    } catch (e) {
-      throw new Error('数据格式错误')
-    }
+    )
   }
+  return await fastify.prisma.$transaction(mission)
 }

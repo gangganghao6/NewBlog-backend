@@ -8,155 +8,146 @@ datasource db {
 }
 
 model Image {
-  id           Int       @id @default(autoincrement())
-  name         String
-  url          String
-  created_time DateTime  @default(now())
-  Video        Video?    @relation(references: [id], fields: [VideoId])
-  VideoId      Int?      @unique
-  BaseInfo     BaseInfo? @relation(references: [id], fields: [BaseInfoId])
-  BaseInfoId   Int?      @unique
-  User         User?     @relation(references: [id], fields: [UserId])
-  UserId       Int?      @unique
-  BlogPost     Blog?     @relation("blogPost", references: [id], fields: [BlogPostId])
-  BlogPostId   Int?      @unique
-  Project      Project?  @relation(references: [id], fields: [ProjectId])
-  ProjectId    Int?      @unique
-  Chat         Chat?     @relation(references: [id], fields: [ChatId])
-  ChatId       Int?      @unique
-  Shuoshuo     Shuoshuo? @relation(references: [id], fields: [ShuoshuoId])
-  ShuoshuoId   Int?
-  BlogImages   Blog?     @relation("blogImages", references: [id], fields: [BlogImagesId])
-  BlogImagesId Int?
+  id            String   @id @default(uuid())
+  name          String
+  url           String
+  size          BigInt
+  created_time  DateTime @default(now())
+  video_id      String?
+  baseinfo_id   String?
+  blogpost_id   String?
+  project_id    String?
+  chat_id       String?
+  shuoshuo_id   String?
+  blogImages_id String?
+  shareFile_id  String?
 }
 
 model Video {
-  id           Int       @id @default(autoincrement())
+  id           String   @id @default(uuid())
   name         String
   url          String
-  length       Int
-  created_time DateTime  @default(now())
-  post         Image?
-  Chat         Chat?     @relation(references: [id], fields: [ChatId])
-  ChatId       Int?      @unique
-  Shuoshuo     Shuoshuo? @relation(references: [id], fields: [ShuoshuoId])
-  ShuoshuoId   Int?      @unique
+  size         BigInt
+  duration     BigInt
+  created_time DateTime @default(now())
+  //  post         Image?
+  chat_id      String?
+  shuoshuo_id  String?
+  shareFile_id String?
 }
 
 model BaseInfo {
-  id                 Int      @id @default(autoincrement())
+  id                 String   @id @default(uuid())
   name               String
   start_time         DateTime @default(now())
   blogs_count        Int      @default(0)
   comments_count     Int      @default(0)
   visits_count       Int      @default(0)
   last_modified_time DateTime @default(now())
-  head_image         Image?
+  //  head_image         Image?
 }
 
 model Root {
-  id       Int    @id @default(autoincrement())
+  id       String @id @default(uuid())
   account  String
   password String
   email    String
 }
 
 model User {
-  id            Int         @id @default(autoincrement())
+  id            String   @id @default(uuid())
   name          String
   email         String
-  created_time  DateTime    @default(now())
-  is_banned     Boolean     @default(false)
-  is_subscribed Boolean     @default(false)
-  userVisit     UserVisit[]
+  created_time  DateTime @default(now())
+  is_banned     Boolean  @default(false)
+  is_subscribed Boolean  @default(false)
+  //  userVisit     UserVisit[]
   //  Comment       Comment[]
   //  pays           Pay[]
-  chats         Chat[]
-  avatar        Image?
+  //  chats         Chat[]
 }
 
 model UserVisit {
-  id         Int      @id @default(autoincrement())
+  id         String   @id @default(uuid())
   ip         String
   user_agent String
   visit_time DateTime @default(now())
-  user       User     @relation(references: [id], fields: [UserId])
-  UserId     Int      @unique
+  user_id    String?
 }
 
 model Comment {
-  id           Int       @id @default(autoincrement())
+  id           String   @id @default(uuid())
   comment      String
-  created_time DateTime  @default(now())
-  //  user         User      @relation(references: [id], fields: [UserId])
-  //  UserId       Int       @unique
-  user_id      Int?
-  Blog         Blog?     @relation(references: [id], fields: [BlogId])
-  BlogId       Int?
-  Shuoshuo     Shuoshuo? @relation(references: [id], fields: [ShuoshuoId])
-  ShuoshuoId   Int?
-  Personal     Personal? @relation(references: [id], fields: [PersonalId])
-  PersonalId   Int?
+  created_time DateTime @default(now())
+  user_id      String?
+  blog_id      String?
+  shuoshuo_id  String?
+  personal_id  String?
 }
 
 model Blog {
-  id                 Int       @id @default(autoincrement())
+  id                 String   @id @default(uuid())
   title              String
   content            String
   type               String
-  created_time       DateTime  @default(now())
-  last_modified_time DateTime  @default(now())
-  visited_count      Int       @default(0)
-  comments_count     Int       @default(0)
-  pays_count         Int       @default(0)
-  post               Image?    @relation("blogPost")
-  images             Image[]   @relation("blogImages")
-  comments           Comment[]
+  created_time       DateTime @default(now())
+  last_modified_time DateTime @default(now())
+  visited_count      Int      @default(0)
+  comments_count     Int      @default(0)
+  pays_count         Int      @default(0)
+  //  post               Image?    @relation("blogPost")
+  //  images             Image[]   @relation("blogImages")
+  //  comments           Comment[]
+  //  pays Pay[]
 }
 
 model Shuoshuo {
-  id                 Int       @id @default(autoincrement())
-  comments           Comment[]
-  images             Image[]
-  video              Video?
-  media_type         String
-  content            String
-  created_time       DateTime  @default(now())
-  last_modified_time DateTime  @default(now())
-  visited_count      Int       @default(0)
-  comments_count     Int       @default(0)
+  id                 String   @id @default(uuid())
+  //  comments           Comment[]
+  //  images             Image[]
+  //  video              Video?
+  media_type         String //image/video/text
+  content            String?
+  created_time       DateTime @default(now())
+  last_modified_time DateTime @default(now())
+  visited_count      Int      @default(0)
+  comments_count     Int      @default(0)
 }
 
 model Pay {
-  id           Int      @id @default(autoincrement())
-  type         String
+  id           String   @id @default(uuid())
+  type         String //blog/personal
   money        Float    @default(0.0)
-  order_id     String   @default(cuid())
+  order_id     String   @default(uuid())
   order_url    String
   created_time DateTime @default(now())
   close_time   DateTime @default(now())
   pay_success  Boolean  @default(false)
   is_close     Boolean  @default(false)
-  pay_type     String
-  //  user         User     @relation(references: [id], fields: [UserId])
-  //  UserId       Int
+  pay_type     String //wechat/alipay
   user_id      Int
 }
 
 model File {
-  id             Int      @id @default(autoincrement())
+  id           String   @id @default(uuid())
+  name         String
+  size         BigInt
+  url          String
+  created_time DateTime @default(now())
+  chat_id      String?
+  shareFile_id String?
+}
+
+model ShareFile {
+  id             String   @id @default(uuid())
   type           String
-  name           String
-  size           Int
-  url            String
+  media_class    String //images/videos/files
   created_time   DateTime @default(now())
   download_count Int      @default(0)
-  Chat           Chat?    @relation(references: [id], fields: [ChatId])
-  ChatId         Int?     @unique
 }
 
 model Github {
-  id                 Int      @id @default(autoincrement())
+  id                 String   @id @default(uuid())
   readme             String
   page_url           String
   title              String
@@ -170,7 +161,7 @@ model Github {
 }
 
 model Todolist {
-  id           Int       @id @default(autoincrement())
+  id           String    @id @default(uuid())
   title        String
   created_time DateTime  @default(now())
   is_done      Boolean   @default(false)
@@ -178,7 +169,7 @@ model Todolist {
 }
 
 model Personal {
-  id                  Int       @id @default(autoincrement())
+  id                  String   @id @default(uuid())
   name                String
   sex                 String
   birthday            DateTime
@@ -189,11 +180,11 @@ model Personal {
   university_end_time DateTime
   home                String
   readme              String
-  comments            Comment[]
+  //  comments            Comment[]
 }
 
 model Experience {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
   company     String
   duty        String
   description String
@@ -202,7 +193,7 @@ model Experience {
 }
 
 model Project {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
   name        String
   duty        String
   description String
@@ -210,19 +201,18 @@ model Project {
   time_end    DateTime
   github_url  String?
   demo_url    String?
-  image       Image?
+  //  image       Image?
 }
 
 model Chat {
-  id           Int      @id @default(autoincrement())
+  id           String   @id @default(uuid())
   ip           String
   location     String
-  user         User     @relation(references: id, fields: UserId)
-  UserId       Int
+  user_id      String
   created_time DateTime
-  content      String
-  image        Image?
-  video        Video?
-  file         File?
-  type         String
+  content      String?
+  //  image        Image?
+  //  video        Video?
+  //  file         File?
+  type         String //image/video/file/text
 }
