@@ -9,8 +9,8 @@ export default function (
   done: any
 ): void {
   fastify.post('/comments', async (req: FastifyRequest, res: FastifyReply) => {
-    const data = req.body as Comment
     try {
+      const data = req.body as Comment
       const result = await postComments(fastify, data)
       return createRequestReturn(200, result, '')
     } catch (e) {
@@ -20,13 +20,13 @@ export default function (
   fastify.delete(
     '/comments',
     async (req: FastifyRequest, res: FastifyReply) => {
-      const data = req.body as {
-        id: number
-        blog_id?: string
-        shuoshuo_id: string
-        personal_id: string
-      }
       try {
+        const data = req.body as {
+          id: number
+          blog_id?: string
+          shuoshuo_id?: string
+          personal_id?: string
+        }
         const result = await deleteComments(fastify, data)
         return createRequestReturn(200, result, '')
       } catch (e) {

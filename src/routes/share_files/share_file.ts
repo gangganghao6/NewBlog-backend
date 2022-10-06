@@ -13,8 +13,8 @@ export default function (
   done: any
 ): void {
   fastify.post('/file', async (req: FastifyRequest, res: FastifyReply) => {
-    const data = req.body
     try {
+      const data = req.body
       const result = await uploadShareFile(fastify, data)
       return createRequestReturn(200, result, '')
     } catch (e) {
@@ -24,8 +24,8 @@ export default function (
   fastify.delete(
     '/file/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
-      const id = (req.params as { id: string }).id
       try {
+        const id = (req.params as { id: string }).id
         await deleteShareFile(fastify, id)
         return createRequestReturn(200, true, '')
       } catch (e) {
@@ -34,9 +34,9 @@ export default function (
     }
   )
   fastify.put('/file/:id', async (req: FastifyRequest, res: FastifyReply) => {
-    const id = (req.params as { id: string }).id
-    const type = (req.body as { type: string }).type
     try {
+      const id = (req.params as { id: string }).id
+      const type = (req.body as { type: string }).type
       const result = await putShareFile(fastify, { id, type })
       return createRequestReturn(200, result, '')
     } catch (e) {
@@ -44,17 +44,18 @@ export default function (
     }
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
-    const query = req.query as {
-      size: string
-      page: string
-      type?: string
-    }
-    const data = {
-      size: parseInt(query.size, 10),
-      page: parseInt(query.page, 10),
-      type: query.type != null ? query.type : null
-    }
     try {
+      const query = req.query as {
+        size: string
+        page: string
+        type?: string
+        sort?: string
+      }
+      const data = {
+        ...query,
+        size: parseInt(query.size, 10),
+        page: parseInt(query.page, 10)
+      }
       const result = await getShareFileList(fastify, data)
       return createRequestReturn(200, result, '')
     } catch (e) {

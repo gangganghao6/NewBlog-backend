@@ -9,7 +9,7 @@ import { getVideoDurationInSeconds } from 'get-video-duration'
 const basePath = path.join(process.env.PROJECT_PATH, 'public')
 let temp: Files_chunk[] = []
 
-export async function uploadFileChunk(req: FastifyRequest): Promise<any> {
+export async function uploadFileChunk(req: FastifyRequest): Promise<void> {
   if (temp.length >= 100) {
     temp = []
     throw new Error('内存中的无效file_chunk数量过多，已全部释放，请重新上传')
@@ -32,7 +32,6 @@ export async function uploadFileChunk(req: FastifyRequest): Promise<any> {
     }
   }
   temp.push(data)
-  return createRequestReturn(200, null, '')
 }
 
 export async function mergeFileChunk(data: {

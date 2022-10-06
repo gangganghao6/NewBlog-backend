@@ -7,13 +7,13 @@ export async function uploadShareFile(
 ): Promise<any> {
   const mission = []
   const shareFileId = v4()
-  const postId = v4()
+  const videoId = v4()
   switch (data.media_class) {
     case 'images':
       mission.push(
         fastify.prisma.image.create({
           data: {
-            shareFile_id: shareFileId,
+            sharefile_id: shareFileId,
             name: data.name,
             url: data.url,
             size: data.size
@@ -24,13 +24,14 @@ export async function uploadShareFile(
     case 'videos':
       mission.push(
         fastify.prisma.image.create({
-          data: { ...data.post, video_id: postId }
+          data: { ...data.post, video_id: videoId }
         })
       )
       mission.push(
         fastify.prisma.video.create({
           data: {
-            shareFile_id: shareFileId,
+            id: videoId,
+            sharefile_id: shareFileId,
             name: data.name,
             url: data.url,
             size: data.size,
@@ -82,14 +83,14 @@ export async function deleteShareFile(
     case 'images':
       mission.push(
         fastify.prisma.image.deleteMany({
-          where: { shareFile_id: id }
+          where: { sharefile_id: id }
         })
       )
       break
     case 'videos':
       // eslint-disable-next-line no-case-declarations
       const temp = await fastify.prisma.video.findFirst({
-        where: { shareFile_id: id }
+        where: { sharefile_id: id }
       })
 
       mission.push(
@@ -101,14 +102,14 @@ export async function deleteShareFile(
       )
       mission.push(
         fastify.prisma.video.deleteMany({
-          where: { shareFile_id: id }
+          where: { sharefile_id: id }
         })
       )
       break
     case 'files':
       mission.push(
         fastify.prisma.file.deleteMany({
-          where: { shareFile_id: id }
+          where: { sharefile_id: id }
         })
       )
       break
@@ -130,13 +131,19 @@ export async function putShareFile(
 
 export async function getShareFileList(
   fastify: FastifyInstance,
-  data: { size: number; page: number; type: string | null }
+  data: any
 ): Promise<any[]> {
   let tempResult
-  if (data.type === null) {
+  if (!('type' in data) || data.type === null) {
     tempResult = await fastify.prisma.shareFile.findMany({
       take: data.size,
-      skip: (data.page - 1) * data.size
+      skip: (data.page - 1) * data.size,
+      orderBy: {
+        created_time: data.sort
+      },
+      select: {
+        id: true
+      }
     })
   } else {
     tempResult = await fastify.prisma.shareFile.findMany({
@@ -146,52 +153,67 @@ export async function getShareFileList(
         }
       },
       take: data.size,
-      skip: (data.page - 1) * data.size
+      skip: (data.page - 1) * data.size,
+      orderBy: {
+        created_time: data.sort
+      },
+      select: {
+        id: true
+      }
     })
   }
   const finalResult: any[] = []
-  for (const obj of tempResult) {
-    switch (obj.media_class) {
-      case 'images':
-        finalResult.push(
-          await fastify.prisma.image.findFirst({
-            where: {
-              shareFile_id: obj.id
-            }
-          })
-        )
-        break
-      case 'videos':
-        // eslint-disable-next-line no-case-declarations
+  for (const temp of tempResult) {
+    finalResult.push(await getShareFile(fastify, temp.id))
+  }
+  return finalResult
+}
+
+export async function getShareFile(
+  fastify: FastifyInstance,
+  id: string
+): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const data = (await fastify.prisma.shareFile.findUnique({
+    where: { id }
+  }))!
+  let result
+  switch (data.media_class) {
+    case 'images':
+      result = await fastify.prisma.image.findFirst({
+        where: {
+          sharefile_id: id
+        }
+      })
+      break
+    case 'videos':
+      {
         const video = await fastify.prisma.video.findFirst({
           where: {
-            shareFile_id: obj.id
+            sharefile_id: id
           }
         })
-        // eslint-disable-next-line no-case-declarations
         const post = await fastify.prisma.image.findFirst({
           where: { video_id: video?.id }
         })
-        finalResult.push({
+        result = {
           video,
           post
+        }
+      }
+      break
+    case 'files':
+      result = {
+        file: await fastify.prisma.file.findFirst({
+          where: {
+            sharefile_id: id
+          }
         })
-        break
-      case 'files':
-        finalResult.push({
-          file: await fastify.prisma.file.findFirst({
-            where: {
-              shareFile_id: obj.id
-            }
-          })
-        })
-        break
-    }
+      }
+      break
   }
-  return tempResult.map((tempResult, index) => {
-    return {
-      shareFile: tempResult,
-      file: finalResult[index]
-    }
-  })
+  return {
+    share_file: data,
+    file: result
+  }
 }

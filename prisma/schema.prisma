@@ -19,8 +19,8 @@ model Image {
   project_id    String?
   chat_id       String?
   shuoshuo_id   String?
-  blogImages_id String?
-  shareFile_id  String?
+  blogimages_id String?
+  sharefile_id  String?
 }
 
 model Video {
@@ -33,7 +33,7 @@ model Video {
   //  post         Image?
   chat_id      String?
   shuoshuo_id  String?
-  shareFile_id String?
+  sharefile_id String?
 }
 
 model BaseInfo {
@@ -125,7 +125,8 @@ model Pay {
   pay_success  Boolean  @default(false)
   is_close     Boolean  @default(false)
   pay_type     String //wechat/alipay
-  user_id      Int
+  user_id      String
+  blog_id      String
 }
 
 model File {
@@ -135,7 +136,7 @@ model File {
   url          String
   created_time DateTime @default(now())
   chat_id      String?
-  shareFile_id String?
+  sharefile_id String?
 }
 
 model ShareFile {

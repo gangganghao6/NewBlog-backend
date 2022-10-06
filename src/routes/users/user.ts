@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { createUser, getUserByEmail, getUserById } from './userFn'
+import { createUser, getUserByEmail, getUserById, putUser } from './userFn'
 import { createRequestReturn } from '../../utils'
 
 export default function (
@@ -30,9 +30,11 @@ export default function (
     const result = await getUserById(fastify, id)
     return createRequestReturn(200, result, '')
   })
-  // fastify.post(
-  //   '/user/:id',
-  //   async (req: FastifyRequest, res: FastifyReply) => {}
-  // )
+  fastify.put('/user/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    const data = req.body
+    const id = (req.params as { id: string }).id
+    const result = await putUser(fastify, data, id)
+    return createRequestReturn(200, result, '')
+  })
   done()
 }

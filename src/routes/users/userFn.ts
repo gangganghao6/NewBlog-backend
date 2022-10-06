@@ -5,7 +5,7 @@ export async function getUserById(
   id: string
 ): Promise<any> {
   return await fastify.prisma.user.findUnique({
-    where: { id: id }
+    where: { id }
   })
 }
 
@@ -29,13 +29,11 @@ export async function createUser(
 
 export async function putUser(
   fastify: FastifyInstance,
-  data: any
+  data: any,
+  id: string
 ): Promise<any> {
-  // if ('name' in data) {
-  // }
-  // if ('is_subscribed' in data) {
-  // }
-  // if ('is_banned' in data) {
-  // }
-  return await getUserById(fastify, data.id)
+  return await fastify.prisma.user.update({
+    where: { id },
+    data
+  })
 }

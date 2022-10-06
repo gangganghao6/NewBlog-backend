@@ -38,11 +38,11 @@ export default function (
     '/modify',
     {},
     async (req: FastifyRequest, res: FastifyReply): Promise<any> => {
-      const data = req.body as Root & {
-        old_password: string
-        new_password: string
-      }
       try {
+        const data = req.body as Root & {
+          old_password: string
+          new_password: string
+        }
         const result = await rootModify(fastify, data)
         return createRequestReturn(200, result, '')
       } catch (e) {

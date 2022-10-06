@@ -25,8 +25,8 @@ export default function (
     if (exist !== null) {
       return createRequestReturn(500, null, '博客已初始化')
     }
-    const data: BaseInfo = req.body as BaseInfo
     try {
+      const data: BaseInfo = req.body as BaseInfo
       const result: BaseInfo = await postBaseInfo(fastify, data)
       return createRequestReturn(200, result, '')
     } catch (e) {
@@ -38,8 +38,8 @@ export default function (
     if (exist === null) {
       return createRequestReturn(500, null, '博客还未初始化')
     }
-    const data = req.body
     try {
+      const data = req.body
       const result = await putBaseInfo(fastify, data, exist)
       return createRequestReturn(200, result, '')
     } catch (e) {

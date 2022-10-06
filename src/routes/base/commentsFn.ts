@@ -6,7 +6,7 @@ export async function postComments(
   data: Comment
 ): Promise<any> {
   return await fastify.prisma.comment.create({
-    data: data
+    data
   })
 }
 

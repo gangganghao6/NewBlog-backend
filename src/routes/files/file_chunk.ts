@@ -12,7 +12,7 @@ export default function (
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
         await uploadFileChunk(req)
-        return createRequestReturn(200, '', '')
+        return createRequestReturn(200, null, '')
       } catch (e) {
         return createRequestReturn(500, null, (e as Error).message)
       }
@@ -21,9 +21,13 @@ export default function (
   fastify.post(
     '/file_merge',
     async (req: FastifyRequest, res: FastifyReply) => {
-      const data = JSON.parse(req.body as string)
-      const result = await mergeFileChunk(data)
-      return createRequestReturn(200, result, '')
+      try {
+        const data = JSON.parse(req.body as string)
+        const result = await mergeFileChunk(data)
+        return createRequestReturn(200, result, '')
+      } catch (e) {
+        return createRequestReturn(500, null, (e as Error).message)
+      }
     }
   )
   done()
