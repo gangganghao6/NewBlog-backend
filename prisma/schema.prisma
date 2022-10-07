@@ -106,7 +106,7 @@ model Shuoshuo {
   //  comments           Comment[]
   //  images             Image[]
   //  video              Video?
-  media_type         String //image/video/text
+  media_class        String //images/videos/texts
   content            String?
   created_time       DateTime @default(now())
   last_modified_time DateTime @default(now())

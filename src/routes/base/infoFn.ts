@@ -21,13 +21,11 @@ export async function postBaseInfo(
   fastify: FastifyInstance,
   data: BaseInfo
 ): Promise<any> {
-  const headImageId = v4()
   const baseInfoId = v4()
   const mission = []
   mission.push(
     fastify.prisma.image.create({
       data: {
-        id: headImageId,
         name: data.head_image.name,
         url: data.head_image.url,
         baseinfo_id: baseInfoId,

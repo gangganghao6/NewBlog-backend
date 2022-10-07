@@ -90,10 +90,14 @@ export async function getBlog(
   const images = await fastify.prisma.image.findMany({
     where: { blogimages_id: id }
   })
+  const comments = await fastify.prisma.comment.findMany({
+    where: { blog_id: id }
+  })
   return {
     ...blog,
     post,
-    images
+    images,
+    comments
   }
 }
 

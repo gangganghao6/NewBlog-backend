@@ -6,6 +6,7 @@ import files from './files/file_chunk'
 import share_file from './share_files/share_file'
 import blogs from './blogs/blog'
 import users from './users/user'
+import shuoshuos from './shuoshuos/shuoshuo'
 
 export async function BaseRoute(fastify: FastifyInstance): Promise<void> {
   await fastify.register(info)
@@ -27,4 +28,8 @@ export async function BlogsRoute(fastify: FastifyInstance): Promise<void> {
 
 export async function UsersRoute(fastify: FastifyInstance): Promise<void> {
   await fastify.register(users)
+}
+
+export async function ShuoshuosRoute(fastify: FastifyInstance): Promise<void> {
+  await fastify.register(shuoshuos)
 }

@@ -84,7 +84,7 @@ export interface Shuoshuo {
   comments?: Comment[]
   images?: Image[]
   video?: Video
-  media_type: 'image' | 'video' | 'text'
+  media_class: 'images' | 'video' | 'text'
   content: string
   created_time: Date
   last_modified_time: Date
