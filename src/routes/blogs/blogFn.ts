@@ -133,8 +133,9 @@ export async function putBlog(
   data: any,
   id: string
 ): Promise<any> {
+  const mission = []
+
   if ('post' in data) {
-    const mission = []
     mission.push(
       fastify.prisma.image.deleteMany({
         where: { blogpost_id: id }
@@ -145,10 +146,8 @@ export async function putBlog(
         data: { ...data.post, blogpost_id: id }
       })
     )
-    await fastify.prisma.$transaction(mission)
   }
   if ('images' in data) {
-    const mission = []
     mission.push(
       fastify.prisma.image.deleteMany({
         where: { blogimages_id: id }
@@ -161,7 +160,6 @@ export async function putBlog(
         })
       )
     }
-    await fastify.prisma.$transaction(mission)
   }
   let temp = {}
   if ('title' in data) {
@@ -173,9 +171,12 @@ export async function putBlog(
   if ('type' in data) {
     temp = { ...temp, type: data.type }
   }
-  await fastify.prisma.blog.update({
-    where: { id },
-    data: { ...temp, last_modified_time: new Date() }
-  })
+  mission.push(
+    fastify.prisma.blog.update({
+      where: { id },
+      data: { ...temp, last_modified_time: new Date() }
+    })
+  )
+  await fastify.prisma.$transaction(mission)
   return await getBlog(fastify, id)
 }

@@ -159,6 +159,7 @@ export interface Experience {
   description: string
   time_start: Date
   time_end: Date
+  image: Image
 }
 
 export interface Project {

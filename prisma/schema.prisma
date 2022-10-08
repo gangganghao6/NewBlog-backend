@@ -17,6 +17,7 @@ model Image {
   baseinfo_id   String?
   blogpost_id   String?
   project_id    String?
+  experience_id String?
   chat_id       String?
   shuoshuo_id   String?
   blogimages_id String?
@@ -185,21 +186,21 @@ model Personal {
 }
 
 model Experience {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   company     String
   duty        String
   description String
   time_start  DateTime
-  time_end    DateTime
+  time_end    DateTime?
 }
 
 model Project {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   duty        String
   description String
   time_start  DateTime
-  time_end    DateTime
+  time_end    DateTime?
   github_url  String?
   demo_url    String?
   //  image       Image?
@@ -215,5 +216,5 @@ model Chat {
   //  image        Image?
   //  video        Video?
   //  file         File?
-  type         String //image/video/file/text
+  media_class  String //image/video/file/text
 }

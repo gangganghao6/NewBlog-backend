@@ -29,3 +29,4 @@ keys
 prisma/migrations
 database
 log
+.eslintcache
