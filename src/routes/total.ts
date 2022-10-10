@@ -10,6 +10,8 @@ import shuoshuos from './shuoshuos/shuoshuo'
 import experience from './personal/experience'
 import project from './personal/project'
 import personalInfo from './personal/info'
+import todolist from './todolists/todolist'
+import github from './githubs/github'
 
 export async function BaseRoute(fastify: FastifyInstance): Promise<void> {
   await fastify.register(baseInfo)
@@ -41,4 +43,12 @@ export async function PersonalRoute(fastify: FastifyInstance): Promise<void> {
   await fastify.register(personalInfo)
   await fastify.register(experience)
   await fastify.register(project)
+}
+
+export async function TodolistRoute(fastify: FastifyInstance): Promise<void> {
+  await fastify.register(todolist)
+}
+
+export async function GithubRoute(fastify: FastifyInstance): Promise<void> {
+  await fastify.register(github)
 }

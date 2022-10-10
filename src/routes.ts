@@ -2,9 +2,11 @@ import {
   BaseRoute,
   BlogsRoute,
   FilesRoute,
+  GithubRoute,
   PersonalRoute,
   ShareFilesRoute,
   ShuoshuosRoute,
+  TodolistRoute,
   UsersRoute
 } from './routes/total'
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
@@ -17,6 +19,8 @@ async function registRoutes(fastify: FastifyInstance): Promise<void> {
   await fastify.register(UsersRoute, { prefix: '/api/users' })
   await fastify.register(ShuoshuosRoute, { prefix: '/api/shuoshuos' })
   await fastify.register(PersonalRoute, { prefix: '/api/personal' })
+  await fastify.register(TodolistRoute, { prefix: '/api/todolists' })
+  await fastify.register(GithubRoute, { prefix: '/api/githubs' })
 }
 
 async function registStatic(fastify: FastifyInstance): Promise<void> {

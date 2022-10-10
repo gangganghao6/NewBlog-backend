@@ -71,6 +71,7 @@ model User {
 model UserVisit {
   id         String   @id @default(uuid())
   ip         String
+  url        String
   user_agent String
   visit_time DateTime @default(now())
   user_id    String?
@@ -150,13 +151,12 @@ model ShareFile {
 
 model Github {
   id                 String   @id @default(uuid())
-  readme             String
   page_url           String
   title              String
-  description        String
+  description        String?
   created_time       DateTime
   last_modified_time DateTime
-  languages          String
+  languages          String?
   stars_count        Int
   forks_count        Int
   watchers_count     Int

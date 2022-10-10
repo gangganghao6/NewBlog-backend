@@ -21,6 +21,7 @@ declare global {
       PORT: number
       ISDEV: boolean
       PUBLIC_URL: string
+      GITHUB_NAME: string
     }
   }
 }
