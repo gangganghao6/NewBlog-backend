@@ -1,6 +1,7 @@
 import {
   BaseRoute,
   BlogsRoute,
+  ChatRoute,
   FilesRoute,
   GithubRoute,
   PersonalRoute,
@@ -21,6 +22,7 @@ async function registRoutes(fastify: FastifyInstance): Promise<void> {
   await fastify.register(PersonalRoute, { prefix: '/api/personal' })
   await fastify.register(TodolistRoute, { prefix: '/api/todolists' })
   await fastify.register(GithubRoute, { prefix: '/api/githubs' })
+  await fastify.register(ChatRoute, { prefix: '/api/chats' })
 }
 
 async function registStatic(fastify: FastifyInstance): Promise<void> {

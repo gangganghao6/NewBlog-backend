@@ -12,11 +12,14 @@ import project from './personal/project'
 import personalInfo from './personal/info'
 import todolist from './todolists/todolist'
 import github from './githubs/github'
+import log from './base/log'
+import chat from './chats/chat'
 
 export async function BaseRoute(fastify: FastifyInstance): Promise<void> {
   await fastify.register(baseInfo)
   await fastify.register(comments)
   await fastify.register(root, { prefix: '/root' })
+  await fastify.register(log, { prefix: '/urls_info' })
 }
 
 export async function FilesRoute(fastify: FastifyInstance): Promise<void> {
@@ -51,4 +54,8 @@ export async function TodolistRoute(fastify: FastifyInstance): Promise<void> {
 
 export async function GithubRoute(fastify: FastifyInstance): Promise<void> {
   await fastify.register(github)
+}
+
+export async function ChatRoute(fastify: FastifyInstance): Promise<void> {
+  await fastify.register(chat)
 }

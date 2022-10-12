@@ -69,12 +69,27 @@ model User {
 }
 
 model UserVisit {
-  id         String   @id @default(uuid())
-  ip         String
-  url        String
-  user_agent String
-  visit_time DateTime @default(now())
-  user_id    String?
+  id               String   @id @default(uuid())
+  ip               String
+  country          String?
+  province         String?
+  city             String?
+  isp              String?
+  url              String
+  user_agent       String
+  browser_name     String?
+  browser_version  String?
+  browser_major    String?
+  engine_name      String?
+  engine_version   String?
+  os_name          String?
+  os_version       String?
+  device_vendor    String?
+  device_model     String?
+  device_type      String?
+  cpu_architecture String?
+  visit_time       DateTime @default(now())
+  user_id          String?
 }
 
 model Comment {
@@ -211,7 +226,7 @@ model Chat {
   ip           String
   location     String
   user_id      String
-  created_time DateTime
+  created_time DateTime @default(now())
   content      String?
   //  image        Image?
   //  video        Video?

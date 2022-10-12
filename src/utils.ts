@@ -41,6 +41,20 @@ function createRequestReturn(
   }
 }
 
+function createRequestWithListReturn(
+  code = 200,
+  data: any = {},
+  message = '',
+  total = 0
+): { code: number; data: any; message: string; total: number } {
+  return {
+    code,
+    data,
+    message,
+    total
+  }
+}
+
 function createLogStream(): Duplex {
   const currentDate = dayjs(new Date()).format('YYYY-MM-DD')
   if (!fs.existsSync(`${process.env.PROJECT_PATH}/log`)) {
@@ -86,4 +100,9 @@ function createLogStream(): Duplex {
   return inoutStream
 }
 
-export { generateRoutesLogs, createRequestReturn, createLogStream }
+export {
+  generateRoutesLogs,
+  createRequestReturn,
+  createLogStream,
+  createRequestWithListReturn
+}

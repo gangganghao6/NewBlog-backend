@@ -10,16 +10,19 @@
     "@fastify/websocket": "^7.0.1",
     "@prisma/client": "^4.4.0",
     "@types/json-schema": "^7.0.11",
+    "@types/ua-parser-js": "^0.7.36",
     "@types/uuid": "^8.3.4",
     "axios": "^1.1.2",
     "dayjs": "^1.11.5",
     "dotenv": "^16.0.2",
     "fastify": "^4.5.3",
     "get-video-duration": "^4.1.0",
+    "ip2region": "^2.3.0",
     "prisma": "^4.4.0",
     "sharp": "0.30.7",
     "sqlite3": "^5.1.0",
     "tsx": "^3.9.0",
+    "ua-parser-js": "^1.0.2",
     "uuid": "^9.0.0"
   },
   "type": "module",
@@ -30,7 +33,8 @@
     "build": "tsc -p tsconfig.json",
     "run": "node dist/index.js",
     "prisma": "prisma format&&npx prisma migrate dev --name init",
-    "tscheck": "tsc --noemit"
+    "tscheck": "tsc --noemit",
+    "prisma_studio": "npx prisma studio"
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",

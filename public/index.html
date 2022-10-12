@@ -6,8 +6,9 @@
 </head>
 <body>
 <input type='file' id='upload'></input>
+<button id='test'>111</button>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.2/socket.io.js'></script>
 <script type='text/javascript'>
-
   const upload = document.getElementById('upload')
   // upload.addEventListener('change', function(e) {
   //   const file = e.target.files[0]
@@ -45,69 +46,93 @@
     return uuid.join('')
   }
 
-  let finalData
-
-  const MEDIA_TYPE = {
-    IMAGES: 'images',
-    VIDEOS: 'videos',
-    FILES: 'files'
+  //
+  // let finalData
+  //
+  // const MEDIA_TYPE = {
+  //   IMAGES: 'images',
+  //   VIDEOS: 'videos',
+  //   FILES: 'files'
+  // }
+  //
+  // upload.addEventListener('change', async (e) => {
+  //   const file = e.target.files[0]
+  //   const fileType = file.name.split('.').at(-1)
+  //   const fileSize = file.size
+  //   const eachSize = 2 * 1024 * 1024
+  //   const totalSlices = Math.ceil(fileSize / eachSize)
+  //   const uuid = getUUID(16, 16)
+  //   const mediaClass = MEDIA_TYPE.FILES
+  //
+  //   let currentSlices = 1
+  //   let missions = []
+  //   for (; currentSlices <= totalSlices; currentSlices++) {
+  //     const fileSlice = file.slice((currentSlices - 1) * eachSize, currentSlices * eachSize)
+  //     const info = {
+  //       current_slices: currentSlices,
+  //       total_slices: totalSlices,
+  //       file_type: fileType,
+  //       uuid: uuid,
+  //       media_class: mediaClass
+  //     }
+  //     const formdata = new FormData()
+  //     formdata.append('file', fileSlice)
+  //     formdata.append('info', JSON.stringify(info))
+  //     // formdata.append('current_slices', JSON.stringify({ current_slices: currentSlices }))
+  //     // formdata.append('total_slices', JSON.stringify({ total_slices: totalSlices }))
+  //     // formdata.append('file_type', JSON.stringify({ file_type: fileType }))
+  //     // formdata.append('uuid', JSON.stringify({ uuid }))
+  //     // formdata.append('media_class', JSON.stringify({ media_class: mediaClass }))
+  //     missions.push(fetch('http://localhost/api/files/file_chunk', {
+  //       method: 'POST',
+  //       headers: {
+  //         contentType: 'multipart/form-data'
+  //       },
+  //       body: formdata
+  //     }).then((res) => res.json()))
+  //     // const result = await (await ).json()
+  //     // if (result.code !== 200) {
+  //     //   alert(result.message)
+  //     //   return
+  //     // }
+  //   }
+  //   let tempResults = await Promise.all(missions)
+  //   if (tempResults.some(result => result.code !== 200)) {
+  //     alert('上传发生错误')
+  //   }
+  //   const result = await (await fetch('http://localhost/api/files/file_merge', {
+  //     method: 'POST',
+  //     body: JSON.stringify({
+  //       uuid,
+  //       media_class: mediaClass,
+  //       file_type: fileType
+  //     })
+  //   })).json()
+  //   console.log(result)
+  // })
+  // fetch('http://192.168.43.143/api/base/urls_info/url', {
+  //   method: 'POST',
+  //   body: JSON.stringify({
+  //     'user_id': '7fB0D48e-eBDA-77fC-E8D2-36B7D2bA2E6D',
+  //     'url': 'http://sqdnbl.fk/eduppdshd'
+  //   })
+  // })
+  const socket = new WebSocket(`ws://127.0.0.1:80/api/chats?id=${getUUID()}`)
+  socket.onopen = () => {
+    // socket.send(JSON.stringify({
+    //   user_id: '2d151dc8-64e3-4267-9361-4ef190e1783',
+    //   content: 'test',
+    //   media_class: 'text'
+    // }))
+    // socket.send(JSON.stringify({ id: getUUID() }))
   }
-
-  upload.addEventListener('change', async (e) => {
-    const file = e.target.files[0]
-    const fileType = file.name.split('.').at(-1)
-    const fileSize = file.size
-    const eachSize = 2 * 1024 * 1024
-    const totalSlices = Math.ceil(fileSize / eachSize)
-    const uuid = getUUID(16, 16)
-    const mediaClass = MEDIA_TYPE.FILES
-
-    let currentSlices = 1
-    let missions = []
-    for (; currentSlices <= totalSlices; currentSlices++) {
-      const fileSlice = file.slice((currentSlices - 1) * eachSize, currentSlices * eachSize)
-      const info = {
-        current_slices: currentSlices,
-        total_slices: totalSlices,
-        file_type: fileType,
-        uuid: uuid,
-        media_class: mediaClass
-      }
-      const formdata = new FormData()
-      formdata.append('file', fileSlice)
-      formdata.append('info', JSON.stringify(info))
-      // formdata.append('current_slices', JSON.stringify({ current_slices: currentSlices }))
-      // formdata.append('total_slices', JSON.stringify({ total_slices: totalSlices }))
-      // formdata.append('file_type', JSON.stringify({ file_type: fileType }))
-      // formdata.append('uuid', JSON.stringify({ uuid }))
-      // formdata.append('media_class', JSON.stringify({ media_class: mediaClass }))
-      missions.push(fetch('http://localhost/api/files/file_chunk', {
-        method: 'POST',
-        headers: {
-          contentType: 'multipart/form-data'
-        },
-        body: formdata
-      }).then((res) => res.json()))
-      // const result = await (await ).json()
-      // if (result.code !== 200) {
-      //   alert(result.message)
-      //   return
-      // }
-    }
-    let tempResults = await Promise.all(missions)
-    if (tempResults.some(result => result.code !== 200)) {
-      alert('上传发生错误')
-    }
-    const result = await (await fetch('http://localhost/api/files/file_merge', {
-      method: 'POST',
-      body: JSON.stringify({
-        uuid,
-        media_class: mediaClass,
-        file_type: fileType
-      })
-    })).json()
-    console.log(result)
+  const button = document.querySelector('#test')
+  button.addEventListener('click', () => {
+    socket.send(JSON.stringify({ time: new Date() }))
   })
+  socket.onmessage = (data) => {
+    console.log(JSON.parse(data.data))
+  }
 </script>
 </body>
 </html>
