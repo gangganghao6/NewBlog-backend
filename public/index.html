@@ -117,8 +117,10 @@
   //     'url': 'http://sqdnbl.fk/eduppdshd'
   //   })
   // })
-  const socket = new WebSocket(`ws://127.0.0.1:80/api/chats?id=${getUUID()}`)
+  const uuid = getUUID()
+  const socket = new WebSocket(`ws://127.0.0.1:80/api/chats?user_id=${uuid}`)
   socket.onopen = () => {
+    setInterval(() => socket.send(JSON.stringify({ type: 'heart_beat', user_id: uuid })), 60 * 1000)
     // socket.send(JSON.stringify({
     //   user_id: '2d151dc8-64e3-4267-9361-4ef190e1783',
     //   content: 'test',
@@ -128,11 +130,19 @@
   }
   const button = document.querySelector('#test')
   button.addEventListener('click', () => {
-    socket.send(JSON.stringify({ time: new Date() }))
+    socket.send(JSON.stringify({ type: 'send_message', user_id: uuid, media_class: 'text', content: 'hahaha' }))
   })
   socket.onmessage = (data) => {
-    console.log(JSON.parse(data.data))
+    const obj = JSON.parse(data.data.toString())
+    console.log(obj)
+    if (obj.type === 'send_message') {
+      console.log(obj)
+    }
   }
+
+  // window.onbeforeunload = () => {
+  //   navigator.sendBeacon(`http://127.0.0.1/api/chats/unload?id=${uuid}`)
+  // }
 </script>
 </body>
 </html>
