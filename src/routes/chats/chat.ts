@@ -21,46 +21,50 @@ export default function (
   config: never,
   done: any
 ): void {
-  // 未解决断开连接移除
   fastify.get('/', { websocket: true }, (connection, req) => {
-    const id = (req.query as { id: string }).id
-    // setInterval(() => {
-    //   connection.socket.send(JSON.stringify({ time: new Date() }))
-    // }, 1000)
-    console.log(id, 'connected')
-    clients.push({
-      id,
-      connection
-    })
-    connection.on('close', () => {
-      console.log(id, 'disconnected')
+    const userId = (req.query as { user_id: string }).user_id
+    let timer = setTimeout(() => {
       clients.splice(
-        clients.findIndex((obj) => obj.id === id),
+        clients.findIndex((obj) => obj.user_id === userId),
         1
       )
+    }, 70 * 1000)
+    clients.push({
+      userId,
+      connection
     })
-    connection.socket.on('message', (buf: Buffer) => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    connection.socket.on('message', async (buf: Buffer) => {
       try {
         const data: any = JSON.parse(buf.toString())
-        const location: {
-          country: string
-          province: string
-          city: string
-          isp: string
-        } = query.search(req.ip)
-        data.location = `${location.country}/${location.province}/${location.city}/${location.isp}`
-        clients.forEach((obj) => {
-          obj.connection.socket.send(JSON.stringify(data))
-        })
-        data.ip = req.ip
-        void sendMessage(fastify, data).then((res) => {
+        if (data.type === 'heart_beat') {
+          clearTimeout(timer)
+          timer = setTimeout(() => {
+            clients.splice(
+              clients.findIndex((obj) => obj.userId === userId),
+              1
+            )
+          }, 70 * 1000)
+        } else if (data.type === 'send_message') {
+          const location: {
+            country: string
+            province: string
+            city: string
+            isp: string
+          } = query.search(req.ip)
+          data.location = `${location.country}/${location.province}/${location.city}/${location.isp}`
+          clients.forEach((obj) => {
+            obj.connection.socket.send(JSON.stringify(data))
+          })
+          data.ip = req.ip
+          const result = await sendMessage(fastify, data)
           connection.socket.send(
-            JSON.stringify(createRequestReturn(200, res, ''))
+            JSON.stringify(createRequestReturn(200, result, ''))
           )
-        })
+        }
       } catch (e) {
         connection.socket.send(
-          JSON.stringify(createRequestReturn(500, null, ''))
+          JSON.stringify(createRequestReturn(500, null, (e as Error).message))
         )
       }
     })

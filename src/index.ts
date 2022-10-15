@@ -79,19 +79,6 @@ await fastify.register(fastifySession, {
 })
 await fastify.register(fastifyWebsocket) // fastify.get('/', { websocket: true }, (connection, req) => {
 
-void fastify.register(async function (fastify) {
-  fastify.get(
-    '/socket.io/',
-    { websocket: true },
-    (connection /* SocketStream */, req /* FastifyRequest */) => {
-      connection.socket.on('message', (message) => {
-        // message.toString() === 'hi from client'
-        connection.socket.send('hi from server')
-      })
-    }
-  )
-})
-
 await fastify.register(fastifyRoutes)
 await fastify.register(fastifyMultipart) // await req.file()
 
