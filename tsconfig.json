@@ -10,7 +10,8 @@
     "module": "ESNext",
     // 指定输出模块规范，默认为 Commonjs
     "lib": [
-      "ESNext"
+      "ESNext",
+      "dom"
     ],
     "types": [
       "node"

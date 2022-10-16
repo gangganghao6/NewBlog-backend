@@ -30,3 +30,4 @@ prisma/migrations
 database
 log
 *.eslintcache
+alipay

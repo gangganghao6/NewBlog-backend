@@ -132,18 +132,18 @@ model Shuoshuo {
 }
 
 model Pay {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   type         String //blog/personal
-  money        Float    @default(0.0)
-  order_id     String   @default(uuid())
+  money        Float     @default(0.0)
+  order_id     String    @default(uuid())
   order_url    String
-  created_time DateTime @default(now())
-  close_time   DateTime @default(now())
-  pay_success  Boolean  @default(false)
-  is_close     Boolean  @default(false)
+  created_time DateTime  @default(now())
+  close_time   DateTime?
+  pay_success  Boolean   @default(false)
+  is_close     Boolean   @default(false)
   pay_type     String //wechat/alipay
   user_id      String
-  blog_id      String
+  blog_id      String?
 }
 
 model File {

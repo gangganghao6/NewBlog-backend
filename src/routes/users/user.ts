@@ -1,5 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+
 import {
+  confirmOrder,
+  createPayOrder,
   createUser,
   getUserAll,
   getUserByEmail,
@@ -78,6 +81,30 @@ export default function (
       try {
         const id = (req.params as { id: string }).id
         const result = await getUserDetail(fastify, id)
+        return createRequestReturn(200, result, '')
+      } catch (e) {
+        return createRequestReturn(500, null, (e as Error).message)
+      }
+    }
+  )
+  fastify.post(
+    '/pay/create',
+    async (req: FastifyRequest, res: FastifyReply) => {
+      try {
+        const data = req.body
+        const result = await createPayOrder(fastify, data)
+        return createRequestReturn(200, result, '')
+      } catch (e) {
+        return createRequestReturn(500, null, (e as Error).message)
+      }
+    }
+  )
+  fastify.get(
+    '/pay/confirm',
+    async (req: FastifyRequest, res: FastifyReply) => {
+      try {
+        const data = req.query
+        const result = await confirmOrder(fastify, data)
         return createRequestReturn(200, result, '')
       } catch (e) {
         return createRequestReturn(500, null, (e as Error).message)

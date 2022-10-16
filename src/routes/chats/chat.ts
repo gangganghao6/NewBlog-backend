@@ -28,7 +28,7 @@ export default function (
         clients.findIndex((obj) => obj.user_id === userId),
         1
       )
-    }, 70 * 1000)
+    }, 60 * 1000)
     clients.push({
       userId,
       connection
@@ -44,7 +44,7 @@ export default function (
               clients.findIndex((obj) => obj.userId === userId),
               1
             )
-          }, 70 * 1000)
+          }, 60 * 1000)
         } else if (data.type === 'send_message') {
           const location: {
             country: string

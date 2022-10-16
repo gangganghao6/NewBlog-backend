@@ -22,6 +22,9 @@ declare global {
       ISDEV: boolean
       PUBLIC_URL: string
       GITHUB_NAME: string
+      ALIPAY_APPID: string
+      ALIPAY_PRIVATEKEY: string
+      ALIPAY_PUBLICKEY: string
     }
   }
 }

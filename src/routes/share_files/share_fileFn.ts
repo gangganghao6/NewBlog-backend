@@ -7,7 +7,6 @@ export async function uploadShareFile(
 ): Promise<any> {
   const mission = []
   const shareFileId = v4()
-  const videoId = v4()
   switch (data.media_class) {
     case 'images':
       mission.push(
@@ -22,23 +21,26 @@ export async function uploadShareFile(
       )
       break
     case 'videos':
-      mission.push(
-        fastify.prisma.image.create({
-          data: { ...data.post, video_id: videoId }
-        })
-      )
-      mission.push(
-        fastify.prisma.video.create({
-          data: {
-            id: videoId,
-            sharefile_id: shareFileId,
-            name: data.name,
-            url: data.url,
-            size: data.size,
-            duration: data.duration
-          }
-        })
-      )
+      {
+        const videoId = v4()
+        mission.push(
+          fastify.prisma.image.create({
+            data: { ...data.post, video_id: videoId }
+          })
+        )
+        mission.push(
+          fastify.prisma.video.create({
+            data: {
+              id: videoId,
+              sharefile_id: shareFileId,
+              name: data.name,
+              url: data.url,
+              size: data.size,
+              duration: data.duration
+            }
+          })
+        )
+      }
       break
     case 'files':
       mission.push(
@@ -46,7 +48,8 @@ export async function uploadShareFile(
           data: {
             name: data.name,
             size: data.size,
-            url: data.url
+            url: data.url,
+            sharefile_id: shareFileId
           }
         })
       )
