@@ -113,6 +113,7 @@ export async function getShuoshuoList(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
+  const count = await fastify.prisma.shuoshuo.count()
   const tempResult = await fastify.prisma.shuoshuo.findMany({
     take: data.size,
     skip: (data.page - 1) * data.size,
@@ -127,7 +128,7 @@ export async function getShuoshuoList(
   for (const obj of tempResult) {
     result.push(await getShuoshuo(fastify, obj.id))
   }
-  return result
+  return { result, count }
 }
 
 export async function deleteShuoshuo(

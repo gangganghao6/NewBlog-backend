@@ -135,9 +135,10 @@ export async function putShareFile(
 export async function getShareFileList(
   fastify: FastifyInstance,
   data: any
-): Promise<any[]> {
-  let tempResult
+): Promise<any> {
+  let tempResult, tempCount
   if (!('type' in data) || data.type === null) {
+    tempCount = await fastify.prisma.shareFile.count()
     tempResult = await fastify.prisma.shareFile.findMany({
       take: data.size,
       skip: (data.page - 1) * data.size,
@@ -149,6 +150,13 @@ export async function getShareFileList(
       }
     })
   } else {
+    tempCount = await fastify.prisma.shareFile.count({
+      where: {
+        type: {
+          equals: data.type
+        }
+      }
+    })
     tempResult = await fastify.prisma.shareFile.findMany({
       where: {
         type: {
@@ -169,7 +177,7 @@ export async function getShareFileList(
   for (const temp of tempResult) {
     finalResult.push(await getShareFile(fastify, temp.id))
   }
-  return finalResult
+  return { result: finalResult, count: tempCount }
 }
 
 export async function getShareFile(

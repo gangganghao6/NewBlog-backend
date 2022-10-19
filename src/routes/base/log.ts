@@ -17,7 +17,7 @@ export default function (
       const ip = req.ip
       const userAgent = req.headers['user-agent']
       await postUserVisitLog(fastify, {
-        ...data,
+        data,
         ip,
         userAgent
       })

@@ -4,6 +4,7 @@ import {
   confirmOrder,
   createPayOrder,
   createUser,
+  getPayAll,
   getUserAll,
   getUserByEmail,
   getUserById,
@@ -22,6 +23,7 @@ export default function (
       const email = (req.body as { email: string }).email
       const result = await getUserByEmail(fastify, email)
       if (result !== null) {
+        req.session.set('user_id', result.id)
         return createRequestReturn(200, result, '')
       } else {
         return createRequestReturn(500, null, '登录失败')
@@ -38,6 +40,7 @@ export default function (
         return createRequestReturn(500, null, '邮箱已被注册')
       }
       const result = await createUser(fastify, data)
+      req.session.set('user_id', result.id)
       return createRequestReturn(200, result, '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
@@ -111,5 +114,16 @@ export default function (
       }
     }
   )
+  fastify.get('/pay/list', async (req: FastifyRequest, res: FastifyReply) => {
+    try {
+      const data: any = req.query
+      data.page = parseInt(data.page, 10)
+      data.size = parseInt(data.size, 10)
+      const result = await getPayAll(fastify, data)
+      return createRequestReturn(200, result, '')
+    } catch (e) {
+      return createRequestReturn(500, null, (e as Error).message)
+    }
+  })
   done()
 }

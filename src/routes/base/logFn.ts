@@ -12,7 +12,7 @@ const query = new IP2Region.default({
 
 export async function postUserVisitLog(
   fastify: FastifyInstance,
-  data: any
+  data: { data: any[]; ip: string; userAgent: any }
 ): Promise<any> {
   const result = parser(data.userAgent)
   const location: {
@@ -21,29 +21,32 @@ export async function postUserVisitLog(
     city: string
     isp: string
   } = query.search(data.ip)
-  await fastify.prisma.userVisit.create({
-    data: {
-      ip: data.ip,
-      country: location.country === '' ? null : location.country,
-      province: location.province === '' ? null : location.province,
-      city: location.city === '' ? null : location.city,
-      isp: location.isp === '' ? null : location.isp,
-      url: data.url,
-      user_agent: data.userAgent,
-      user_id: data.user_id,
-      browser_name: result.browser.name,
-      browser_version: result.browser.version,
-      browser_major: result.browser.major,
-      engine_name: result.engine.name,
-      engine_version: result.engine.version,
-      os_name: result.os.name,
-      os_version: result.os.version,
-      device_vendor: result.device.vendor,
-      device_model: result.device.model,
-      device_type: result.device.type,
-      cpu_architecture: result.cpu.architecture
-    }
-  })
+  for (const obj of data.data) {
+    await fastify.prisma.userVisit.create({
+      data: {
+        ip: obj.ip,
+        country: location.country === '' ? null : location.country,
+        province: location.province === '' ? null : location.province,
+        city: location.city === '' ? null : location.city,
+        isp: location.isp === '' ? null : location.isp,
+        url: obj.url,
+        user_agent: data.userAgent,
+        user_id: obj.user_id,
+        browser_name: result.browser.name,
+        browser_version: result.browser.version,
+        browser_major: result.browser.major,
+        engine_name: result.engine.name,
+        engine_version: result.engine.version,
+        os_name: result.os.name,
+        os_version: result.os.version,
+        device_vendor: result.device.vendor,
+        device_model: result.device.model,
+        device_type: result.device.type,
+        cpu_architecture: result.cpu.architecture
+      }
+    })
+  }
+
   return null
 }
 
@@ -51,13 +54,15 @@ export async function getUserVisitAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  return await fastify.prisma.userVisit.findMany({
+  const count = fastify.prisma.userVisit.count()
+  const result = await fastify.prisma.userVisit.findMany({
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
       visit_time: data.sort
     }
   })
+  return { result, count }
 }
 
 export async function getUserVisitAnalysis(

@@ -66,9 +66,14 @@ export async function getChatAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  let temps: any[]
-  const results = []
+  let temps: any[], tempCount: number
+  const result = []
   if ('user_id' in data && data.user_id !== null) {
+    tempCount = await fastify.prisma.chat.count({
+      where: {
+        user_id: data.user_id
+      }
+    })
     temps = await fastify.prisma.chat.findMany({
       take: data.size,
       skip: (data.page - 1) * data.size,
@@ -83,6 +88,7 @@ export async function getChatAll(
       }
     })
   } else {
+    tempCount = await fastify.prisma.chat.count()
     temps = await fastify.prisma.chat.findMany({
       take: data.size,
       skip: (data.page - 1) * data.size,
@@ -95,9 +101,9 @@ export async function getChatAll(
     })
   }
   for (const temp of temps) {
-    results.push(await getChat(fastify, temp.id))
+    result.push(await getChat(fastify, temp.id))
   }
-  return results
+  return { result, count: tempCount }
 }
 
 async function getChat(fastify: FastifyInstance, id: string): Promise<any> {

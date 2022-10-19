@@ -15,13 +15,15 @@ export async function getTodolistAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  return await fastify.prisma.todolist.findMany({
+  const count = await fastify.prisma.todolist.count()
+  const result = await fastify.prisma.todolist.findMany({
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
       created_time: data.sort
     }
   })
+  return { result, count }
 }
 
 export async function putTodolist(

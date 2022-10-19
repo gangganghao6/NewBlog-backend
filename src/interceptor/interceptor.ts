@@ -4,7 +4,7 @@ async function registeInterceptor(fastify: FastifyInstance): Promise<void> {
   await fastify.addHook(
     'onRequest',
     async (req: FastifyRequest, res: FastifyReply) => {
-      // console.log(req.query)
+      //
     }
   )
   // await fastify.addHook(

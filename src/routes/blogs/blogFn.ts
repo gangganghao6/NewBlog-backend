@@ -40,9 +40,10 @@ export async function postBlog(
 export async function getBlogList(
   fastify: FastifyInstance,
   data: any
-): Promise<any[]> {
-  let tempResult
+): Promise<any> {
+  let tempResult, tempCount
   if (!('type' in data)) {
+    tempCount = await fastify.prisma.blog.count()
     tempResult = await fastify.prisma.blog.findMany({
       take: data.size,
       skip: (data.page - 1) * data.size,
@@ -54,6 +55,13 @@ export async function getBlogList(
       }
     })
   } else {
+    tempCount = await fastify.prisma.blog.count({
+      where: {
+        type: {
+          equals: data.type
+        }
+      }
+    })
     tempResult = await fastify.prisma.blog.findMany({
       where: {
         type: {
@@ -74,14 +82,14 @@ export async function getBlogList(
   for (const obj of tempResult) {
     result.push(await getBlog(fastify, obj.id))
   }
-  return result
+  return { result, count: tempCount }
 }
 
 export async function getBlog(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
-  const blog = await fastify.prisma.blog.findFirstOrThrow({
+  const blog = await fastify.prisma.blog.findFirst({
     where: { id }
   })
   const post = await fastify.prisma.image.findFirst({

@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 import AliPaySdk from 'alipay-sdk'
 import AliPayForm from 'alipay-sdk/lib/form'
 import { v4 } from 'uuid'
+import { getBlog } from '../blogs/blogFn'
 
 // eslint-disable-next-line new-cap,@typescript-eslint/ban-ts-comment
 // @ts-expect-error
@@ -55,7 +56,13 @@ export async function getUserAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  return await fastify.prisma.user.findMany({
+  const count = await fastify.prisma.user.count({
+    where: {
+      is_subscribed: data.is_subscribed,
+      is_banned: data.is_banned
+    }
+  })
+  const result = await fastify.prisma.user.findMany({
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
@@ -66,6 +73,7 @@ export async function getUserAll(
       is_banned: data.is_banned
     }
   })
+  return { result, count }
 }
 
 export async function getUserDetail(
@@ -170,7 +178,7 @@ export async function confirmOrder(
     )
     const orderResult = await fetch(orderUrl, {
       method: 'GET'
-    }).then((response) => response.json())
+    }).then(async (response) => await response.json())
     const status = orderResult.alipay_trade_query_response.trade_status // WAIT_BUYER_PAY TRADE_CLOSED TRADE_SUCCESS TRADE_FINISHED
     if (status === 'TRADE_SUCCESS') {
       await fastify.prisma.pay.updateMany({
@@ -202,4 +210,38 @@ export async function confirmOrder(
       where: { order_id: orderId }
     })
   }
+}
+
+export async function getPayAll(
+  fastify: FastifyInstance,
+  data: any
+): Promise<any> {
+  const count = await fastify.prisma.pay.count()
+  const tempResult = await fastify.prisma.pay.findMany({
+    take: data.size,
+    skip: (data.page - 1) * data.size,
+    orderBy: {
+      created_time: data.sort
+    },
+    select: {
+      id: true
+    }
+  })
+  const result = []
+  for (const obj of tempResult) {
+    result.push(await getPayById(fastify, obj.id))
+  }
+  return { result, count }
+}
+
+export async function getPayById(
+  fastify: FastifyInstance,
+  id: any
+): Promise<any> {
+  const result: any = await fastify.prisma.pay.findUnique({ where: { id } })
+  result.user = await getUserById(fastify, id)
+  if (result?.type === 'blog') {
+    result.blog = await getBlog(fastify, result.blog_id)
+  }
+  return result
 }

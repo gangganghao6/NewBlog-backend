@@ -57,8 +57,9 @@ await prisma.$queryRaw`PRAGMA journal_mode=WAL`
 fastify.prisma = prisma
 
 await fastify.register(fastifyCors, {
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+  origin: ['http://127.0.0.1'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
 })
 
 await fastify.register(fastifyCompress, {
@@ -72,9 +73,12 @@ await fastify.register(fastifyStatic, {
 await fastify.register(fastifyCookie)
 await fastify.register(fastifySession, {
   // request.session.destroy(next) request.session.user = {name: 'max'}
+  cookieName: 'sessionId',
   secret: 'a secret with minimum length of 32 characters',
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 30
+    maxAge: 1000 * 60 * 60 * 24 * 30,
+    sameSite: 'lax',
+    secure: false
   }
 })
 await fastify.register(fastifyWebsocket) // fastify.get('/', { websocket: true }, (connection, req) => {

@@ -5,7 +5,7 @@ import { Root } from '../../types/model'
 export async function rootLogin(
   fastify: FastifyInstance,
   data: Root
-): Promise<boolean> {
+): Promise<any> {
   const RootWhereInput = Prisma.validator<Prisma.RootWhereInput>()({
     OR: [
       {
@@ -18,10 +18,9 @@ export async function rootLogin(
       }
     ]
   })
-  const result = await fastify.prisma.root.findFirst({
+  return await fastify.prisma.root.findFirst({
     where: RootWhereInput
   })
-  return result !== null
 }
 
 export async function rootRegist(
@@ -70,5 +69,14 @@ export async function rootModify(
       account: true,
       email: true
     }
+  })
+}
+
+export async function getRootById(
+  fastify: FastifyInstance,
+  id: string
+): Promise<any> {
+  return await fastify.prisma.root.findUnique({
+    where: { id }
   })
 }

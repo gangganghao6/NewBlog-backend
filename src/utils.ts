@@ -1,6 +1,9 @@
 import fs from 'fs'
 import dayjs from 'dayjs'
 import { Duplex } from 'stream'
+import { FastifyInstance } from 'fastify'
+import { getUserById } from './routes/users/userFn'
+import { getRootById } from './routes/base/rootFn'
 
 function generateRoutesLogs(fastify: any): void {
   const obj: any = []
@@ -38,20 +41,6 @@ function createRequestReturn(
     code,
     data,
     message
-  }
-}
-
-function createRequestWithListReturn(
-  code = 200,
-  data: any = {},
-  message = '',
-  total = 0
-): { code: number; data: any; message: string; total: number } {
-  return {
-    code,
-    data,
-    message,
-    total
   }
 }
 
@@ -100,9 +89,28 @@ function createLogStream(): Duplex {
   return inoutStream
 }
 
-export {
-  generateRoutesLogs,
-  createRequestReturn,
-  createLogStream,
-  createRequestWithListReturn
+export async function validateUser(
+  fastify: FastifyInstance,
+  id: string | null | undefined
+): Promise<boolean> {
+  if (id === null || id === undefined) throw new Error('用户尚未登录')
+  const user = await getUserById(fastify, id)
+  if (user === null) {
+    throw new Error('用户不存在')
+  } else if (user.is_banned === true) {
+    throw new Error('用户已被禁止登录')
+  } else return true
 }
+
+export async function validateRoot(
+  fastify: FastifyInstance,
+  id: string | null | undefined
+): Promise<boolean> {
+  if (id === null || id === undefined) throw new Error('管理员尚未登录')
+  const root = await getRootById(fastify, id)
+  if (root === null) {
+    throw new Error('管理员不存在')
+  } else return true
+}
+
+export { generateRoutesLogs, createRequestReturn, createLogStream }

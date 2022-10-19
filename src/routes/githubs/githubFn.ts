@@ -5,13 +5,15 @@ export async function getGithubAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  return await fastify.prisma.github.findMany({
+  const count = await fastify.prisma.github.count()
+  const result = await fastify.prisma.github.findMany({
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
       created_time: data.sort
     }
   })
+  return { result, count }
 }
 
 export async function getGithubById(

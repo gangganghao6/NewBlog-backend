@@ -10,7 +10,8 @@ export declare module 'fastify' {
   }
 
   interface Session {
-    user: string
+    user_id?: string
+    root_id?: string
   }
 }
 declare global {

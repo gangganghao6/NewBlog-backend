@@ -12,12 +12,16 @@ export default function (
     '/login',
     {},
     async (req: FastifyRequest, res: FastifyReply): Promise<any> => {
-      const data = req.body as Root
-      const result = await rootLogin(fastify, data)
-      if (!result) {
-        return createRequestReturn(500, null, '登录失败')
-      } else {
+      try {
+        const data = req.body as Root
+        const result = await rootLogin(fastify, data)
+        if (result === null) {
+          return createRequestReturn(500, null, '登录失败')
+        }
+        req.session.root_id = result.id
         return createRequestReturn(200, result, '')
+      } catch (e) {
+        return createRequestReturn(500, null, (e as Error).message)
       }
     }
   )
@@ -28,6 +32,7 @@ export default function (
       const data = req.body as Root
       try {
         const result = await rootRegist(fastify, data)
+        req.session.root_id = result.id
         return createRequestReturn(200, result, '')
       } catch (e) {
         return createRequestReturn(200, null, '账号或邮箱已存在或数据格式错误')
