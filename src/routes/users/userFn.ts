@@ -130,21 +130,44 @@ export async function createPayOrder(
     {},
     { formData }
   )
-  return await fastify.prisma.pay.create({
-    data: {
-      id: v4(),
-      type: data.type,
-      money: data.money,
-      order_id: orderId,
-      order_url: orderResult,
-      pay_type: data.pay_type,
-      user_id: data.user_id,
-      blog_id:
-        data.blog_id === null || data.blog_id === undefined
-          ? data.blog_id
-          : null
+  const mission = []
+  if (data.blog_id !== null || data.blog_id !== undefined) {
+    const blog = await fastify.prisma.blog.findUnique({
+      where: {
+        id: data.blog_id
+      }
+    })
+    if (blog !== null) {
+      mission.push(
+        fastify.prisma.blog.update({
+          where: { id: blog.id },
+          data: {
+            pays_count: blog.pays_count + 1
+          }
+        })
+      )
     }
-  })
+  }
+  const payId = v4()
+  mission.push(
+    fastify.prisma.pay.create({
+      data: {
+        id: payId,
+        type: data.type,
+        money: data.money,
+        order_id: orderId,
+        order_url: orderResult,
+        pay_type: data.pay_type,
+        user_id: data.user_id,
+        blog_id:
+          data.blog_id === null || data.blog_id === undefined
+            ? null
+            : data.blog_id
+      }
+    })
+  )
+  await fastify.prisma.$transaction(mission)
+  return await getPayById(fastify, payId)
 }
 
 export async function confirmOrder(
@@ -241,7 +264,11 @@ export async function getPayById(
   const result: any = await fastify.prisma.pay.findUnique({ where: { id } })
   result.user = await getUserById(fastify, id)
   if (result?.type === 'blog') {
-    result.blog = await getBlog(fastify, result.blog_id)
+    try {
+      result.blog = await getBlog(fastify, result.blog_id)
+    } catch (e) {
+      result.blog = null
+    }
   }
   return result
 }

@@ -58,18 +58,28 @@ export async function postShuoshuo(
       }
     })
   )
-  return await fastify.prisma.$transaction(mission)
+  await fastify.prisma.$transaction(mission)
+  return await getShuoshuo(fastify, shuoshuoId)
 }
 
 export async function getShuoshuo(
   fastify: FastifyInstance,
-  id: string
+  id: string,
+  update = false
 ): Promise<any> {
   const shuoshuo: any = await fastify.prisma.shuoshuo.findFirst({
     where: {
       id
     }
   })
+  if (update && shuoshuo !== null && shuoshuo !== undefined) {
+    await fastify.prisma.shuoshuo.update({
+      where: { id },
+      data: {
+        visited_count: (shuoshuo.visited_count as number) + 1
+      }
+    })
+  }
   switch (shuoshuo.media_class) {
     case 'images':
       {
@@ -100,12 +110,11 @@ export async function getShuoshuo(
       }
       break
   }
-  const comments = await fastify.prisma.comment.findMany({
+  shuoshuo.comments = await fastify.prisma.comment.findMany({
     where: {
       shuoshuo_id: id
     }
   })
-  shuoshuo.comments = comments
   return shuoshuo
 }
 
@@ -194,7 +203,7 @@ export async function putShuoshuo(
       })
     )
   }
-  if ('images' in data) {
+  if ('images' in data && data.images !== null) {
     mission.push(
       fastify.prisma.image.deleteMany({
         where: {
@@ -267,6 +276,12 @@ export async function putShuoshuo(
       })
     )
   }
+  mission.push(
+    fastify.prisma.shuoshuo.update({
+      where: { id },
+      data: { last_modified_time: new Date() }
+    })
+  )
   await fastify.prisma.$transaction(mission)
   return await getShuoshuo(fastify, id)
 }

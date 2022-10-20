@@ -1,10 +1,10 @@
 import { Prisma } from '@prisma/client'
 import { FastifyInstance } from 'fastify'
-import { Root } from '../../types/model'
+import { RootLogin, RootModify, RootRegist } from './root'
 
 export async function rootLogin(
   fastify: FastifyInstance,
-  data: Root
+  data: RootLogin
 ): Promise<any> {
   const RootWhereInput = Prisma.validator<Prisma.RootWhereInput>()({
     OR: [
@@ -19,14 +19,19 @@ export async function rootLogin(
     ]
   })
   return await fastify.prisma.root.findFirst({
-    where: RootWhereInput
+    where: RootWhereInput,
+    select: {
+      id: true,
+      account: true,
+      email: true
+    }
   })
 }
 
 export async function rootRegist(
   fastify: FastifyInstance,
-  data: Root
-): Promise<Root> {
+  data: RootRegist
+): Promise<any> {
   const RootWhereInput = Prisma.validator<Prisma.RootCreateInput>()({
     email: data.email,
     account: data.account,
@@ -47,7 +52,7 @@ export async function rootRegist(
 
 export async function rootModify(
   fastify: FastifyInstance,
-  data: Root & { old_password: string; new_password: string }
+  data: RootModify
 ): Promise<any> {
   const myRoot = await fastify.prisma.root.findFirstOrThrow({
     where: {

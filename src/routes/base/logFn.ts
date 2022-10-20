@@ -24,7 +24,7 @@ export async function postUserVisitLog(
   for (const obj of data.data) {
     await fastify.prisma.userVisit.create({
       data: {
-        ip: obj.ip,
+        ip: data.ip,
         country: location.country === '' ? null : location.country,
         province: location.province === '' ? null : location.province,
         city: location.city === '' ? null : location.city,
@@ -54,7 +54,7 @@ export async function getUserVisitAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const count = fastify.prisma.userVisit.count()
+  const count = await fastify.prisma.userVisit.count()
   const result = await fastify.prisma.userVisit.findMany({
     take: data.size,
     skip: (data.page - 1) * data.size,

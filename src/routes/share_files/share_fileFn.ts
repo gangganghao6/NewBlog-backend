@@ -13,9 +13,9 @@ export async function uploadShareFile(
         fastify.prisma.image.create({
           data: {
             sharefile_id: shareFileId,
-            name: data.name,
-            url: data.url,
-            size: data.size
+            name: data.image.name,
+            url: data.image.url,
+            size: data.image.size
           }
         })
       )
@@ -25,7 +25,12 @@ export async function uploadShareFile(
         const videoId = v4()
         mission.push(
           fastify.prisma.image.create({
-            data: { ...data.post, video_id: videoId }
+            data: {
+              video_id: videoId,
+              name: data.video.post.name,
+              url: data.video.post.url,
+              size: data.video.post.size
+            }
           })
         )
         mission.push(
@@ -33,10 +38,10 @@ export async function uploadShareFile(
             data: {
               id: videoId,
               sharefile_id: shareFileId,
-              name: data.name,
-              url: data.url,
-              size: data.size,
-              duration: data.duration
+              name: data.video.name,
+              url: data.video.url,
+              size: data.video.size,
+              duration: data.video.duration
             }
           })
         )
@@ -46,9 +51,9 @@ export async function uploadShareFile(
       mission.push(
         fastify.prisma.file.create({
           data: {
-            name: data.name,
-            size: data.size,
-            url: data.url,
+            name: data.file.name,
+            size: data.file.size,
+            url: data.file.url,
             sharefile_id: shareFileId
           }
         })
@@ -64,7 +69,8 @@ export async function uploadShareFile(
       }
     })
   )
-  return await fastify.prisma.$transaction(mission)
+  await fastify.prisma.$transaction(mission)
+  return await getShareFile(fastify, shareFileId)
 }
 
 export async function deleteShareFile(
@@ -208,23 +214,38 @@ export async function getShareFile(
           where: { video_id: video?.id }
         })
         result = {
-          video,
+          ...video,
           post
         }
       }
       break
     case 'files':
-      result = {
-        file: await fastify.prisma.file.findFirst({
-          where: {
-            sharefile_id: id
-          }
-        })
-      }
+      result = await fastify.prisma.file.findFirst({
+        where: {
+          sharefile_id: id
+        }
+      })
       break
   }
   return {
     share_file: data,
     file: result
+  }
+}
+
+export async function increaseShareFileDownload(
+  fastify: FastifyInstance,
+  id: string
+): Promise<any> {
+  const sharefile = await fastify.prisma.shareFile.findUnique({
+    where: { id }
+  })
+  if (sharefile !== null) {
+    return await fastify.prisma.shareFile.update({
+      where: { id },
+      data: {
+        download_count: sharefile.download_count + 1
+      }
+    })
   }
 }

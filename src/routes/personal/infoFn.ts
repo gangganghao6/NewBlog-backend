@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import { getExperiencesAll } from './experienceFn'
 import { getProjectsAll } from './projectFn'
+import { getPayAll } from '../users/userFn'
 
 export async function postPersonalInfo(
   fastify: FastifyInstance,
@@ -41,9 +42,15 @@ export async function getPersonalInfoAll(
   const info = await fastify.prisma.personal.findFirst()
   const projects = await getProjectsAll(fastify)
   const experiences = await getExperiencesAll(fastify)
+  const pays = await getPayAll(fastify, {
+    page: 1,
+    size: 100,
+    sort: 'desc'
+  })
   return {
     ...info,
     projects,
-    experiences
+    experiences,
+    pays
   }
 }

@@ -59,7 +59,10 @@ export async function sendMessage(
       }
     })
   )
-  return await fastify.prisma.$transaction(mission)
+  await fastify.prisma.$transaction(mission)
+  return await fastify.prisma.chat.findUnique({
+    where: { id: chatId }
+  })
 }
 
 export async function getChatAll(

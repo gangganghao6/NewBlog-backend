@@ -175,6 +175,7 @@ model Github {
   stars_count        Int
   forks_count        Int
   watchers_count     Int
+  visited_count      Int      @default(0)
 }
 
 model Todolist {
@@ -186,7 +187,7 @@ model Todolist {
 }
 
 model Personal {
-  id                  String   @id @default(uuid())
+  id                  String    @id @default(uuid())
   name                String
   sex                 String
   birthday            DateTime
@@ -194,10 +195,13 @@ model Personal {
   qq                  String
   github              String
   university          String
-  university_end_time DateTime
+  university_end_time DateTime?
   home                String
   readme              String
+  //projects              Project[]
+  //experiences           Experience[]
   //  comments            Comment[]
+  //pays                  Pays[]
 }
 
 model Experience {
@@ -207,6 +211,7 @@ model Experience {
   description String
   time_start  DateTime
   time_end    DateTime?
+  //  image       Image?
 }
 
 model Project {

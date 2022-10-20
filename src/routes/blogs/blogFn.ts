@@ -87,11 +87,20 @@ export async function getBlogList(
 
 export async function getBlog(
   fastify: FastifyInstance,
-  id: string
+  id: string,
+  update = false
 ): Promise<any> {
   const blog = await fastify.prisma.blog.findFirst({
     where: { id }
   })
+  if (update && blog !== null) {
+    await fastify.prisma.blog.update({
+      where: { id },
+      data: {
+        visited_count: blog.visited_count + 1
+      }
+    })
+  }
   const post = await fastify.prisma.image.findFirst({
     where: { blogpost_id: id }
   })
@@ -101,11 +110,15 @@ export async function getBlog(
   const comments = await fastify.prisma.comment.findMany({
     where: { blog_id: id }
   })
+  const pays = await fastify.prisma.pay.findMany({
+    where: { blog_id: id }
+  })
   return {
     ...blog,
     post,
     images,
-    comments
+    comments,
+    pays
   }
 }
 
@@ -143,7 +156,7 @@ export async function putBlog(
 ): Promise<any> {
   const mission = []
 
-  if ('post' in data) {
+  if ('post' in data && data.post !== null && data.post !== undefined) {
     mission.push(
       fastify.prisma.image.deleteMany({
         where: { blogpost_id: id }
@@ -155,7 +168,7 @@ export async function putBlog(
       })
     )
   }
-  if ('images' in data) {
+  if ('images' in data && data.images !== null && data.images !== undefined) {
     mission.push(
       fastify.prisma.image.deleteMany({
         where: { blogimages_id: id }
@@ -170,13 +183,17 @@ export async function putBlog(
     }
   }
   let temp = {}
-  if ('title' in data) {
+  if ('title' in data && data.title !== null && data.title !== undefined) {
     temp = { ...temp, title: data.title }
   }
-  if ('content' in data) {
+  if (
+    'content' in data &&
+    data.content !== null &&
+    data.content !== undefined
+  ) {
     temp = { ...temp, content: data.content }
   }
-  if ('type' in data) {
+  if ('type' in data && data.type !== null && data.type !== undefined) {
     temp = { ...temp, type: data.type }
   }
   mission.push(

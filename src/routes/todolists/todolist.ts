@@ -1,11 +1,12 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { createRequestReturn } from '../../utils'
+import { createRequestReturn, validateRoot } from '../../utils'
 import {
   createTodolist,
   deleteTodolist,
   getTodolistAll,
   putTodolist
 } from './todolistFn'
+import { Todolist } from '../../types/model'
 
 export default function (
   fastify: FastifyInstance,
@@ -14,9 +15,10 @@ export default function (
 ): void {
   fastify.post('/todolist', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      const data = req.body
+      await validateRoot(fastify, req.session.root_id)
+      const data = req.body as { title: string }
       const result = await createTodolist(fastify, data)
-      return createRequestReturn(200, result, '')
+      return createRequestReturn(200, result as Todolist, '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
     }
@@ -27,7 +29,7 @@ export default function (
       data.page = parseInt(data.page, 10)
       data.size = parseInt(data.size, 10)
       const result = await getTodolistAll(fastify, data)
-      return createRequestReturn(200, result, '')
+      return createRequestReturn(200, result as Todolist[], '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
     }
@@ -36,10 +38,11 @@ export default function (
     '/todolist/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
+        await validateRoot(fastify, req.session.root_id)
         const id = (req.params as { id: string }).id
-        const data = req.body
+        const data = req.body as PutTodolist
         const result = await putTodolist(fastify, data, id)
-        return createRequestReturn(200, result, '')
+        return createRequestReturn(200, result as Todolist, '')
       } catch (e) {
         return createRequestReturn(500, null, (e as Error).message)
       }
@@ -49,13 +52,21 @@ export default function (
     '/todolist/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
+        await validateRoot(fastify, req.session.root_id)
         const id = (req.params as { id: string }).id
         const result = await deleteTodolist(fastify, id)
-        return createRequestReturn(200, result, '')
+        return createRequestReturn(200, result as never, '')
       } catch (e) {
         return createRequestReturn(500, null, (e as Error).message)
       }
     }
   )
   done()
+}
+
+export interface PutTodolist {
+  title?: string
+  is_done?: boolean
+  is_done_time?: Date
+  created_time?: Date
 }

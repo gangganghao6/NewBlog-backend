@@ -10,7 +10,7 @@ export async function getGithubAll(
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
-      created_time: data.sort
+      last_modified_time: data.sort
     }
   })
   return { result, count }
@@ -18,11 +18,20 @@ export async function getGithubAll(
 
 export async function getGithubById(
   fastify: FastifyInstance,
-  id: string
+  id: string,
+  update = false
 ): Promise<any> {
-  return await fastify.prisma.github.findUnique({
+  const github = await fastify.prisma.github.findUnique({
     where: { id }
   })
+  if (update && github !== undefined && github !== null) {
+    await fastify.prisma.github.update({
+      where: { id },
+      data: {
+        visited_count: github.visited_count + 1
+      }
+    })
+  }
 }
 
 export async function updateGithub(fastify: FastifyInstance): Promise<void> {

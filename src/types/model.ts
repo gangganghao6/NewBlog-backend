@@ -4,6 +4,15 @@ export interface Image {
   name: string
   url: string
   created_time: Date
+  video_id?: string
+  baseinfo_id?: string
+  blogpost_id?: string
+  project_id?: string
+  experience_id?: string
+  chat_id?: string
+  shuoshuo_id?: string
+  blogimages_id?: string
+  sharefile_id?: string
 }
 
 export interface Video {
@@ -50,8 +59,25 @@ export interface User {
 export interface UserVisit {
   id: string
   ip: string
+  country?: string
+  province?: string
+  city?: string
+  isp?: string
+  url: string
   user_agent: string
-  visit_time: Date
+  browser_name?: string
+  browser_version?: string
+  browser_major?: string
+  engine_name?: string
+  engine_version?: string
+  os_name?: string
+  os_version?: string
+  device_vendor?: string
+  device_model?: string
+  device_type?: string
+  cpu_architecture?: string
+  visit_time: string
+  user_id?: string
 }
 
 export interface Comment {
@@ -59,9 +85,9 @@ export interface Comment {
   comment: string
   created_time: Date
   user_id: string
-  shuoshuo_id: string
-  personal_id: string
-  blog_id: string
+  shuoshuo_id?: string
+  personal_id?: string
+  blog_id?: string
 }
 
 export interface Blog {
@@ -74,7 +100,7 @@ export interface Blog {
   visited_count: number
   comments_count: number
   pays_count: number
-  post: Image
+  post?: Image
   images?: Image[]
   comments?: Comment[]
 }
@@ -85,7 +111,7 @@ export interface Shuoshuo {
   images?: Image[]
   video?: Video
   media_class: 'images' | 'video' | 'text'
-  content: string
+  content?: string
   created_time: Date
   last_modified_time: Date
   visited_count: number
@@ -104,6 +130,8 @@ export interface Pay {
   is_close: boolean
   type: 'blog' | 'personal'
   user: User
+  user_id?: string
+  blog_id?: string
 }
 
 export interface File {
@@ -112,8 +140,16 @@ export interface File {
   size: number
   url: string
   created_time: Date
+  chat_id: string
+  sharefile_id: string
+}
+
+export interface ShareFile {
+  id: string
+  type: string
+  media_class: 'images' | 'videos' | 'files'
+  created_time: Date
   download_count: number
-  media_class: string
 }
 
 export interface Github {
@@ -128,14 +164,15 @@ export interface Github {
   stars_count: number
   forks_count: number
   watchers_count: number
+  visited_count: number
 }
 
 export interface Todolist {
   id: string
   title: string
   created_time: Date
-  is_Done: boolean
-  is_Done_timeL: boolean
+  is_done: boolean
+  is_done_time: boolean
 }
 
 export interface Personal {
@@ -147,9 +184,12 @@ export interface Personal {
   qq: string
   github: string
   university: string
-  university_end_time: Date
+  university_end_time?: Date
   home: string
   readme: string
+  pays: Pay[]
+  experience: Experience[]
+  projects: Project[]
 }
 
 export interface Experience {
@@ -176,10 +216,11 @@ export interface Project {
 
 export interface Chat {
   id: string
+  user_id: string
   ip: string
   location: string
   created_time: Date
-  content: string
+  content?: string
   image?: Image
   video?: Video
   file?: File

@@ -3,7 +3,7 @@ import { createHash, streamToBuffer } from './utils'
 import fs from 'fs'
 import path from 'path'
 import { createRequestReturn } from '../../utils'
-import { Files_chunk } from '../../types/files'
+import { Files_chunk } from './file_chunk'
 import { getVideoDurationInSeconds } from 'get-video-duration'
 
 const basePath = path.join(process.env.PROJECT_PATH, 'public')

@@ -33,7 +33,13 @@ export async function postProject(
       })
     )
   }
-  return await fastify.prisma.$transaction(mission)
+  const temp = await fastify.prisma.$transaction(mission)
+  const image = temp[1]
+  const project = temp[0]
+  return {
+    ...project,
+    image
+  }
 }
 
 export async function getProject(
