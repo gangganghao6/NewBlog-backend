@@ -26,6 +26,7 @@ declare global {
       ALIPAY_APPID: string
       ALIPAY_PRIVATEKEY: string
       ALIPAY_PUBLICKEY: string
+      CRYPTO_KEY: string
     }
   }
 }

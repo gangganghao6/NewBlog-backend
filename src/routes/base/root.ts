@@ -63,7 +63,6 @@ export default function (
 export interface RootLogin {
   account?: string
   password: string
-  email?: string
 }
 
 export interface RootLoginReturn {

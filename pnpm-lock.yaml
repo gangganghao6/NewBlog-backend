@@ -11,6 +11,7 @@ specifiers:
   '@fastify/websocket': ^7.0.1
   '@prisma/client': ^4.4.0
   '@tsconfig/node16': ^1.0.3
+  '@types/crypto-js': ^4.1.1
   '@types/json-schema': ^7.0.11
   '@types/node': ^18.7.13
   '@types/ua-parser-js': ^0.7.36
@@ -20,6 +21,7 @@ specifiers:
   '@typescript-eslint/parser': ^5.36.1
   alipay-sdk: ^3.2.0
   axios: ^1.1.2
+  crypto-js: ^4.1.1
   dayjs: ^1.11.5
   dotenv: ^16.0.2
   eslint: ^8.23.0
@@ -52,11 +54,13 @@ dependencies:
   '@fastify/static': 6.5.0
   '@fastify/websocket': 7.0.1
   '@prisma/client': 4.4.0_prisma@4.4.0
+  '@types/crypto-js': 4.1.1
   '@types/json-schema': 7.0.11
   '@types/ua-parser-js': 0.7.36
   '@types/uuid': 8.3.4
   alipay-sdk: 3.2.0
   axios: 1.1.2
+  crypto-js: 4.1.1
   dayjs: 1.11.5
   dotenv: 16.0.2
   fastify: 4.5.3
@@ -452,6 +456,10 @@ packages:
   /@tsconfig/node16/1.0.3:
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
     dev: true
+
+  /@types/crypto-js/4.1.1:
+    resolution: {integrity: sha512-BG7fQKZ689HIoc5h+6D2Dgq1fABRa0RbBWKBd9SP/MVRVXROflpm5fhwyATX5duFmbStzyzyycPB8qUYKDH3NA==}
+    dev: false
 
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
