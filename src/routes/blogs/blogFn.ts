@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { v4 } from 'uuid'
+import nodemailer from 'nodemailer'
 
 export async function postBlog(
   fastify: FastifyInstance,
@@ -34,7 +35,23 @@ export async function postBlog(
     })
   )
   await fastify.prisma.$transaction(mission)
-  return await getBlog(fastify, blogId)
+  const result = await getBlog(fastify, blogId)
+
+  void checkSubscribe(fastify)
+    .then((str) => {
+      const title: string = result.title
+      const content: string = result.content
+      const time: string = result.created_time
+      void sendMail(
+        fastify,
+        str,
+        `标题：${title}\n内容：${content}\n发表于：${time}`
+      )
+    })
+    .catch((err) => {
+      fastify.log.error(err)
+    })
+  return result
 }
 
 export async function getBlogList(
@@ -204,4 +221,43 @@ export async function putBlog(
   )
   await fastify.prisma.$transaction(mission)
   return await getBlog(fastify, id)
+}
+
+export async function checkSubscribe(fastify: FastifyInstance): Promise<any> {
+  const result = await fastify.prisma.user.findMany({
+    where: { is_subscribed: true },
+    select: { email: true }
+  })
+  if (result.length <= 0) {
+    throw new Error('没有用户订阅')
+  }
+  const allUsersEmail = result.map((user) => user.email)
+  return allUsersEmail.join(',')
+}
+
+export async function sendMail(
+  fastify: FastifyInstance,
+  userEmail: string,
+  message: string
+): Promise<any> {
+  // 创建Nodemailer传输器 SMTP 或者 其他 运输机制
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_SMTP_HOST, // 第三方邮箱的主机地址
+    port: process.env.EMAIL_SMTP_PORT,
+    secure: true, // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_SMTP_ACCOUNT, // 发送方邮箱的账号
+      pass: process.env.EMAIL_SMTP_PASS // 邮箱授权密码
+    }
+  })
+
+  // 定义transport对象并发送邮件
+  const info = await transporter.sendMail({
+    from: process.env.EMAIL_SMTP_ACCOUNT, // 发送方邮箱的账号
+    to: userEmail, // 邮箱接受者的账号
+    subject: '您订阅的博客更新啦', // Subject line
+    text: message // 文本内容
+    // html: '欢迎注册h5.dooring.cn, 您的邮箱验证码是:<b>${emailCode}</b>' // html 内容, 如果设置了html内容, 将忽略text内容
+  })
+  fastify.log.info(JSON.stringify(info))
 }

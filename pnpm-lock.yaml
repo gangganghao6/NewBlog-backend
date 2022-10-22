@@ -14,6 +14,7 @@ specifiers:
   '@types/crypto-js': ^4.1.1
   '@types/json-schema': ^7.0.11
   '@types/node': ^18.7.13
+  '@types/nodemailer': ^6.4.6
   '@types/ua-parser-js': ^0.7.36
   '@types/uuid': ^8.3.4
   '@types/ws': ^8.5.3
@@ -35,6 +36,7 @@ specifiers:
   get-video-duration: ^4.1.0
   husky: ^8.0.1
   ip2region: ^2.3.0
+  nodemailer: ^6.8.0
   prettier: ^2.7.1
   prisma: ^4.4.0
   sharp: 0.30.7
@@ -56,6 +58,7 @@ dependencies:
   '@prisma/client': 4.4.0_prisma@4.4.0
   '@types/crypto-js': 4.1.1
   '@types/json-schema': 7.0.11
+  '@types/nodemailer': 6.4.6
   '@types/ua-parser-js': 0.7.36
   '@types/uuid': 8.3.4
   alipay-sdk: 3.2.0
@@ -66,6 +69,7 @@ dependencies:
   fastify: 4.5.3
   get-video-duration: 4.1.0
   ip2region: 2.3.0_@types+node@18.7.14
+  nodemailer: 6.8.0
   prisma: 4.4.0
   sharp: 0.30.7
   sqlite3: 5.1.0
@@ -473,6 +477,12 @@ packages:
 
   /@types/node/9.6.61:
     resolution: {integrity: sha512-/aKAdg5c8n468cYLy2eQrcR5k6chlbNwZNGUj3TboyPa2hcO2QAJcfymlqPzMiRj8B6nYKXjzQz36minFE0RwQ==}
+    dev: false
+
+  /@types/nodemailer/6.4.6:
+    resolution: {integrity: sha512-pD6fL5GQtUKvD2WnPmg5bC2e8kWCAPDwMPmHe/ohQbW+Dy0EcHgZ2oCSuPlWNqk74LS5BVMig1SymQbFMPPK3w==}
+    dependencies:
+      '@types/node': 18.7.14
     dev: false
 
   /@types/ua-parser-js/0.7.36:
@@ -3069,6 +3079,11 @@ packages:
       - supports-color
     dev: false
     optional: true
+
+  /nodemailer/6.8.0:
+    resolution: {integrity: sha512-EjYvSmHzekz6VNkNd12aUqAco+bOkRe3Of5jVhltqKhEsjw/y0PYPJfp83+s9Wzh1dspYAkUW/YNQ350NATbSQ==}
+    engines: {node: '>=6.0.0'}
+    dev: false
 
   /nopt/5.0.0:
     resolution: {integrity: sha512-Tbj67rffqceeLpcRXrT7vKAN8CwfPeIBgM7E6iBkmKLV7bEMwpGgYLGv0jACUsECaa/vuxP0IjEont6umdMgtQ==}

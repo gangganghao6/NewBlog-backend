@@ -27,6 +27,10 @@ declare global {
       ALIPAY_PRIVATEKEY: string
       ALIPAY_PUBLICKEY: string
       CRYPTO_KEY: string
+      EMAIL_SMTP_ACCOUNT: string
+      EMAIL_SMTP_PASS: string
+      EMAIL_SMTP_HOST: string
+      EMAIL_SMTP_PORT: number
     }
   }
 }
