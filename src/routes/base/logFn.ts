@@ -22,31 +22,33 @@ export async function postUserVisitLog(
     isp: string
   } = query.search(data.ip)
   for (const obj of data.data) {
-    await fastify.prisma.userVisit.create({
-      data: {
-        ip: data.ip,
-        country: location.country === '' ? null : location.country,
-        province: location.province === '' ? null : location.province,
-        city: location.city === '' ? null : location.city,
-        isp: location.isp === '' ? null : location.isp,
-        url: obj.url,
-        user_agent: data.userAgent,
-        user_id: obj.user_id,
-        browser_name: result.browser.name,
-        browser_version: result.browser.version,
-        browser_major: result.browser.major,
-        engine_name: result.engine.name,
-        engine_version: result.engine.version,
-        os_name: result.os.name,
-        os_version: result.os.version,
-        device_vendor: result.device.vendor,
-        device_model: result.device.model,
-        device_type: result.device.type,
-        cpu_architecture: result.cpu.architecture
-      }
-    })
+    void fastify.prisma.userVisit
+      .create({
+        data: {
+          ip: data.ip,
+          country: location.country === '' ? null : location.country,
+          province: location.province === '' ? null : location.province,
+          city: location.city === '' ? null : location.city,
+          isp: location.isp === '' ? null : location.isp,
+          url: obj.url,
+          user_agent: data.userAgent,
+          user_id: obj.user_id,
+          browser_name: result.browser.name,
+          browser_version: result.browser.version,
+          browser_major: result.browser.major,
+          engine_name: result.engine.name,
+          engine_version: result.engine.version,
+          os_name: result.os.name,
+          os_version: result.os.version,
+          device_vendor: result.device.vendor,
+          device_model: result.device.model,
+          device_type: result.device.type,
+          cpu_architecture: result.cpu.architecture
+        }
+      })
+      .then()
+      .catch((err) => fastify.log.error(err))
   }
-
   return null
 }
 

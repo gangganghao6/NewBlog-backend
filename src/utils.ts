@@ -4,6 +4,7 @@ import { Duplex } from 'stream'
 import { FastifyInstance } from 'fastify'
 import { getUserById } from './routes/users/userFn'
 import { getRootById } from './routes/base/rootFn'
+import { fastify } from './index'
 
 function generateRoutesLogs(fastify: any): void {
   const obj: any = []
@@ -37,6 +38,9 @@ function createRequestReturn(
   data: any = {},
   message = ''
 ): { code: number; data: any; message: string } {
+  if (code !== 200) {
+    fastify.log.error(message)
+  }
   return {
     code,
     data,
@@ -44,8 +48,33 @@ function createRequestReturn(
   }
 }
 
+let currentDate = dayjs(new Date()).format('YYYY-MM-DD')
+let logStream = fs.createWriteStream(`./log/normal/${currentDate}.txt`, {
+  encoding: 'utf8',
+  flags: 'a+'
+})
+let errStream = fs.createWriteStream(`./log/error/${currentDate}.txt`, {
+  encoding: 'utf8',
+  flags: 'a+'
+})
+
+setInterval(() => {
+  currentDate = dayjs(new Date()).format('YYYY-MM-DD')
+  logStream.close(() => {
+    logStream = fs.createWriteStream(`./log/normal/${currentDate}.txt`, {
+      encoding: 'utf8',
+      flags: 'a+'
+    })
+  })
+  errStream.close(() => {
+    errStream = fs.createWriteStream(`./log/error/${currentDate}.txt`, {
+      encoding: 'utf8',
+      flags: 'a+'
+    })
+  })
+}, 1000 * 1000 * 60 * 24)
+
 function createLogStream(): Duplex {
-  const currentDate = dayjs(new Date()).format('YYYY-MM-DD')
   if (!fs.existsSync(`${process.env.PROJECT_PATH}/log`)) {
     fs.mkdirSync(`${process.env.PROJECT_PATH}/log`)
   }
@@ -55,12 +84,7 @@ function createLogStream(): Duplex {
   if (!fs.existsSync(`${process.env.PROJECT_PATH}/log/error`)) {
     fs.mkdirSync(`${process.env.PROJECT_PATH}/log/error`)
   }
-  const logStream = fs.createWriteStream(`./log/normal/${currentDate}.txt`, {
-    encoding: 'utf8'
-  })
-  const errStream = fs.createWriteStream(`./log/error/${currentDate}.txt`, {
-    encoding: 'utf8'
-  })
+
   const inoutStream: Duplex = new Duplex({
     write(chunk, encoding, callback) {
       const data = JSON.parse(chunk.toString())
@@ -93,24 +117,36 @@ export async function validateUser(
   fastify: FastifyInstance,
   id: string | null | undefined
 ): Promise<boolean> {
+  if (process.env.ISDEV === 'true') {
+    return true
+  }
   if (id === null || id === undefined) throw new Error('用户尚未登录')
   const user = await getUserById(fastify, id)
   if (user === null) {
     throw new Error('用户不存在')
   } else if (user.is_banned === true) {
     throw new Error('用户已被禁止登录')
-  } else return true
+  } else {
+    fastify.log.info({ user_id: id })
+    return true
+  }
 }
 
 export async function validateRoot(
   fastify: FastifyInstance,
   id: string | null | undefined
 ): Promise<boolean> {
+  if (process.env.ISDEV === 'true') {
+    return true
+  }
   if (id === null || id === undefined) throw new Error('管理员尚未登录')
   const root = await getRootById(fastify, id)
   if (root === null) {
     throw new Error('管理员不存在')
-  } else return true
+  } else {
+    fastify.log.info({ root_id: id })
+    return true
+  }
 }
 
 export { generateRoutesLogs, createRequestReturn, createLogStream }

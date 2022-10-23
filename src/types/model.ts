@@ -179,6 +179,7 @@ export interface Personal {
   id: string
   name: string
   sex: string
+  visits_count: number
   birthday: Date
   wechat: string
   qq: string

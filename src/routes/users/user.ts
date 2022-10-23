@@ -49,6 +49,7 @@ export default function (
   })
   fastify.get('/user/:id', async (req: FastifyRequest, res: FastifyReply) => {
     try {
+      await validateRoot(fastify, req.session.root_id)
       const id = (req.params as { id: string }).id
       const result = await getUserById(fastify, id)
       return createRequestReturn(200, result as UserLoginReturn, '')

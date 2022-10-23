@@ -20,7 +20,7 @@ declare global {
       PROJECT_PATH: string
       DATABASE_URL: string
       PORT: number
-      ISDEV: boolean
+      ISDEV: string
       PUBLIC_URL: string
       GITHUB_NAME: string
       ALIPAY_APPID: string

@@ -36,21 +36,22 @@ export async function postBlog(
   )
   await fastify.prisma.$transaction(mission)
   const result = await getBlog(fastify, blogId)
-
-  void checkSubscribe(fastify)
-    .then((str) => {
-      const title: string = result.title
-      const content: string = result.content
-      const time: string = result.created_time
-      void sendMail(
-        fastify,
-        str,
-        `标题：${title}\n内容：${content}\n发表于：${time}`
-      )
-    })
-    .catch((err) => {
-      fastify.log.error(err)
-    })
+  if (process.env.ISDEV !== 'true') {
+    void checkSubscribe(fastify)
+      .then((str) => {
+        const title: string = result.title
+        const content: string = result.content
+        const time: string = result.created_time
+        void sendMail(
+          fastify,
+          str,
+          `标题：${title}\n内容：${content}\n发表于：${time}`
+        )
+      })
+      .catch((err) => {
+        fastify.log.error(err)
+      })
+  }
   return result
 }
 
@@ -111,11 +112,16 @@ export async function getBlog(
     where: { id }
   })
   if (update && blog !== null) {
-    await fastify.prisma.blog.update({
-      where: { id },
-      data: {
-        visited_count: blog.visited_count + 1
-      }
+    setImmediate(() => {
+      void fastify.prisma.blog
+        .update({
+          where: { id },
+          data: {
+            visited_count: blog.visited_count + 1
+          }
+        })
+        .then()
+        .catch((err) => fastify.log.error(err))
     })
   }
   const post = await fastify.prisma.image.findFirst({

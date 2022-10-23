@@ -25,13 +25,19 @@ export async function getGithubById(
     where: { id }
   })
   if (update && github !== undefined && github !== null) {
-    await fastify.prisma.github.update({
-      where: { id },
-      data: {
-        visited_count: github.visited_count + 1
-      }
+    setImmediate(() => {
+      void fastify.prisma.github
+        .update({
+          where: { id },
+          data: {
+            visited_count: github.visited_count + 1
+          }
+        })
+        .then()
+        .catch((err) => fastify.log.error(err))
     })
   }
+  return github
 }
 
 export async function updateGithub(fastify: FastifyInstance): Promise<void> {

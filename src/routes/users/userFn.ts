@@ -27,6 +27,9 @@ export async function getUserByEmail(
   fastify: FastifyInstance,
   email: string
 ): Promise<any> {
+  if (email === undefined) {
+    throw new Error('参数错误')
+  }
   return await fastify.prisma.user.findFirst({
     where: { email }
   })
@@ -131,7 +134,7 @@ export async function createPayOrder(
     { formData }
   )
   const mission = []
-  if (data.blog_id !== null || data.blog_id !== undefined) {
+  if (data.blog_id !== null && data.blog_id !== undefined) {
     const blog = await fastify.prisma.blog.findUnique({
       where: {
         id: data.blog_id
@@ -175,6 +178,9 @@ export async function confirmOrder(
   data: any
 ): Promise<any> {
   const orderId = data.out_trade_no
+  if (orderId === null || orderId === undefined) {
+    throw new Error('参数错误')
+  }
   const exist = await fastify.prisma.pay.findFirst({
     where: { order_id: orderId }
   })

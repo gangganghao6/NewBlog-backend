@@ -73,11 +73,16 @@ export async function getShuoshuo(
     }
   })
   if (update && shuoshuo !== null && shuoshuo !== undefined) {
-    await fastify.prisma.shuoshuo.update({
-      where: { id },
-      data: {
-        visited_count: (shuoshuo.visited_count as number) + 1
-      }
+    setImmediate(() => {
+      void fastify.prisma.shuoshuo
+        .update({
+          where: { id },
+          data: {
+            visited_count: (shuoshuo.visited_count as number) + 1
+          }
+        })
+        .then()
+        .catch((err) => fastify.log.error(err))
     })
   }
   switch (shuoshuo.media_class) {

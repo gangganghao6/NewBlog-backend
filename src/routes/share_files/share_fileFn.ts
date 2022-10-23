@@ -241,11 +241,17 @@ export async function increaseShareFileDownload(
     where: { id }
   })
   if (sharefile !== null) {
-    return await fastify.prisma.shareFile.update({
-      where: { id },
-      data: {
-        download_count: sharefile.download_count + 1
-      }
+    setImmediate(() => {
+      void fastify.prisma.shareFile
+        .update({
+          where: { id },
+          data: {
+            download_count: sharefile.download_count + 1
+          }
+        })
+        .then()
+        .catch((err) => fastify.log.error(err))
     })
   }
+  return null
 }

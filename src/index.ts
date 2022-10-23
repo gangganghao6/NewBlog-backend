@@ -51,13 +51,13 @@ const FasitfyConfig = {
   //   )
   // }
 }
-const fastify = Fastify(FasitfyConfig)
+export const fastify = Fastify(FasitfyConfig)
 const prisma = new PrismaClient()
 await prisma.$queryRaw`PRAGMA journal_mode=WAL`
 fastify.prisma = prisma
 
 await fastify.register(fastifyCors, {
-  origin: ['http://127.0.0.1'],
+  origin: ['http://172.33.149.217:8080'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 })

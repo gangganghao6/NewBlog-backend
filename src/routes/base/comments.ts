@@ -41,7 +41,7 @@ export default function (
 
 export interface CommentsCreate {
   comment: string
-  user_id?: string
+  user_id: string
   blog_id?: string
   shuoshuo_id?: string
   personal_id?: string // 只要不是null和undefined就行

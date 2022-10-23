@@ -198,6 +198,7 @@ model Personal {
   university_end_time DateTime?
   home                String
   readme              String
+  visits_count        Int       @default(0)
   //projects              Project[]
   //experiences           Experience[]
   //  comments            Comment[]

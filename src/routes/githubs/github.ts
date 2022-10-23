@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { getGithubAll, getGithubById } from './githubFn'
+import { getGithubAll, getGithubById, updateGithub } from './githubFn'
 import { createRequestReturn } from '../../utils'
 import { Github } from '../../types/model'
 
@@ -28,9 +28,11 @@ export default function (
       return createRequestReturn(500, null, (e as Error).message)
     }
   })
-  // void updateGithub(fastify)
-  // setInterval(() => {
-  //   void updateGithub(fastify)
-  // }, 1000 * 60 * 10)
+  if (process.env.ISDEV !== 'true') {
+    void updateGithub(fastify)
+    setInterval(() => {
+      void updateGithub(fastify)
+    }, 1000 * 60 * 10)
+  }
   done()
 }

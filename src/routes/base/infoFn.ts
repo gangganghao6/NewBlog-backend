@@ -14,11 +14,16 @@ export async function getBaseInfo(
   })
   const blogsCount = await fastify.prisma.blog.count()
   const commentsCount = await fastify.prisma.comment.count()
-  await fastify.prisma.baseInfo.update({
-    where: { id: baseInfo.id },
-    data: {
-      visits_count: baseInfo.visits_count + 1
-    }
+  setImmediate(() => {
+    void fastify.prisma.baseInfo
+      .update({
+        where: { id: baseInfo.id },
+        data: {
+          visits_count: baseInfo.visits_count + 1
+        }
+      })
+      .then()
+      .catch((err) => fastify.log.error(err))
   })
   return {
     ...baseInfo,
