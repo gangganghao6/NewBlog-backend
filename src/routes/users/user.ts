@@ -49,7 +49,6 @@ export default function (
   })
   fastify.get('/user/:id', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
       const id = (req.params as { id: string }).id
       const result = await getUserById(fastify, id)
       return createRequestReturn(200, result as UserLoginReturn, '')
@@ -59,7 +58,9 @@ export default function (
   })
   fastify.put('/user/:id', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      validateRoot(fastify, req.session.root_id).catch(() => {
+        void validateUser(fastify, req.session.user_id).then()
+      })
       const data = req.body as PutUser
       const id = (req.params as { id: string }).id
       const result = await putUser(fastify, data, id)

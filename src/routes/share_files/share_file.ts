@@ -30,8 +30,8 @@ export default function (
       try {
         await validateRoot(fastify, req.session.root_id)
         const id = (req.params as { id: string }).id
-        await deleteShareFile(fastify, id)
-        return createRequestReturn(200, true, '')
+        const result = await deleteShareFile(fastify, id)
+        return createRequestReturn(200, result, '')
       } catch (e) {
         return createRequestReturn(500, null, (e as Error).message)
       }

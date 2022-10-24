@@ -57,7 +57,7 @@ await prisma.$queryRaw`PRAGMA journal_mode=WAL`
 fastify.prisma = prisma
 
 await fastify.register(fastifyCors, {
-  origin: ['http://172.33.149.217:8080'],
+  origin: [`${process.env.PUBLIC_URL}:${parseInt(process.env.FRONT_PORT)}`],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 })
@@ -94,7 +94,7 @@ await registRoutes(fastify)
 const start = async (): Promise<void> => {
   try {
     await fastify.listen({
-      port: process.env.PORT,
+      port: parseInt(process.env.PORT),
       host: '0.0.0.0'
     })
     generateRoutesLogs(fastify)

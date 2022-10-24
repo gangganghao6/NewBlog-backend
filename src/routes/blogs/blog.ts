@@ -73,7 +73,7 @@ export default function (
 }
 
 export interface CreateBlog {
-  images: { [index: number]: [Image] }
+  images: Image[]
   title: string
   content: string
   type: string

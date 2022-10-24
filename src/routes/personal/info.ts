@@ -61,5 +61,5 @@ export interface CreatePersonal {
   university: string
   home: string
   university_end_time?: Date
-  readme: '队用取门安的来西下林参物照想离林论。圆身越义矿温那导军所者华亲。业据织济部代东更因素分内水广连。思见却约式具次号月他六团识入。'
+  readme: string
 }

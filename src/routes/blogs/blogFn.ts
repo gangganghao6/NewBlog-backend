@@ -249,7 +249,7 @@ export async function sendMail(
   // 创建Nodemailer传输器 SMTP 或者 其他 运输机制
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_SMTP_HOST, // 第三方邮箱的主机地址
-    port: process.env.EMAIL_SMTP_PORT,
+    port: parseInt(process.env.EMAIL_SMTP_PORT),
     secure: true, // true for 465, false for other ports
     auth: {
       user: process.env.EMAIL_SMTP_ACCOUNT, // 发送方邮箱的账号

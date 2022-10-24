@@ -15,7 +15,7 @@ import { Chat } from '../../types/model'
 const query = new IP2Region.default({
   disableIpv6: true
 })
-const clients: any[] = []
+const clients: Array<{ userId: string; connection: any }> = []
 
 export default function (
   fastify: FastifyInstance,
@@ -27,7 +27,7 @@ export default function (
     const userId = (req.query as { user_id: string }).user_id
     let timer = setTimeout(() => {
       clients.splice(
-        clients.findIndex((obj) => obj.user_id === userId),
+        clients.findIndex((obj) => obj.userId === userId),
         1
       )
     }, 60 * 1000)
@@ -56,12 +56,23 @@ export default function (
           } = query.search(req.ip)
           data.location = `${location.country}/${location.province}/${location.city}/${location.isp}`
           clients.forEach((obj) => {
-            obj.connection.socket.send(JSON.stringify(data))
+            obj.connection.socket.send(
+              JSON.stringify(createRequestReturn(200, data, ''))
+            )
           })
           data.ip = req.ip
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const result = (await sendMessage(fastify, data)) as Chat
           connection.socket.send(
-            JSON.stringify(createRequestReturn(200, result, ''))
+            JSON.stringify(
+              createRequestReturn(
+                200,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                { type: 'message_confirm', ...result },
+                ''
+              )
+            )
           )
         }
       } catch (e) {
