@@ -61,7 +61,7 @@ export default function (
 }
 
 export interface RootLogin {
-  account?: string
+  account: string
   password: string
 }
 

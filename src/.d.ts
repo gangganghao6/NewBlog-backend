@@ -19,7 +19,8 @@ declare global {
     interface ProcessEnv {
       PROJECT_PATH: string
       DATABASE_URL: string
-      PORT: number
+      PORT: string
+      FRONT_PORT: string
       ISDEV: string
       PUBLIC_URL: string
       GITHUB_NAME: string
@@ -30,7 +31,7 @@ declare global {
       EMAIL_SMTP_ACCOUNT: string
       EMAIL_SMTP_PASS: string
       EMAIL_SMTP_HOST: string
-      EMAIL_SMTP_PORT: number
+      EMAIL_SMTP_PORT: string
     }
   }
 }

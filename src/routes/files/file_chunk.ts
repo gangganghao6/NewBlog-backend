@@ -24,7 +24,7 @@ export default function (
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
         await validateRoot(fastify, req.session.root_id)
-        const data = JSON.parse(req.body as string) as Files_merge
+        const data = req.body as Files_merge
         const result = await mergeFileChunk(data)
         return createRequestReturn(200, result as Files_return, '')
       } catch (e) {
