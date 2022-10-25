@@ -58,9 +58,11 @@ export default function (
   })
   fastify.put('/user/:id', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      validateRoot(fastify, req.session.root_id).catch(() => {
-        void validateUser(fastify, req.session.user_id).then()
-      })
+      try {
+        await validateRoot(fastify, req.session.root_id)
+      } catch (e) {
+        await validateUser(fastify, req.session.user_id)
+      }
       const data = req.body as PutUser
       const id = (req.params as { id: string }).id
       const result = await putUser(fastify, data, id)
