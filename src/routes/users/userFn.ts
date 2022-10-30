@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import AliPaySdk from 'alipay-sdk'
-import AliPayForm from 'alipay-sdk/lib/form'
+import AliPayForm from 'alipay-sdk/lib/form.js'
 import { v4 } from 'uuid'
 import { getBlog } from '../blogs/blogFn'
 

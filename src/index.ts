@@ -12,10 +12,13 @@ import fastifyRoutes from '@fastify/routes'
 import fastifyCompress from '@fastify/compress'
 import fastifyWebsocket from '@fastify/websocket'
 import registeInterceptor from './interceptor/interceptor.js'
-import { generateRoutesLogs, createLogStream } from './utils.js'
+import { generateRoutesLogs, createLogStream, initMkdir } from './utils.js'
 import { registRoutes, registStatic } from './routes.js'
 
-dotenv.config()
+dotenv.config({
+  override: true
+})
+initMkdir()
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 // eslint-disable-next-line no-extend-native

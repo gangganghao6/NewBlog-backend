@@ -40,7 +40,7 @@ export interface Files_chunk {
   total_slices: number
   current_slices: number
   file_type: string // 'txt'/'jpg'...
-  media_class: 'images' | 'videos' | 'files' | ''
+  media_class: 'images' | 'videos' | 'files'
   file_slices: Buffer
 }
 

@@ -19,7 +19,7 @@ export async function uploadFileChunk(req: FastifyRequest): Promise<void> {
     total_slices: 0,
     current_slices: 0,
     file_type: '',
-    media_class: '',
+    media_class: 'files',
     file_slices: Buffer.of()
   }
   const parts = await req.parts()

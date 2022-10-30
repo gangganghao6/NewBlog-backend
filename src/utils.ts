@@ -75,16 +75,6 @@ setInterval(() => {
 }, 1000 * 1000 * 60 * 24)
 
 function createLogStream(): Duplex {
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}/log`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}/log`)
-  }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}/log/normal`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}/log/normal`)
-  }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}/log/error`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}/log/error`)
-  }
-
   const inoutStream: Duplex = new Duplex({
     write(chunk, encoding, callback) {
       const data = JSON.parse(chunk.toString())
@@ -149,4 +139,36 @@ export async function validateRoot(
   }
 }
 
-export { generateRoutesLogs, createRequestReturn, createLogStream }
+function initMkdir(): void {
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\.env`)) {
+    fs.writeFileSync(`${process.env.PROJECT_PATH}\\.env`, '')
+    throw new Error('需要创建并修改 .env 文件')
+  }
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\log`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}\\log`)
+  }
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\log\\normal`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}\\log\\normal`)
+  }
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\log\\error`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}/log/error`)
+  }
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\database`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}\\database`)
+    throw new Error('需要运行 npm run prisma 命令以创建数据库文件')
+  }
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}/public`)
+  }
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public\\files`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}\\public\\files`)
+  }
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public\\images`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}\\public\\images`)
+  }
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public\\videos`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}\\public\\videos`)
+  }
+}
+
+export { generateRoutesLogs, createRequestReturn, createLogStream, initMkdir }
