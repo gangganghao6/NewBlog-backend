@@ -72,7 +72,7 @@ setInterval(() => {
       flags: 'a+'
     })
   })
-}, 1000 * 1000 * 60 * 24)
+}, 1000 * 60 * 60 * 24)
 
 function createLogStream(): Duplex {
   const inoutStream: Duplex = new Duplex({
@@ -142,7 +142,7 @@ export async function validateRoot(
 function initMkdir(): void {
   if (!fs.existsSync(`${process.env.PROJECT_PATH}\\.env`)) {
     fs.writeFileSync(`${process.env.PROJECT_PATH}\\.env`, '')
-    throw new Error('需要创建并修改 .env 文件')
+    throw new Error('已自动创建.env文件，需要配置')
   }
   if (!fs.existsSync(`${process.env.PROJECT_PATH}\\log`)) {
     fs.mkdirSync(`${process.env.PROJECT_PATH}\\log`)
@@ -151,14 +151,14 @@ function initMkdir(): void {
     fs.mkdirSync(`${process.env.PROJECT_PATH}\\log\\normal`)
   }
   if (!fs.existsSync(`${process.env.PROJECT_PATH}\\log\\error`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}/log/error`)
+    fs.mkdirSync(`${process.env.PROJECT_PATH}\\log\\error`)
   }
   if (!fs.existsSync(`${process.env.PROJECT_PATH}\\database`)) {
     fs.mkdirSync(`${process.env.PROJECT_PATH}\\database`)
     throw new Error('需要运行 npm run prisma 命令以创建数据库文件')
   }
   if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}/public`)
+    fs.mkdirSync(`${process.env.PROJECT_PATH}\\public`)
   }
   if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public\\files`)) {
     fs.mkdirSync(`${process.env.PROJECT_PATH}\\public\\files`)
