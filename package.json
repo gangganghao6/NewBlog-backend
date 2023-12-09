@@ -40,7 +40,7 @@
     "prepare": "husky install",
     "dev": "set NODE_ENV=dev&&tsx watch src/index.ts",
     "build": "rollup -c",
-    "run": "set NODE_ENV=dev&&pnpm build&&node dist/index.js",
+    "run": "set NODE_ENV=pro&&pnpm build&&node dist/index.js",
     "prisma": "prisma format&&npx prisma migrate dev --name init",
     "tscheck": "tsc --noemit",
     "prisma_studio": "npx prisma studio"

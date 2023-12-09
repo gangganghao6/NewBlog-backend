@@ -111,7 +111,7 @@ export async function validateUser(
   fastify: FastifyInstance,
   id: string | null | undefined
 ): Promise<boolean> {
-  if (process.env.ISDEV === 'true') {
+  if (process.env.NODE_ENV.trim() === 'dev') {
     return true
   }
   if (id === null || id === undefined) throw new Error('用户尚未登录')
@@ -130,7 +130,7 @@ export async function validateRoot(
   fastify: FastifyInstance,
   id: string | null | undefined
 ): Promise<boolean> {
-  if (process.env.ISDEV === 'true') {
+  if (process.env.NODE_ENV.trim() === 'dev') {
     return true
   }
   if (id === null || id === undefined) throw new Error('管理员尚未登录')

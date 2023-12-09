@@ -62,7 +62,7 @@ export async function postBlog(
   // )
   // await fastify.prisma.$transaction(mission)
   // const result = await getBlog(fastify, blogId)
-  if (process.env.ISDEV !== 'true') {
+  if (process.env.NODE_ENV.trim() === 'dev') {
     void checkSubscribe(fastify)
       .then((str) => {
         const title: string = result.title

@@ -32,3 +32,4 @@ log
 *.eslintcache
 alipay
 /public/*
+.eslintcache

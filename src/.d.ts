@@ -21,7 +21,6 @@ declare global {
       DATABASE_URL: string
       PORT: string
       FRONT_PORT: string
-      ISDEV: string
       PUBLIC_URL: string
       GITHUB_NAME: string
       ALIPAY_APPID: string

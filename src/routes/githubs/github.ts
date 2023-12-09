@@ -28,7 +28,7 @@ export default function (
       return createRequestReturn(500, null, (e as Error).message)
     }
   })
-  if (process.env.ISDEV !== 'true') {
+  if (process.env.NODE_ENV.trim() === 'dev') {
     void updateGithub(fastify)
     setInterval(() => {
       void updateGithub(fastify)
