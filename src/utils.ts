@@ -5,7 +5,6 @@ import { FastifyInstance } from 'fastify'
 import { getUserById } from './routes/users/userFn'
 import { getRootById } from './routes/base/rootFn'
 import { fastify } from './index'
-
 function generateRoutesLogs(fastify: any): void {
   const obj: any = []
   fastify.routes.forEach((route: any[]) => {
@@ -82,18 +81,23 @@ function createLogStream(): Duplex {
       delete data.reqId
       delete data.hostname
       data.time = dayjs(data.time).format('YYYY-MM-DD HH:mm:ss')
-      if ('err' in data) {
-        const stack = decodeURIComponent(data.err.stack)
-        delete data.err
-        delete data.msg
-        console.log(JSON.stringify(data))
-        console.log(`ERROR:${stack}\n`)
-        errStream.write(JSON.stringify(data))
-        logStream.write(JSON.stringify(data))
-        errStream.write(`ERROR:${stack}\n`)
+      const dataStr = JSON.stringify(data).replaceAll('\\n', '\n')
+      // if (!isNil(data.err)) {
+      //   const stack = decodeURIComponent(data.err.stack)
+      //   delete data.err
+      //   delete data.msg
+      //   console.log(JSON.stringify(data))
+      //   console.log("ERROR:" + stack)
+      //   errStream.write(JSON.stringify(data) + '\n')
+      //   logStream.write(JSON.stringify(data) + '\n')
+      //   errStream.write(`ERROR:${stack}\n`)
+      // } else
+      if (data.level === 50) {
+        console.log(dataStr)
+        errStream.write(dataStr + '\n')
       } else {
-        console.log(JSON.stringify(data))
-        logStream.write(JSON.stringify(data) + '\n')
+        console.log(dataStr)
+        logStream.write(dataStr + '\n')
       }
       callback()
     },

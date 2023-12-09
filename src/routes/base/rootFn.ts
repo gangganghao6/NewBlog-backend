@@ -75,11 +75,11 @@ export async function rootModify(
   data: RootModify
 ): Promise<any> {
   const oldPassword = CryptoJS.AES.decrypt(
-    data.old_password,
+    data.oldPassword,
     process.env.CRYPTO_KEY
   ).toString(CryptoJS.enc.Utf8)
   const newPassword = CryptoJS.AES.decrypt(
-    data.new_password,
+    data.newPassword,
     process.env.CRYPTO_KEY
   ).toString(CryptoJS.enc.Utf8)
   const myRoot = await fastify.prisma.root.findFirstOrThrow({

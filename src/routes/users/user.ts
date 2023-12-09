@@ -24,7 +24,7 @@ export default function (
       const email = (req.body as { email: string }).email
       const result = await getUserByEmail(fastify, email)
       if (result !== null) {
-        req.session.set('user_id', result.id)
+        req.session.set('userId', result.id)
         return createRequestReturn(200, result as UserLoginReturn, '')
       } else {
         return createRequestReturn(500, null, '登录失败')
@@ -41,7 +41,7 @@ export default function (
         return createRequestReturn(500, null, '邮箱已被注册')
       }
       const result = await createUser(fastify, data)
-      req.session.set('user_id', result.id)
+      req.session.set('userId', result.id)
       return createRequestReturn(200, result as UserLoginReturn, '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
@@ -59,9 +59,9 @@ export default function (
   fastify.put('/user/:id', async (req: FastifyRequest, res: FastifyReply) => {
     try {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
       } catch (e) {
-        await validateUser(fastify, req.session.user_id)
+        await validateUser(fastify, req.session.userId)
       }
       const data = req.body as PutUser
       const id = (req.params as { id: string }).id
@@ -73,12 +73,12 @@ export default function (
   })
   fastify.get('/user_list', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const data: any = req.query
       data.page = parseInt(data.page, 10)
       data.size = parseInt(data.size, 10)
-      data.is_subscribed = data.is_subscribed === 'true'
-      data.is_banned = data.is_banned === 'true'
+      data.isSubscribed = data.isSubscribed === 'true'
+      data.isBanned = data.isBanned === 'true'
       const result = await getUserAll(fastify, data)
       return createRequestReturn(200, result as UserLoginReturn[], '')
     } catch (e) {
@@ -89,7 +89,7 @@ export default function (
     '/user_detail/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const id = (req.params as { id: string }).id
         const result = await getUserDetail(fastify, id)
         return createRequestReturn(200, result as User, '')
@@ -102,7 +102,7 @@ export default function (
     '/pay/create',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateUser(fastify, req.session.user_id)
+        await validateUser(fastify, req.session.userId)
         const data = req.body as CreatePayOrder
         const result = await createPayOrder(fastify, data)
         return createRequestReturn(200, result as Pay, '')
@@ -115,7 +115,7 @@ export default function (
     '/pay/confirm',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateUser(fastify, req.session.user_id)
+        await validateUser(fastify, req.session.userId)
         const data = req.query as { out_trade_no: string }
         const result = await confirmOrder(fastify, data)
         return createRequestReturn(200, result as Pay, '')
@@ -126,7 +126,7 @@ export default function (
   )
   fastify.get('/pay/list', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const data: any = req.query
       data.page = parseInt(data.page, 10)
       data.size = parseInt(data.size, 10)
@@ -143,20 +143,20 @@ export interface UserLoginReturn {
   id: string
   name: string
   email: string
-  is_subscribed: boolean
-  is_banned: boolean
+  isSubscribed: boolean
+  isBanned: boolean
 }
 
 export interface PutUser {
   name: string
-  is_banned: boolean
-  is_subscribed: boolean
+  isBanned: boolean
+  is_Subscribed: boolean
 }
 
 export interface CreatePayOrder {
-  user_id: string
-  type: 'blog' | 'personal'
-  blog_id: string
+  userId: string
+  // type: 'blog' | 'personal'
+  blogId: string
   money: number
-  pay_type: 'alipay' | 'wechat'
+  payType: 'alipay' | 'wechat'
 }

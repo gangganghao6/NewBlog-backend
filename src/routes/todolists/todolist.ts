@@ -15,7 +15,7 @@ export default function (
 ): void {
   fastify.post('/todolist', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const data = req.body as { title: string }
       const result = await createTodolist(fastify, data)
       return createRequestReturn(200, result as Todolist, '')
@@ -38,7 +38,7 @@ export default function (
     '/todolist/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const id = (req.params as { id: string }).id
         const data = req.body as PutTodolist
         const result = await putTodolist(fastify, data, id)
@@ -52,7 +52,7 @@ export default function (
     '/todolist/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const id = (req.params as { id: string }).id
         const result = await deleteTodolist(fastify, id)
         return createRequestReturn(200, result as never, '')
@@ -66,7 +66,7 @@ export default function (
 
 export interface PutTodolist {
   title?: string
-  is_done?: boolean
-  is_done_time?: Date
-  created_time?: Date
+  isDone?: boolean
+  isDoneTime?: Date
+  createdTime?: Date
 }

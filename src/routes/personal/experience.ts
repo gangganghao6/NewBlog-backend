@@ -12,7 +12,7 @@ export default function (
     '/experience',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const data = req.body as CreateExperience
         const result = await postExperience(fastify, data)
         return createRequestReturn(200, result as Experience, '')
@@ -25,7 +25,7 @@ export default function (
     '/experience/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const data = req.body
         const id = (req.params as { id: string }).id
         const result = await putExperience(fastify, data, id)
@@ -39,7 +39,7 @@ export default function (
     '/experience/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const id = (req.params as { id: string }).id
         const result = await deleteExperience(fastify, id)
         return createRequestReturn(200, result as never, '')
@@ -55,7 +55,7 @@ export interface CreateExperience {
   company: string
   duty: string
   description: string
-  time_start: Date
-  time_end?: Date
-  image?: Image
+  timeStart: Date
+  timeEnd?: Date
+  images?: Image[]
 }

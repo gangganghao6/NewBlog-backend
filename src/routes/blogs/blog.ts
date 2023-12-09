@@ -10,7 +10,7 @@ export default function (
 ): void {
   fastify.post('/blog', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const data = req.body as CreateBlog
       const result = await postBlog(fastify, data)
       return createRequestReturn(200, result as Blog, '')
@@ -49,7 +49,7 @@ export default function (
     '/blog/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const id = (req.params as { id: string }).id
         const result = await deleteBlog(fastify, id)
         return createRequestReturn(200, result as Blog, '')
@@ -60,7 +60,7 @@ export default function (
   )
   fastify.put('/blog/:id', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const id = (req.params as { id: string }).id
       const data = req.body as CreateBlog
       const result = await putBlog(fastify, data, id)

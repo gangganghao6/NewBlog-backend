@@ -20,7 +20,7 @@ export async function getTodolistAll(
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
-      created_time: data.sort
+      createdTime: data.sort
     }
   })
   return { result, count }

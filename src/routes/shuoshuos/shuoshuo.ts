@@ -16,7 +16,7 @@ export default function (
 ): void {
   fastify.post('/shuoshuo', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const data = req.body as CreateShuoshuo
       const result = await postShuoshuo(fastify, data)
       return createRequestReturn(200, result as Shuoshuo, '')
@@ -51,7 +51,7 @@ export default function (
     '/shuoshuo/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const id = (req.params as { id: string }).id
         const data = req.body
         const result = await putShuoshuo(fastify, data, id)
@@ -65,7 +65,7 @@ export default function (
     '/shuoshuo/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const id = (req.params as { id: string }).id
         const result = await deleteShuoshuo(fastify, id)
         return createRequestReturn(200, result as never, '')

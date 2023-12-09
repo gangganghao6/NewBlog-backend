@@ -1,5 +1,8 @@
 import { FastifyInstance } from 'fastify'
 import axios from 'axios'
+import lodash from 'lodash'
+import { getPersonalInfoAll } from '../personal/infoFn'
+const { isNil } = lodash
 
 export async function getGithubAll(
   fastify: FastifyInstance,
@@ -10,7 +13,7 @@ export async function getGithubAll(
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
-      last_modified_time: data.sort
+      lastModifiedTime: data.sort
     }
   })
   return { result, count }
@@ -24,18 +27,18 @@ export async function getGithubById(
   const github = await fastify.prisma.github.findUnique({
     where: { id }
   })
-  if (update && github !== undefined && github !== null) {
-    setImmediate(() => {
-      void fastify.prisma.github
-        .update({
-          where: { id },
-          data: {
-            visited_count: github.visited_count + 1
-          }
-        })
-        .then()
-        .catch((err) => fastify.log.error(err))
-    })
+  if (update && !isNil(github)) {
+    // setImmediate(() => {
+    void fastify.prisma.github
+      .update({
+        where: { id },
+        data: {
+          visitedCount: github.visitedCount + 1
+        }
+      })
+      .then()
+      .catch((err) => fastify.log.error(err))
+    // })
   }
   return github
 }
@@ -44,7 +47,11 @@ export async function updateGithub(fastify: FastifyInstance): Promise<void> {
   try {
     fastify.log.info('Updating Github Data...')
     const mission = []
-    const githubName: string = process.env.GITHUB_NAME
+    const personal = await getPersonalInfoAll(fastify)
+    const githubName: string = personal.personal.githubName
+    if (isNil(githubName)) {
+      throw new Error('请先初始化个人信息')
+    }
     const githubRepos: any = await axios.get(
       `https://api.github.com/users/${githubName}/repos`,
       {
@@ -57,13 +64,13 @@ export async function updateGithub(fastify: FastifyInstance): Promise<void> {
     const tempRepos = githubRepos.data.map((repo: any) => {
       return {
         title: repo.name,
-        page_url: repo.html_url,
+        pageUrl: repo.html_url,
         description: repo.description,
-        created_time: repo.created_at,
-        last_modified_time: repo.pushed_at,
-        watchers_count: repo.watchers_count,
-        forks_count: repo.forks_count,
-        stars_count: repo.stargazers_count,
+        createdTime: repo.created_at,
+        lastModifiedTime: repo.pushed_at,
+        watchersCount: repo.watchers_count,
+        forksCount: repo.forks_count,
+        starsCount: repo.stargazers_count,
         languages: repo.language
       }
     })

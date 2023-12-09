@@ -15,9 +15,9 @@ import registeInterceptor from './interceptor/interceptor.js'
 import { generateRoutesLogs, createLogStream, initMkdir } from './utils.js'
 import { registRoutes, registStatic } from './routes.js'
 
-dotenv.config({
-  override: true
-})
+const isDev = process.env.NODE_ENV.trim() === 'dev'
+dotenv.config({ path: isDev ? '.env' : '.env.prod', override: true })
+
 initMkdir()
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error

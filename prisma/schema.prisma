@@ -8,44 +8,43 @@ datasource db {
 }
 
 model Image {
-  id            String   @id @default(uuid())
-  name          String
-  url           String
-  size          BigInt
-  created_time  DateTime @default(now())
-  video_id      String?
-  baseinfo_id   String?
-  blogpost_id   String?
-  project_id    String?
-  experience_id String?
-  chat_id       String?
-  shuoshuo_id   String?
-  blogimages_id String?
-  sharefile_id  String?
-}
-
-model Video {
-  id           String   @id @default(uuid())
+  id           String      @id @default(uuid())
   name         String
   url          String
   size         BigInt
-  duration     BigInt
-  created_time DateTime @default(now())
-  //  post         Image?
-  chat_id      String?
-  shuoshuo_id  String?
-  sharefile_id String?
+  createdTime  DateTime    @default(now())
+  videoId      String?     @unique
+  video        Video?      @relation(fields: [videoId], references: [id])
+  blogPostId   String?     @unique
+  blogPost     Blog?       @relation(fields: [blogPostId], references: [id])
+  blogImagesId String?
+  blogImages   Blog?       @relation("blogImages", fields: [blogImagesId], references: [id])
+  projectId    String?
+  project      Project?    @relation(fields: [projectId], references: [id])
+  experienceId String?
+  experience   Experience? @relation(fields: [experienceId], references: [id])
+  chatId       String?     @unique
+  chat         Chat?       @relation(fields: [chatId], references: [id])
+  shuoshuoId   String?
+  shuoshuo     Shuoshuo?   @relation(fields: [shuoshuoId], references: [id])
+  shareFileId  String?
+  shareFile    ShareFile?  @relation(fields: [shareFileId], references: [id])
 }
 
-model BaseInfo {
-  id                 String   @id @default(uuid())
-  name               String
-  start_time         DateTime @default(now())
-  blogs_count        Int      @default(0)
-  comments_count     Int      @default(0)
-  visits_count       Int      @default(0)
-  last_modified_time DateTime @default(now())
-  //  head_image         Image?
+model Video {
+  id          String     @id @default(uuid())
+  name        String
+  url         String
+  size        BigInt
+  duration    BigInt
+  createdTime DateTime   @default(now())
+  post        Image?
+  chatId      String?    @unique
+  chat        Chat?      @relation(fields: [chatId], references: [id])
+  shuoshuoId  String?
+  shuoshuo    Shuoshuo?  @relation(fields: [shuoshuoId], references: [id])
+  shareFileId String?
+  shareFile   ShareFile? @relation(fields: [shareFileId], references: [id])
 }
 
 model Root {
@@ -56,153 +55,168 @@ model Root {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  name          String
-  email         String
-  created_time  DateTime @default(now())
-  is_banned     Boolean  @default(false)
-  is_subscribed Boolean  @default(false)
-  //  userVisit     UserVisit[]
-  //  Comment       Comment[]
-  //  pays           Pay[]
-  //  chats         Chat[]
+  id           String      @id @default(uuid())
+  name         String
+  email        String
+  createdTime  DateTime    @default(now())
+  isBanned     Boolean     @default(false)
+  isSubscribed Boolean     @default(false)
+  userVisits   UserVisit[]
+  comments     Comment[]
+  chats        Chat[]
+  pays         Pay[]
 }
 
 model UserVisit {
-  id               String   @id @default(uuid())
-  ip               String
-  country          String?
-  province         String?
-  city             String?
-  isp              String?
-  url              String
-  user_agent       String
-  browser_name     String?
-  browser_version  String?
-  browser_major    String?
-  engine_name      String?
-  engine_version   String?
-  os_name          String?
-  os_version       String?
-  device_vendor    String?
-  device_model     String?
-  device_type      String?
-  cpu_architecture String?
-  visit_time       DateTime @default(now())
-  user_id          String?
+  id              String   @id @default(uuid())
+  ip              String
+  country         String?
+  province        String?
+  city            String?
+  isp             String?
+  url             String
+  userAgent       String
+  browserName     String?
+  browserVersion  String?
+  browserMajor    String?
+  engineName      String?
+  engineVersion   String?
+  osName          String?
+  osVersion       String?
+  deviceVendor    String?
+  deviceModel     String?
+  deviceType      String?
+  cpuArchitecture String?
+  visitTime       DateTime @default(now())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
 }
 
 model Comment {
-  id           String   @id @default(uuid())
-  comment      String
-  created_time DateTime @default(now())
-  user_id      String?
-  blog_id      String?
-  shuoshuo_id  String?
-  personal_id  String?
+  id          String    @id @default(uuid())
+  comment     String
+  createdTime DateTime  @default(now())
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+  blogId      String?
+  blog        Blog?     @relation(fields: [blogId], references: [id])
+  shuoshuoId  String?
+  shuoshuo    Shuoshuo? @relation(fields: [shuoshuoId], references: [id])
+  personalId  String?
+  personal    Personal? @relation(fields: [personalId], references: [id])
 }
 
 model Blog {
-  id                 String   @id @default(uuid())
-  title              String
-  content            String
-  type               String
-  created_time       DateTime @default(now())
-  last_modified_time DateTime @default(now())
-  visited_count      Int      @default(0)
-  comments_count     Int      @default(0)
-  pays_count         Int      @default(0)
-  //  post               Image?    @relation("blogPost")
-  //  images             Image[]   @relation("blogImages")
-  //  comments           Comment[]
-  //  pays Pay[]
+  id               String    @id @default(uuid())
+  title            String
+  content          String
+  type             String
+  createdTime      DateTime  @default(now())
+  lastModifiedTime DateTime  @default(now())
+  visitedCount     Int       @default(0)
+  commentsCount    Int       @default(0)
+  paysCount        Int       @default(0)
+  post             Image?
+  images           Image[]   @relation("blogImages")
+  comments         Comment[]
+  pays             Pay[]
 }
 
 model Shuoshuo {
-  id                 String   @id @default(uuid())
-  //  comments           Comment[]
-  //  images             Image[]
-  //  video              Video?
-  media_class        String //images/videos/texts
-  content            String?
-  created_time       DateTime @default(now())
-  last_modified_time DateTime @default(now())
-  visited_count      Int      @default(0)
-  comments_count     Int      @default(0)
+  id               String    @id @default(uuid())
+  // media_class        String //images/videos/texts
+  content          String?
+  createdTime      DateTime  @default(now())
+  lastModifiedTime DateTime  @default(now())
+  visitedCount     Int       @default(0)
+  commentsCount    Int       @default(0)
+  images           Image[]
+  videos           Video[]
+  comments         Comment[]
 }
 
 model Pay {
-  id           String    @id @default(uuid())
-  type         String //blog/personal
-  money        Float     @default(0.0)
-  order_id     String    @default(uuid())
-  order_url    String
-  created_time DateTime  @default(now())
-  close_time   DateTime?
-  pay_success  Boolean   @default(false)
-  is_close     Boolean   @default(false)
-  pay_type     String //wechat/alipay
-  user_id      String
-  blog_id      String?
+  id          String    @id @default(uuid())
+  // type        String //blog/personal
+  payType     String //wechat/alipay
+  money       Float     @default(0.0)
+  orderId     String    @default(uuid())
+  orderUrl    String
+  createdTime DateTime  @default(now())
+  closeTime   DateTime?
+  paySuccess  Boolean   @default(false)
+  isClose     Boolean   @default(false)
+  userId      String    @unique
+  user        User?     @relation(fields: [userId], references: [id])
+  blogId      String?   @unique
+  blog        Blog?     @relation(fields: [blogId], references: [id])
+  personalId  String?   @unique
+  personal    Personal? @relation(fields: [personalId], references: [id])
 }
 
 model File {
-  id           String   @id @default(uuid())
-  name         String
-  size         BigInt
-  url          String
-  created_time DateTime @default(now())
-  chat_id      String?
-  sharefile_id String?
+  id          String     @id @default(uuid())
+  name        String
+  size        BigInt
+  url         String
+  createdTime DateTime   @default(now())
+  chatId      String?    @unique
+  chat        Chat?      @relation(fields: [chatId], references: [id])
+  shareFileId String?    @unique
+  shareFile   ShareFile? @relation(fields: [shareFileId], references: [id])
 }
 
 model ShareFile {
-  id             String   @id @default(uuid())
-  type           String
-  media_class    String //images/videos/files
-  created_time   DateTime @default(now())
-  download_count Int      @default(0)
+  id            String   @id @default(uuid())
+  type          String
+  // mediaClass    String //images/videos/files
+  createdTime   DateTime @default(now())
+  downloadCount Int      @default(0)
+  files         File[]
+  videos        Video[]
+  images        Image[]
 }
 
 model Github {
-  id                 String   @id @default(uuid())
-  page_url           String
-  title              String
-  description        String?
-  created_time       DateTime
-  last_modified_time DateTime
-  languages          String?
-  stars_count        Int
-  forks_count        Int
-  watchers_count     Int
-  visited_count      Int      @default(0)
+  id               String   @id @default(uuid())
+  pageUrl          String
+  title            String
+  description      String?
+  createdTime      DateTime
+  lastModifiedTime DateTime
+  languages        String?
+  starsCount       Int
+  forksCount       Int
+  watchersCount    Int
+  visitedCount     Int      @default(0)
 }
 
 model Todolist {
-  id           String    @id @default(uuid())
-  title        String
-  created_time DateTime  @default(now())
-  is_done      Boolean   @default(false)
-  is_done_time DateTime?
+  id          String    @id @default(uuid())
+  title       String
+  createdTime DateTime  @default(now())
+  isDone      Boolean   @default(false)
+  isDoneTime  DateTime?
 }
 
 model Personal {
-  id                  String    @id @default(uuid())
-  name                String
-  sex                 String
-  birthday            DateTime
-  wechat              String
-  qq                  String
-  github              String
-  university          String
-  university_end_time DateTime?
-  home                String
-  readme              String
-  visits_count        Int       @default(0)
-  //projects              Project[]
-  //experiences           Experience[]
-  //  comments            Comment[]
-  //pays                  Pays[]
+  id                String    @id @default(uuid())
+  name              String?
+  sex               String?
+  birthday          DateTime?
+  wechat            String?
+  qq                String?
+  githubName        String?
+  githubUrl         String?
+  university        String?
+  universityEndTime DateTime?
+  home              String?
+  readme            String?
+  visitedCount      Int       @default(0)
+  pays              Pay[]
+  comments          Comment[]
+  // experiences       Experience[]
+  // projects          Project[]
 }
 
 model Experience {
@@ -210,9 +224,11 @@ model Experience {
   company     String
   duty        String
   description String
-  time_start  DateTime
-  time_end    DateTime?
-  //  image       Image?
+  timeStart   DateTime
+  timeEnd     DateTime?
+  // personalId  String
+  // personal    Personal  @relation(fields: [personalId], references: [id])
+  images      Image[]
 }
 
 model Project {
@@ -220,22 +236,25 @@ model Project {
   name        String
   duty        String
   description String
-  time_start  DateTime
-  time_end    DateTime?
-  github_url  String?
-  demo_url    String?
-  //  image       Image?
+  timeStart   DateTime
+  timeEnd     DateTime?
+  githubUrl   String?
+  demoUrl     String?
+  // personalId  String
+  // personal    Personal  @relation(fields: [personalId], references: [id])
+  images      Image[]
 }
 
 model Chat {
-  id           String   @id @default(uuid())
-  ip           String
-  location     String
-  user_id      String
-  created_time DateTime @default(now())
-  content      String?
-  //  image        Image?
-  //  video        Video?
-  //  file         File?
-  media_class  String //image/video/file/text
+  id          String   @id @default(uuid())
+  ip          String
+  location    String
+  userId      String   @unique
+  user        User?    @relation(fields: [userId], references: [id])
+  createdTime DateTime @default(now())
+  content     String?
+  // media_class  String //image/video/file/text
+  image       Image?
+  video       Video?
+  File        File?
 }

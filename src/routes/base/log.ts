@@ -29,7 +29,7 @@ export default function (
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const data: any = req.query
       data.size = parseInt(data.size, 10)
       data.page = parseInt(data.page, 10)
@@ -41,7 +41,7 @@ export default function (
   })
   fastify.get('/analysis', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const result = await getUserVisitAnalysis(fastify)
       return createRequestReturn(200, result as UserVisitAnalysis, '')
     } catch (e) {

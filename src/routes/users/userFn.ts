@@ -2,7 +2,6 @@ import { FastifyInstance } from 'fastify'
 import AliPaySdk from 'alipay-sdk'
 import AliPayForm from 'alipay-sdk/lib/form.js'
 import { v4 } from 'uuid'
-import { getBlog } from '../blogs/blogFn'
 
 // eslint-disable-next-line new-cap,@typescript-eslint/ban-ts-comment
 // @ts-expect-error
@@ -27,9 +26,9 @@ export async function getUserByEmail(
   fastify: FastifyInstance,
   email: string
 ): Promise<any> {
-  if (email === undefined) {
-    throw new Error('参数错误')
-  }
+  // if (email === undefined) {
+  //   throw new Error('参数错误')
+  // }
   return await fastify.prisma.user.findFirst({
     where: { email }
   })
@@ -61,19 +60,19 @@ export async function getUserAll(
 ): Promise<any> {
   const count = await fastify.prisma.user.count({
     where: {
-      is_subscribed: data.is_subscribed,
-      is_banned: data.is_banned
+      isSubscribed: data.isSubscribed,
+      isBanned: data.isBanned
     }
   })
   const result = await fastify.prisma.user.findMany({
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
-      created_time: data.sort
+      createdTime: data.sort
     },
     where: {
-      is_subscribed: data.is_subscribed,
-      is_banned: data.is_banned
+      isSubscribed: data.isSubscribed,
+      isBanned: data.isBanned
     }
   })
   return { result, count }
@@ -83,28 +82,17 @@ export async function getUserDetail(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
-  const user = await getUserById(fastify, id)
-  const chats = await fastify.prisma.chat.findMany({
+  return await fastify.prisma.user.findUnique({
     where: {
-      user_id: id
+      id
+    },
+    include: {
+      comments: true,
+      userVisits: true,
+      chats: true,
+      pays: true
     }
   })
-  const userVisits = await fastify.prisma.userVisit.findMany({
-    where: { user_id: id }
-  })
-  const comments = await fastify.prisma.comment.findMany({
-    where: { user_id: id }
-  })
-  const pays = await fastify.prisma.pay.findMany({
-    where: { user_id: id }
-  })
-  return {
-    ...user,
-    chats,
-    user_visit: userVisits,
-    comments,
-    pays
-  }
 }
 
 export async function createPayOrder(
@@ -119,11 +107,11 @@ export async function createPayOrder(
   formData.setMethod('get')
   formData.addField(
     'returnUrl',
-    `${process.env.PUBLIC_URL}/api/users/pay/confirm`
+    `${process.env.PUBLICURL as string}/api/users/pay/confirm`
   )
   formData.addField('bizContent', {
     outTradeNo: orderId, // 订单号
-    productCode: 'FAST_INSTANT_TRADE_PAY', // 产品码
+    productCode: 'FASTINSTANTTRADE_PAY', // 产品码
     totalAmount: data.money, // 商品金额
     subject: data.type === 'blog' ? '博客打赏' : '个人打赏', // 出售商品的标题
     body: '谢谢喵~' // 出售商品的内容
@@ -134,10 +122,10 @@ export async function createPayOrder(
     { formData }
   )
   const mission = []
-  if (data.blog_id !== null && data.blog_id !== undefined) {
+  if (data.blogId !== null && data.blogId !== undefined) {
     const blog = await fastify.prisma.blog.findUnique({
       where: {
-        id: data.blog_id
+        id: data.blogId
       }
     })
     if (blog !== null) {
@@ -145,7 +133,7 @@ export async function createPayOrder(
         fastify.prisma.blog.update({
           where: { id: blog.id },
           data: {
-            pays_count: blog.pays_count + 1
+            paysCount: blog.paysCount + 1
           }
         })
       )
@@ -156,16 +144,14 @@ export async function createPayOrder(
     fastify.prisma.pay.create({
       data: {
         id: payId,
-        type: data.type,
+        // type: data.type,
         money: data.money,
-        order_id: orderId,
-        order_url: orderResult,
-        pay_type: data.pay_type,
-        user_id: data.user_id,
-        blog_id:
-          data.blog_id === null || data.blog_id === undefined
-            ? null
-            : data.blog_id
+        orderId,
+        orderUrl: orderResult,
+        payType: data.payType,
+        userId: data.userId,
+        blogId:
+          data.blogId === null || data.blogId === undefined ? null : data.blogId
       }
     })
   )
@@ -177,18 +163,18 @@ export async function confirmOrder(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const orderId = data.out_trade_no
+  const orderId = data.outTrade_no
   if (orderId === null || orderId === undefined) {
     throw new Error('参数错误')
   }
   const exist = await fastify.prisma.pay.findFirst({
-    where: { order_id: orderId }
+    where: { orderId }
   })
   if (exist === null) {
     throw new Error('订单不存在')
-  } else if (exist?.is_close) {
+  } else if (exist?.isClose) {
     return await fastify.prisma.pay.findFirst({
-      where: { order_id: orderId }
+      where: { orderId }
     })
   } else {
     // eslint-disable-next-line new-cap,@typescript-eslint/ban-ts-comment
@@ -197,7 +183,7 @@ export async function confirmOrder(
     const formData = new AliPayForm.default()
     formData.setMethod('get')
     formData.addField('bizContent', {
-      out_trade_no: orderId
+      outTrade_no: orderId
     })
     // 通过该接口主动查询订单状态
     const orderUrl = await alipaySdk.exec(
@@ -208,35 +194,35 @@ export async function confirmOrder(
     const orderResult = await fetch(orderUrl, {
       method: 'GET'
     }).then(async (response) => await response.json())
-    const status = orderResult.alipay_trade_query_response.trade_status // WAIT_BUYER_PAY TRADE_CLOSED TRADE_SUCCESS TRADE_FINISHED
+    const status = orderResult.alipayTrade_query_response.trade_status // WAIT_BUYER_PAY TRADE_CLOSED TRADE_SUCCESS TRADE_FINISHED
     if (status === 'TRADE_SUCCESS') {
       await fastify.prisma.pay.updateMany({
-        where: { order_id: orderId },
+        where: { orderId },
         data: {
-          is_close: true,
-          close_time: new Date(),
-          pay_success: true
+          isClose: true,
+          closeTime: new Date(),
+          paySuccess: true
         }
       })
     } else if (status === 'TRADE_CLOSED') {
       await fastify.prisma.pay.updateMany({
-        where: { order_id: orderId },
+        where: { orderId },
         data: {
-          is_close: true,
-          close_time: new Date(),
-          pay_success: false
+          isClose: true,
+          closeTime: new Date(),
+          paySuccess: false
         }
       })
     } else if (status === 'WAIT_BUYER_PAY') {
       await fastify.prisma.pay.updateMany({
-        where: { order_id: orderId },
+        where: { orderId },
         data: {
-          is_close: false
+          isClose: false
         }
       })
     }
     return await fastify.prisma.pay.findFirst({
-      where: { order_id: orderId }
+      where: { orderId }
     })
   }
 }
@@ -246,20 +232,25 @@ export async function getPayAll(
   data: any
 ): Promise<any> {
   const count = await fastify.prisma.pay.count()
-  const tempResult = await fastify.prisma.pay.findMany({
+  const result = await fastify.prisma.pay.findMany({
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
-      created_time: data.sort
+      createdTime: data.sort
     },
-    select: {
-      id: true
+    include: {
+      user: true,
+      blog: true,
+      personal: true
     }
+    // select: {
+    //   id: true
+    // }
   })
-  const result = []
-  for (const obj of tempResult) {
-    result.push(await getPayById(fastify, obj.id))
-  }
+  // const result = []
+  // for (const obj of tempResult) {
+  //   result.push(await getPayById(fastify, obj.id))
+  // }
   return { result, count }
 }
 
@@ -267,14 +258,20 @@ export async function getPayById(
   fastify: FastifyInstance,
   id: any
 ): Promise<any> {
-  const result: any = await fastify.prisma.pay.findUnique({ where: { id } })
-  result.user = await getUserById(fastify, id)
-  if (result?.type === 'blog') {
-    try {
-      result.blog = await getBlog(fastify, result.blog_id)
-    } catch (e) {
-      result.blog = null
+  return await fastify.prisma.pay.findUnique({
+    where: { id },
+    include: {
+      user: true,
+      blog: true,
+      personal: true
     }
-  }
-  return result
+  })
+  // result.user = await getUserById(fastify, id)
+  // if (result?.type === 'blog') {
+  //   try {
+  //     result.blog = await getBlog(fastify, result.blogId)
+  //   } catch (e) {
+  //     result.blog = null
+  //   }
+  // }
 }

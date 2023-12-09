@@ -1,76 +1,105 @@
 import { FastifyInstance } from 'fastify'
-import { v4 } from 'uuid'
 
 export async function uploadShareFile(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const mission = []
-  const shareFileId = v4()
-  switch (data.media_class) {
-    case 'images':
-      mission.push(
-        fastify.prisma.image.create({
-          data: {
-            sharefile_id: shareFileId,
-            name: data.image.name,
-            url: data.image.url,
-            size: data.image.size
+  return await fastify.prisma.shareFile.create({
+    data: {
+      ...data,
+      files: {
+        create: data.files
+      },
+      images: {
+        create: data.images
+      },
+      videos: {
+        create: data.videos.map((item: any) => {
+          return {
+            ...item,
+            post: {
+              create: item.post
+            }
           }
         })
-      )
-      break
-    case 'videos':
-      {
-        const videoId = v4()
-        mission.push(
-          fastify.prisma.image.create({
-            data: {
-              video_id: videoId,
-              name: data.video.post.name,
-              url: data.video.post.url,
-              size: data.video.post.size
-            }
-          })
-        )
-        mission.push(
-          fastify.prisma.video.create({
-            data: {
-              id: videoId,
-              sharefile_id: shareFileId,
-              name: data.video.name,
-              url: data.video.url,
-              size: data.video.size,
-              duration: data.video.duration
-            }
-          })
-        )
       }
-      break
-    case 'files':
-      mission.push(
-        fastify.prisma.file.create({
-          data: {
-            name: data.file.name,
-            size: data.file.size,
-            url: data.file.url,
-            sharefile_id: shareFileId
-          }
-        })
-      )
-      break
-  }
-  mission.push(
-    fastify.prisma.shareFile.create({
-      data: {
-        id: shareFileId,
-        media_class: data.media_class,
-        type: data.type
+    },
+    include: {
+      files: true,
+      images: true,
+      videos: {
+        include: {
+          post: true
+        }
       }
-    })
-  )
-  await fastify.prisma.$transaction(mission)
-  return await getShareFile(fastify, shareFileId)
+    }
+  })
+  // const mission = []
+  // const shareFileId = v4()
+  // switch (data.media_class) {
+  //   case 'images':
+  //     mission.push(
+  //       fastify.prisma.image.create({
+  //         data: {
+  //           sharefile_id: shareFileId,
+  //           name: data.image.name,
+  //           url: data.image.url,
+  //           size: data.image.size
+  //         }
+  //       })
+  //     )
+  //     break
+  //   case 'videos':
+  //     {
+  //       const videoId = v4()
+  //       mission.push(
+  //         fastify.prisma.image.create({
+  //           data: {
+  //             video_id: videoId,
+  //             name: data.video.post.name,
+  //             url: data.video.post.url,
+  //             size: data.video.post.size
+  //           }
+  //         })
+  //       )
+  //       mission.push(
+  //         fastify.prisma.video.create({
+  //           data: {
+  //             id: videoId,
+  //             sharefile_id: shareFileId,
+  //             name: data.video.name,
+  //             url: data.video.url,
+  //             size: data.video.size,
+  //             duration: data.video.duration
+  //           }
+  //         })
+  //       )
+  //     }
+  //     break
+  //   case 'files':
+  //     mission.push(
+  //       fastify.prisma.file.create({
+  //         data: {
+  //           name: data.file.name,
+  //           size: data.file.size,
+  //           url: data.file.url,
+  //           sharefile_id: shareFileId
+  //         }
+  //       })
+  //     )
+  //     break
+  // }
+  // mission.push(
+  //   fastify.prisma.shareFile.create({
+  //     data: {
+  //       id: shareFileId,
+  //       media_class: data.media_class,
+  //       type: data.type
+  //     }
+  //   })
+  // )
+  // await fastify.prisma.$transaction(mission)
+  // return await getShareFile(fastify, shareFileId)
 }
 
 export async function deleteShareFile(
@@ -246,7 +275,9 @@ export async function increaseShareFileDownload(
         .update({
           where: { id },
           data: {
-            download_count: sharefile.download_count + 1
+            downloadCount: {
+              increment: 1
+            }
           }
         })
         .then()

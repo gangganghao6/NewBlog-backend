@@ -10,8 +10,8 @@ export declare module 'fastify' {
   }
 
   interface Session {
-    user_id?: string
-    root_id?: string
+    userId?: string
+    rootId?: string
   }
 }
 declare global {
@@ -32,6 +32,7 @@ declare global {
       EMAIL_SMTP_PASS: string
       EMAIL_SMTP_HOST: string
       EMAIL_SMTP_PORT: string
+      NODE_ENV: string
     }
   }
 }

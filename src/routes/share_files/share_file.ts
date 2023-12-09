@@ -16,7 +16,7 @@ export default function (
 ): void {
   fastify.post('/file', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const data = req.body as CreateShareFile
       const result = await uploadShareFile(fastify, data)
       return createRequestReturn(200, result as ShareFileReturn, '')
@@ -28,7 +28,7 @@ export default function (
     '/file/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const id = (req.params as { id: string }).id
         const result = await deleteShareFile(fastify, id)
         return createRequestReturn(200, result, '')
@@ -39,7 +39,7 @@ export default function (
   )
   fastify.put('/file/:id', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const id = (req.params as { id: string }).id
       const type = (req.body as { type: string }).type
       const result = await putShareFile(fastify, { id, type })
@@ -84,13 +84,15 @@ export default function (
 
 export interface CreateShareFile {
   type: string
-  media_class: 'videos' | 'images' | 'files'
-  video?: Video
-  image?: Image
-  file?: File
+  // media_class: 'videos' | 'images' | 'files'
+  videos?: Video
+  images?: Image
+  files?: File
 }
 
 export interface ShareFileReturn {
-  share_file: ShareFile
-  file: Image | Video | File
+  shareFile: ShareFile
+  videos?: Video
+  images?: Image
+  files?: File
 }

@@ -18,7 +18,7 @@ export default function (
         if (result === null) {
           return createRequestReturn(500, null, '登录失败')
         }
-        req.session.root_id = result.id
+        req.session.rootId = result.id
         return createRequestReturn(200, result as RootLoginReturn, '')
       } catch (e) {
         return createRequestReturn(500, null, (e as Error).message)
@@ -32,7 +32,7 @@ export default function (
       const data = req.body as RootRegist
       try {
         const result = await rootRegist(fastify, data)
-        req.session.root_id = result.id
+        req.session.rootId = result.id
         return createRequestReturn(200, result as Root, '')
       } catch (e) {
         return createRequestReturn(200, null, '账号或邮箱已存在或数据格式错误')
@@ -44,7 +44,7 @@ export default function (
     {},
     async (req: FastifyRequest, res: FastifyReply): Promise<any> => {
       try {
-        await validateRoot(fastify, req.session.root_id)
+        await validateRoot(fastify, req.session.rootId)
         const data = req.body as RootModify
         const result = await rootModify(fastify, data)
         return createRequestReturn(200, result as Root, '')
@@ -79,6 +79,6 @@ export interface RootRegist {
 
 export interface RootModify {
   id: string
-  new_password: string
-  old_password: string
+  newPassword: string
+  oldPassword: string
 }

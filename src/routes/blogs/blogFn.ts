@@ -1,51 +1,77 @@
 import { FastifyInstance } from 'fastify'
-import { v4 } from 'uuid'
 import nodemailer from 'nodemailer'
+import lodash from 'lodash'
+const { isNil } = lodash
 
 export async function postBlog(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const mission = []
-  const blogId = v4()
-  if ('post' in data && data.post !== null) {
-    mission.push(
-      fastify.prisma.image.create({
-        data: { ...data.post, blogpost_id: blogId }
-      })
-    )
-  }
-  if ('images' in data && data.images !== null && data.images.length > 0) {
-    for (const image of data.images) {
-      mission.push(
-        fastify.prisma.image.create({
-          data: { ...image, blogimages_id: blogId }
-        })
-      )
-    }
-  }
-  mission.push(
-    fastify.prisma.blog.create({
-      data: {
-        id: blogId,
-        title: data.title,
-        content: data.content,
-        type: data.type
+  const result = await fastify.prisma.blog.create({
+    data: {
+      ...data,
+      images: {
+        create: data.images
+      },
+      post: {
+        create: data.post
       }
-    })
-  )
-  await fastify.prisma.$transaction(mission)
-  const result = await getBlog(fastify, blogId)
+    },
+    include: {
+      images: true,
+      post: true,
+      comments: {
+        include: {
+          user: true
+        }
+      },
+      pays: {
+        include: {
+          user: true
+        }
+      }
+    }
+  })
+  // const mission = []
+  // const blogId = v4()
+  // if ('post' in data && data.post !== null) {
+  //   mission.push(
+  //     fastify.prisma.image.create({
+  //       data: { ...data.post, blogpost_id: blogId }
+  //     })
+  //   )
+  // }
+  // if ('images' in data && data.images !== null && data.images.length > 0) {
+  //   for (const image of data.images) {
+  //     mission.push(
+  //       fastify.prisma.image.create({
+  //         data: { ...image, blogimages_id: blogId }
+  //       })
+  //     )
+  //   }
+  // }
+  // mission.push(
+  //   fastify.prisma.blog.create({
+  //     data: {
+  //       id: blogId,
+  //       title: data.title,
+  //       content: data.content,
+  //       type: data.type
+  //     }
+  //   })
+  // )
+  // await fastify.prisma.$transaction(mission)
+  // const result = await getBlog(fastify, blogId)
   if (process.env.ISDEV !== 'true') {
     void checkSubscribe(fastify)
       .then((str) => {
         const title: string = result.title
         const content: string = result.content
-        const time: string = result.created_time
+        const time: Date = result.createdTime
         void sendMail(
           fastify,
           str,
-          `标题：${title}\n内容：${content}\n发表于：${time}`
+          `标题：${title}\n内容：${content}\n发表于：${time.toLocaleString()}`
         )
       })
       .catch((err) => {
@@ -59,48 +85,82 @@ export async function getBlogList(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  let tempResult, tempCount
-  if (!('type' in data)) {
-    tempCount = await fastify.prisma.blog.count()
-    tempResult = await fastify.prisma.blog.findMany({
-      take: data.size,
-      skip: (data.page - 1) * data.size,
-      select: {
-        id: true
-      },
-      orderBy: {
-        created_time: data.sort
-      }
-    })
-  } else {
-    tempCount = await fastify.prisma.blog.count({
-      where: {
-        type: {
-          equals: data.type
-        }
-      }
-    })
-    tempResult = await fastify.prisma.blog.findMany({
-      where: {
-        type: {
-          equals: data.type
-        }
-      },
-      take: data.size,
-      skip: (data.page - 1) * data.size,
-      select: {
-        id: true
-      },
-      orderBy: {
-        created_time: data.sort
-      }
-    })
+  const countObj: any = {}
+  const searchObj: any = {
+    take: data.size,
+    skip: (data.page - 1) * data.size,
+    orderBy: {
+      createdTime: data.sort
+    },
+    include: {
+      images: true,
+      post: true
+    }
   }
-  const result = []
-  for (const obj of tempResult) {
-    result.push(await getBlog(fastify, obj.id))
+  if (!isNil(data.type)) {
+    countObj.where = {
+      type: {
+        equals: data.type
+      }
+    }
+    searchObj.where = {
+      type: {
+        equals: data.type
+      }
+    }
   }
-  return { result, count: tempCount }
+  const count = await fastify.prisma.blog.count(countObj)
+  const result = await fastify.prisma.blog.findMany(searchObj)
+  // let result, count
+  // if (!('type' in data)) {
+  //   count = await fastify.prisma.blog.count()
+  //   result = await fastify.prisma.blog.findMany({
+  //     take: data.size,
+  //     skip: (data.page - 1) * data.size,
+  //     // select: {
+  //     //   id: true
+  //     // },
+  //     orderBy: {
+  //       createdTime: data.sort
+  //     },
+  //     include: {
+  //       images: true,
+  //       post: true
+  //     }
+  //   })
+  // } else {
+  //   count = await fastify.prisma.blog.count({
+  //     where: {
+  //       type: {
+  //         equals: data.type
+  //       }
+  //     }
+  //   })
+  //   result = await fastify.prisma.blog.findMany({
+  //     where: {
+  //       type: {
+  //         equals: data.type
+  //       }
+  //     },
+  //     take: data.size,
+  //     skip: (data.page - 1) * data.size,
+  //     // select: {
+  //     //   id: true
+  //     // },
+  //     orderBy: {
+  //       createdTime: data.sort
+  //     },
+  //     include: {
+  //       images: true,
+  //       post: true
+  //     }
+  //   })
+  // }
+  // const result = []
+  // for (const obj of tempResult) {
+  //   result.push(await getBlog(fastify, obj.id))
+  // }
+  return { result, count }
 }
 
 export async function getBlog(
@@ -108,68 +168,106 @@ export async function getBlog(
   id: string,
   update = false
 ): Promise<any> {
-  const blog = await fastify.prisma.blog.findFirst({
-    where: { id }
-  })
-  if (update && blog !== null) {
-    setImmediate(() => {
-      void fastify.prisma.blog
-        .update({
-          where: { id },
-          data: {
-            visited_count: blog.visited_count + 1
-          }
-        })
-        .then()
-        .catch((err) => fastify.log.error(err))
+  // const blog = await fastify.prisma.blog.findFirst({
+  //   where: { id }
+  // })
+  if (update) {
+    void fastify.prisma.blog.update({
+      where: { id },
+      data: {
+        visitedCount: {
+          increment: 1
+        }
+      }
     })
   }
-  const post = await fastify.prisma.image.findFirst({
-    where: { blogpost_id: id }
+  return await fastify.prisma.blog.findFirst({
+    where: { id },
+    include: {
+      images: true,
+      post: true,
+      comments: {
+        include: {
+          user: true
+        }
+      },
+      pays: {
+        include: {
+          user: true
+        }
+      }
+    }
   })
-  const images = await fastify.prisma.image.findMany({
-    where: { blogimages_id: id }
-  })
-  const comments = await fastify.prisma.comment.findMany({
-    where: { blog_id: id }
-  })
-  const pays = await fastify.prisma.pay.findMany({
-    where: { blog_id: id }
-  })
-  return {
-    ...blog,
-    post,
-    images,
-    comments,
-    pays
-  }
+  // setImmediate(() => {
+  //   void fastify.prisma.blog
+  //     .update({
+  //       where: { id },
+  //       data: {
+  //         visitedCount: blog.visitedCount + 1
+  //       }
+  //     })
+  //     .then()
+  //     .catch((err) => fastify.log.error(err))
+  // })
+  // }
+  // const post = await fastify.prisma.image.findFirst({
+  //   where: { blogpost_id: id }
+  // })
+  // const images = await fastify.prisma.image.findMany({
+  //   where: { blogimages_id: id }
+  // })
+  // const comments = await fastify.prisma.comment.findMany({
+  //   where: { blog_id: id }
+  // })
+  // const pays = await fastify.prisma.pay.findMany({
+  //   where: { blog_id: id }
+  // })
+  // return {
+  //   ...blog,
+  //   post,
+  //   images,
+  //   comments,
+  //   pays
+  // }
 }
 
 export async function deleteBlog(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
-  const mission = []
-  mission.push(
-    fastify.prisma.image.deleteMany({
-      where: { blogpost_id: id }
-    })
-  )
-  mission.push(
-    fastify.prisma.image.deleteMany({ where: { blogimages_id: id } })
-  )
-  mission.push(
-    fastify.prisma.comment.deleteMany({
-      where: { blog_id: id }
-    })
-  )
-  mission.push(
-    fastify.prisma.blog.delete({
-      where: { id }
-    })
-  )
-  // pay不删除
-  return await fastify.prisma.$transaction(mission)
+  await fastify.prisma.blog.update({
+    where: { id },
+    data: {
+      pays: {
+        disconnect: true
+      },
+      comments: {
+        disconnect: true
+      }
+    }
+  })
+  return await fastify.prisma.blog.delete({ where: { id } })
+  // const mission = []
+  // mission.push(
+  //   fastify.prisma.image.deleteMany({
+  //     where: { blogpost_id: id }
+  //   })
+  // )
+  // mission.push(
+  //   fastify.prisma.image.deleteMany({ where: { blogimages_id: id } })
+  // )
+  // mission.push(
+  //   fastify.prisma.comment.deleteMany({
+  //     where: { blog_id: id }
+  //   })
+  // )
+  // mission.push(
+  //   fastify.prisma.blog.delete({
+  //     where: { id }
+  //   })
+  // )
+  // // pay不删除
+  // return await fastify.prisma.$transaction(mission)
 }
 
 export async function putBlog(
@@ -177,61 +275,89 @@ export async function putBlog(
   data: any,
   id: string
 ): Promise<any> {
-  const mission = []
-
-  if ('post' in data && data.post !== null && data.post !== undefined) {
-    mission.push(
-      fastify.prisma.image.deleteMany({
-        where: { blogpost_id: id }
-      })
-    )
-    mission.push(
-      fastify.prisma.image.create({
-        data: { ...data.post, blogpost_id: id }
-      })
-    )
-  }
-  if ('images' in data && data.images !== null && data.images !== undefined) {
-    mission.push(
-      fastify.prisma.image.deleteMany({
-        where: { blogimages_id: id }
-      })
-    )
-    for (const image of data.images) {
-      mission.push(
-        fastify.prisma.image.create({
-          data: { ...image, blogimages_id: id }
-        })
-      )
+  return await fastify.prisma.blog.update({
+    where: { id },
+    data: {
+      ...data,
+      lastModifiedTime: new Date(),
+      post: {
+        deleteMany: {},
+        create: data.post
+      },
+      images: {
+        deleteMany: {},
+        create: data.images
+      }
+      // comments: {
+      //   deleteMany: {},
+      //   create: data.comments.map((item: any) => {
+      //     return {
+      //       ...item,
+      //       user: {
+      //         connect: {
+      //           id: item.user.id
+      //         }
+      //       }
+      //     }
+      //   })
+      // }
     }
-  }
-  let temp = {}
-  if ('title' in data && data.title !== null && data.title !== undefined) {
-    temp = { ...temp, title: data.title }
-  }
-  if (
-    'content' in data &&
-    data.content !== null &&
-    data.content !== undefined
-  ) {
-    temp = { ...temp, content: data.content }
-  }
-  if ('type' in data && data.type !== null && data.type !== undefined) {
-    temp = { ...temp, type: data.type }
-  }
-  mission.push(
-    fastify.prisma.blog.update({
-      where: { id },
-      data: { ...temp, last_modified_time: new Date() }
-    })
-  )
-  await fastify.prisma.$transaction(mission)
-  return await getBlog(fastify, id)
+  })
+  // const mission = []
+
+  // if ('post' in data && data.post !== null && data.post !== undefined) {
+  //   mission.push(
+  //     fastify.prisma.image.deleteMany({
+  //       where: { blogpost_id: id }
+  //     })
+  //   )
+  //   mission.push(
+  //     fastify.prisma.image.create({
+  //       data: { ...data.post, blogpost_id: id }
+  //     })
+  //   )
+  // }
+  // if ('images' in data && data.images !== null && data.images !== undefined) {
+  //   mission.push(
+  //     fastify.prisma.image.deleteMany({
+  //       where: { blogimages_id: id }
+  //     })
+  //   )
+  //   for (const image of data.images) {
+  //     mission.push(
+  //       fastify.prisma.image.create({
+  //         data: { ...image, blogimages_id: id }
+  //       })
+  //     )
+  //   }
+  // }
+  // let temp = {}
+  // if ('title' in data && data.title !== null && data.title !== undefined) {
+  //   temp = { ...temp, title: data.title }
+  // }
+  // if (
+  //   'content' in data &&
+  //   data.content !== null &&
+  //   data.content !== undefined
+  // ) {
+  //   temp = { ...temp, content: data.content }
+  // }
+  // if ('type' in data && data.type !== null && data.type !== undefined) {
+  //   temp = { ...temp, type: data.type }
+  // }
+  // mission.push(
+  //   fastify.prisma.blog.update({
+  //     where: { id },
+  //     data: { ...temp, last_modified_time: new Date() }
+  //   })
+  // )
+  // await fastify.prisma.$transaction(mission)
+  // return await getBlog(fastify, id)
 }
 
 export async function checkSubscribe(fastify: FastifyInstance): Promise<any> {
   const result = await fastify.prisma.user.findMany({
-    where: { is_subscribed: true },
+    where: { isSubscribed: true },
     select: { email: true }
   })
   if (result.length <= 0) {

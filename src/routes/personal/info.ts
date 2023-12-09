@@ -22,7 +22,7 @@ export default function (
   })
   fastify.post('/info', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const data = req.body as CreatePersonal
       const exist = await fastify.prisma.personal.findFirst()
       if (exist !== null) {
@@ -36,7 +36,7 @@ export default function (
   })
   fastify.put('/info', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateRoot(fastify, req.session.root_id)
+      await validateRoot(fastify, req.session.rootId)
       const data = req.body as CreatePersonal
       const exist = await fastify.prisma.personal.findFirst()
       if (exist === null) {
@@ -57,9 +57,10 @@ export interface CreatePersonal {
   birthday: Date
   wechat: string
   qq: string
-  github: string
+  githubName: string
+  githubUrl: string
   university: string
   home: string
-  university_end_time?: Date
+  universityEndTime?: Date
   readme: string
 }

@@ -31,19 +31,19 @@ export async function postUserVisitLog(
           city: location.city === '' ? null : location.city,
           isp: location.isp === '' ? null : location.isp,
           url: obj.url,
-          user_agent: data.userAgent,
-          user_id: obj.user_id,
-          browser_name: result.browser.name,
-          browser_version: result.browser.version,
-          browser_major: result.browser.major,
-          engine_name: result.engine.name,
-          engine_version: result.engine.version,
-          os_name: result.os.name,
-          os_version: result.os.version,
-          device_vendor: result.device.vendor,
-          device_model: result.device.model,
-          device_type: result.device.type,
-          cpu_architecture: result.cpu.architecture
+          userAgent: data.userAgent,
+          userId: obj.user_id,
+          browserName: result.browser.name,
+          browserVersion: result.browser.version,
+          browserMajor: result.browser.major,
+          engineName: result.engine.name,
+          engineVersion: result.engine.version,
+          osName: result.os.name,
+          osVersion: result.os.version,
+          deviceVendor: result.device.vendor,
+          deviceModel: result.device.model,
+          deviceType: result.device.type,
+          cpuArchitecture: result.cpu.architecture
         }
       })
       .then()
@@ -61,7 +61,7 @@ export async function getUserVisitAll(
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
-      visit_time: data.sort
+      visitTime: data.sort
     }
   })
   return { result, count }
@@ -87,33 +87,33 @@ export async function getUserVisitAnalysis(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   const total: Array<{
-    browser_name: string
-    engine_name: string
-    os_name: string
-    device_type: string
-    cpu_architecture: string
+    browserName: string
+    engineName: string
+    osName: string
+    deviceType: string
+    cpuArchitecture: string
     country: string
     province: string
     city: string
     isp: string
-    visit_time: string
-    user_id: string
+    visitTime: string
+    userId: string
     url: string
     ip: string
   }> = await fastify.prisma.userVisit.findMany()
   total.forEach((data) => {
-    proceedCurrency(browserNames, data, 'browser_name')
-    proceedCurrency(engineNames, data, 'engine_name')
-    proceedCurrency(osNames, data, 'os_name')
-    proceedCurrency(deviceTypes, data, 'device_type')
-    proceedCurrency(cpuArchitectures, data, 'cpu_architecture')
+    proceedCurrency(browserNames, data, 'browserName')
+    proceedCurrency(engineNames, data, 'engineName')
+    proceedCurrency(osNames, data, 'osName')
+    proceedCurrency(deviceTypes, data, 'deviceType')
+    proceedCurrency(cpuArchitectures, data, 'cpuArchitecture')
     proceedCurrency(countrys, data, 'country')
     proceedCurrency(provinces, data, 'province')
     proceedCurrency(citys, data, 'city')
     proceedCurrency(isps, data, 'isp')
-    proceedCurrency(userIds, data, 'user_id')
-    const time = dayjs(data.visit_time).format('YYYY-MM-DD')
-    proceedCurrency(visitTimes, { visit_time: time }, 'visit_time')
+    proceedCurrency(userIds, data, 'userId')
+    const time = dayjs(data.visitTime).format('YYYY-MM-DD')
+    proceedCurrency(visitTimes, { visitTime: time }, 'visitTime')
     proceedCurrency(ips, data, 'ip')
     proceedCurrency(urls, data, 'url')
   })

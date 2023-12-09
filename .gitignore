@@ -31,3 +31,4 @@ database
 log
 *.eslintcache
 alipay
+/public/*

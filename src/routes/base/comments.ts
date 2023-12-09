@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { deleteComments, postComments } from './commentsFn'
+import { deleteComment, postComment } from './commentsFn'
 import { createRequestReturn, validateRoot, validateUser } from '../../utils'
 
 export default function (
@@ -9,21 +9,22 @@ export default function (
 ): void {
   fastify.post('/comments', async (req: FastifyRequest, res: FastifyReply) => {
     try {
-      await validateUser(fastify, req.session.user_id)
+      await validateUser(fastify, req.session.userId)
       const data = req.body as CommentsCreate
-      const result = await postComments(fastify, data)
+      const result = await postComment(fastify, data)
       return createRequestReturn(200, result as Comment, '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
     }
   })
   fastify.delete(
-    '/comments',
+    '/comments/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.root_id)
-        const data = req.body as CommentsDelete
-        const result = await deleteComments(fastify, data)
+        await validateRoot(fastify, req.session.rootId)
+        // const data = req.body as CommentsDelete
+        const id = (req.params as { id: string }).id
+        const result = await deleteComment(fastify, id)
         return createRequestReturn(
           200,
           result as {
@@ -41,15 +42,8 @@ export default function (
 
 export interface CommentsCreate {
   comment: string
-  user_id: string
-  blog_id?: string
-  shuoshuo_id?: string
-  personal_id?: string // 只要不是null和undefined就行
-}
-
-export interface CommentsDelete {
-  id?: number
-  blog_id?: string
-  shuoshuo_id?: string
-  personal_id?: string
+  userId: string
+  blogId?: string
+  shuoshuoId?: string
+  personalId?: string // 只要不是null和undefined就行
 }
