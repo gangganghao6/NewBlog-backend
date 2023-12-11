@@ -62,7 +62,7 @@ await prisma.$queryRaw`PRAGMA journal_mode=WAL`
 fastify.prisma = prisma
 
 await fastify.register(fastifyCors, {
-  origin: [`${process.env.PUBLIC_URL}:${parseInt(process.env.FRONT_PORT)}`],
+  // origin: [`${process.env.PUBLIC_URL}:${parseInt(process.env.FRONT_PORT)}`],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 })
