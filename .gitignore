@@ -33,3 +33,4 @@ log
 alipay
 /public/*
 .eslintcache
+/frontdist/*

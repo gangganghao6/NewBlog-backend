@@ -73,7 +73,12 @@ await fastify.register(fastifyCompress, {
 })
 await fastify.register(fastifyStatic, {
   root: path.join(process.env.PROJECT_PATH, 'public'),
-  prefix: '/public/' // optional: default '/'
+  prefix: '/public/'
+})
+await fastify.register(fastifyStatic, {
+  root: path.join(process.env.PROJECT_PATH, 'frontdist'),//前端代理
+  prefix: '/',
+  decorateReply: false
 })
 await fastify.register(fastifyCookie)
 await fastify.register(fastifySession, {

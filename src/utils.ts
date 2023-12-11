@@ -164,6 +164,9 @@ function initMkdir(): void {
   if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public`)) {
     fs.mkdirSync(`${process.env.PROJECT_PATH}\\public`)
   }
+  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\frontdist`)) {
+    fs.mkdirSync(`${process.env.PROJECT_PATH}\\frontdist`)
+  }
   if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public\\files`)) {
     fs.mkdirSync(`${process.env.PROJECT_PATH}\\public\\files`)
   }
