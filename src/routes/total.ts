@@ -19,7 +19,7 @@ export async function BaseRoute(fastify: FastifyInstance): Promise<void> {
   await fastify.register(baseInfo)
   await fastify.register(comments)
   await fastify.register(root, { prefix: '/root' })
-  await fastify.register(log, { prefix: '/urls_info' })
+  await fastify.register(log, { prefix: '/urlsInfo' })
 }
 
 export async function FilesRoute(fastify: FastifyInstance): Promise<void> {

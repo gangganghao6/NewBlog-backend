@@ -10,7 +10,7 @@ let myFastify: FastifyInstance
 function generateRoutesLogs(fastify: any): void {
   myFastify = fastify
   myFastify.log.info(
-    `progress running in ${getProjectPath()} folder, mode:${
+    `Progress running in ${getProjectPath()} folder, mode:${
       process.env.NODE_ENV
     }`
   )
