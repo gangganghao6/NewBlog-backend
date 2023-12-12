@@ -4,12 +4,12 @@ import fs from 'fs'
 import lodash from 'lodash'
 import { getVideoDurationInSeconds } from 'get-video-duration'
 import { createHash, streamToBuffer } from './utils'
-import { createRequestReturn } from '../../utils'
+import { createRequestReturn, getNetworkIp, getProjectPath } from '../../utils'
 import { Files_chunk } from './file_chunk'
 
 const { isNil } = lodash
 
-const basePath = path.join(process.env.PROJECT_PATH, 'public')
+const basePath = path.join(getProjectPath(), 'public')
 let temp: Files_chunk[] = []
 
 export async function uploadFileChunk(req: FastifyRequest): Promise<void> {
@@ -53,7 +53,9 @@ export async function mergeFileChunk(data: {
 
   const fileName = `${fileHash}.${data.fileType}` // 文件名
   const filePath = path.join(basePath, data.mediaType, fileName) // 文件绝对路径
-  const fileUrl = `${process.env.PUBLIC_URL}:${process.env.PORT}/public/${data.mediaType}/${fileName}` // 文件网络路径
+  const fileUrl = `${getNetworkIp()}:${process.env.PORT}/public/${
+    data.mediaType
+  }/${fileName}` // 文件网络路径
   fs.writeFileSync(filePath, allBuffer)
   const fileSize = fs.statSync(filePath).size
   let result: any = {

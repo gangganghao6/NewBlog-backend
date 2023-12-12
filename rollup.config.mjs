@@ -11,6 +11,7 @@ export default defineConfig({
     plugins: [
         typescript({
             tsconfig: "tsconfig.json",
+            check: false,
         }),
         commonjs()
     ]

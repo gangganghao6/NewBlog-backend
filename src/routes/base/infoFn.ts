@@ -4,6 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { BaseInfoCreate, BaseInfoModify } from './info'
 import { BaseInfo } from 'src/types/model'
+import { getProjectPath } from 'src/utils'
 const { isNil } = lodash
 export async function postBaseInfo(
   fastify: FastifyInstance,
@@ -100,7 +101,7 @@ export async function putBaseInfo(
 export function getBaseInfo(): BaseInfo {
   return JSON.parse(
     fs.readFileSync(
-      path.join(process.env.PROJECT_PATH, 'config/baseInfo.json'),
+      path.join(getProjectPath(), 'config/baseInfo.json'),
       'utf-8'
     )
   )
@@ -110,7 +111,7 @@ export async function editBaseInfo(
 ): Promise<BaseInfoModify> {
   const baseInfo = { ...getBaseInfo(), ...data }
   fs.writeFileSync(
-    path.join(process.env.PROJECT_PATH, 'config/baseInfo.json'),
+    path.join(getProjectPath(), 'config/baseInfo.json'),
     JSON.stringify(baseInfo)
   )
   return baseInfo

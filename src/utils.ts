@@ -2,10 +2,13 @@ import fs from 'fs'
 import dayjs from 'dayjs'
 import { Duplex } from 'stream'
 import { FastifyInstance } from 'fastify'
+import os from 'os'
 import { getUserById } from './routes/users/userFn'
 import { getRootById } from './routes/base/rootFn'
-import { fastify } from './index'
+
+let myFastify: FastifyInstance
 function generateRoutesLogs(fastify: any): void {
+  myFastify = fastify
   const obj: any = []
   fastify.routes.forEach((route: any[]) => {
     route.forEach((item) => {
@@ -27,7 +30,7 @@ function generateRoutesLogs(fastify: any): void {
     })
     .filter((item: any) => item !== null)
   fs.writeFileSync(
-    `${process.env.PROJECT_PATH}\\log\\routes.json`,
+    `${getProjectPath()}\\log\\routes.json`,
     JSON.stringify(routes)
   )
 }
@@ -38,7 +41,7 @@ function createRequestReturn(
   message = ''
 ): { code: number; data: any; message: string } {
   if (code !== 200) {
-    fastify.log.error(message)
+    myFastify.log.error(message)
   }
   return {
     code,
@@ -144,38 +147,74 @@ export async function validateRoot(
 }
 
 function initMkdir(): void {
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\.env`)) {
-    fs.writeFileSync(`${process.env.PROJECT_PATH}\\.env`, '')
+  const path = getProjectPath()
+  if (!fs.existsSync(`${path}\\.env`)) {
+    fs.writeFileSync(`${path}\\.env`, '')
     throw new Error('已自动创建.env文件，需要配置')
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\log`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}\\log`)
+  if (!fs.existsSync(`${path}\\log`)) {
+    fs.mkdirSync(`${path}\\log`)
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\log\\normal`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}\\log\\normal`)
+  if (!fs.existsSync(`${path}\\log\\normal`)) {
+    fs.mkdirSync(`${path}\\log\\normal`)
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\log\\error`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}\\log\\error`)
+  if (!fs.existsSync(`${path}\\log\\error`)) {
+    fs.mkdirSync(`${path}\\log\\error`)
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\database`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}\\database`)
+  if (!fs.existsSync(`${path}\\database`)) {
+    fs.mkdirSync(`${path}\\database`)
     throw new Error('需要运行 npm run prisma 命令以创建数据库文件')
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}\\public`)
+  if (!fs.existsSync(`${path}\\public`)) {
+    fs.mkdirSync(`${path}\\public`)
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\frontdist`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}\\frontdist`)
+  if (!fs.existsSync(`${path}\\frontdist`)) {
+    fs.mkdirSync(`${path}\\frontdist`)
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public\\files`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}\\public\\files`)
+  if (!fs.existsSync(`${path}\\public\\files`)) {
+    fs.mkdirSync(`${path}\\public\\files`)
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public\\images`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}\\public\\images`)
+  if (!fs.existsSync(`${path}\\public\\images`)) {
+    fs.mkdirSync(`${path}\\public\\images`)
   }
-  if (!fs.existsSync(`${process.env.PROJECT_PATH}\\public\\videos`)) {
-    fs.mkdirSync(`${process.env.PROJECT_PATH}\\public\\videos`)
+  if (!fs.existsSync(`${path}\\public\\videos`)) {
+    fs.mkdirSync(`${path}\\public\\videos`)
   }
 }
 
-export { generateRoutesLogs, createRequestReturn, createLogStream, initMkdir }
+function getNetworkIp(): string {
+  let needHost = '' // 打开的host
+  try {
+    // 获得网络接口列表
+    const network = os.networkInterfaces()
+    for (const dev in network) {
+      const iface = network[dev]!
+      for (let i = 0; i < iface.length; i++) {
+        const alias = iface[i]
+        if (
+          alias.family === 'IPv4' &&
+          alias.address !== '127.0.0.1' &&
+          !alias.internal
+        ) {
+          needHost = alias.address
+        }
+      }
+    }
+  } catch (e) {
+    needHost = 'localhost'
+  }
+  return needHost
+}
+
+function getProjectPath(): string {
+  return process.cwd()
+}
+
+export {
+  generateRoutesLogs,
+  createRequestReturn,
+  createLogStream,
+  initMkdir,
+  getNetworkIp,
+  getProjectPath
+}

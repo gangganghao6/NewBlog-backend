@@ -28,7 +28,7 @@ async function registRoutes(fastify: FastifyInstance): Promise<void> {
 async function registStatic(fastify: FastifyInstance): Promise<void> {
   await fastify.get(
     '/frontend',
-    async (req: FastifyRequest, res: FastifyReply) => {
+    async (req: FastifyRequest, res: FastifyReply): Promise<void> => {
       await res.sendFile('index.html')
     }
   )

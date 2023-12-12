@@ -12,7 +12,12 @@ import fastifyRoutes from '@fastify/routes'
 import fastifyCompress from '@fastify/compress'
 import fastifyWebsocket from '@fastify/websocket'
 import registeInterceptor from './interceptor/interceptor.js'
-import { generateRoutesLogs, createLogStream, initMkdir } from './utils.js'
+import {
+  generateRoutesLogs,
+  createLogStream,
+  initMkdir,
+  getProjectPath
+} from './utils.js'
 import { registRoutes, registStatic } from './routes.js'
 
 dotenv.config({
@@ -72,11 +77,11 @@ await fastify.register(fastifyCompress, {
   encodings: ['deflate', 'gzip']
 })
 await fastify.register(fastifyStatic, {
-  root: path.join(process.env.PROJECT_PATH, 'public'),
+  root: path.join(getProjectPath(), 'public'),
   prefix: '/public/'
 })
 await fastify.register(fastifyStatic, {
-  root: path.join(process.env.PROJECT_PATH, 'frontdist'),//前端代理
+  root: path.join(getProjectPath(), 'frontdist'), // 前端代理
   prefix: '/',
   decorateReply: false
 })

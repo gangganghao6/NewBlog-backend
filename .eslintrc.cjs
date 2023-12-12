@@ -23,6 +23,7 @@ module.exports = {
   'rules': {
     'prettier/prettier': 'error',
     'dot-notation': 'off',
-    '@typescript-eslint/no-explicit-any':['off']
+    '@typescript-eslint/no-explicit-any':['off'],
+    '@typescript-eslint/no-non-null-assertion': ['off']
   }
 }
