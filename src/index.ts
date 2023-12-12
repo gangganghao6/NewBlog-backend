@@ -16,12 +16,13 @@ import {
   generateRoutesLogs,
   createLogStream,
   initMkdir,
-  getProjectPath
+  getProjectPath,
+  getLocalIp
 } from './utils.js'
 import { registRoutes, registStatic } from './routes.js'
 
 dotenv.config({
-  path: process.env.NODE_ENV.trim() === 'dev' ? '.env' : '.env.prod',
+  path: '.env',
   override: true
 })
 
@@ -67,7 +68,7 @@ await prisma.$queryRaw`PRAGMA journal_mode=WAL`
 fastify.prisma = prisma
 
 await fastify.register(fastifyCors, {
-  // origin: [`${process.env.PUBLIC_URL}:${parseInt(process.env.FRONT_PORT)}`],
+  // origin: [`${getNetworkIp()}:${parseInt(process.env.FRONT_PORT)}`],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 })
@@ -99,7 +100,17 @@ await fastify.register(fastifySession, {
 await fastify.register(fastifyWebsocket) // fastify.get('/', { websocket: true }, (connection, req) => {
 
 await fastify.register(fastifyRoutes)
-await fastify.register(fastifyMultipart) // await req.file()
+await fastify.register(fastifyMultipart, {
+  limits: {
+    // fieldNameSize: 100, // Max field name size in bytes
+    // fieldSize: 100, // Max field value size in bytes
+    // fields: 10, // Max number of non-file fields
+    fileSize: 1024 * 1024 * 1024, // For multipart forms, the max file size in bytes
+    files: 100 // Max number of file fields
+    // headerPairs: 2000, // Max number of header key=>value pairs
+    // parts: 1000 // For multipart forms, the max number of parts (fields + files)
+  }
+}) // await req.file()
 
 await registeInterceptor(fastify)
 
@@ -110,7 +121,7 @@ const start = async (): Promise<void> => {
   try {
     await fastify.listen({
       port: parseInt(process.env.PORT),
-      host: '0.0.0.0'
+      host: getLocalIp()
     })
     generateRoutesLogs(fastify)
   } catch (err) {

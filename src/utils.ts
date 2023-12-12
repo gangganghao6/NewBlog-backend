@@ -9,6 +9,11 @@ import { getRootById } from './routes/base/rootFn'
 let myFastify: FastifyInstance
 function generateRoutesLogs(fastify: any): void {
   myFastify = fastify
+  myFastify.log.info(
+    `progress running in ${getProjectPath()} folder, mode:${
+      process.env.NODE_ENV
+    }`
+  )
   const obj: any = []
   fastify.routes.forEach((route: any[]) => {
     route.forEach((item) => {
@@ -182,7 +187,7 @@ function initMkdir(): void {
   }
 }
 
-function getNetworkIp(): string {
+function getLocalIp(): string {
   let needHost = '' // 打开的host
   try {
     // 获得网络接口列表
@@ -215,6 +220,6 @@ export {
   createRequestReturn,
   createLogStream,
   initMkdir,
-  getNetworkIp,
+  getLocalIp,
   getProjectPath
 }

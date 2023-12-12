@@ -19,9 +19,9 @@ export default function (
   fastify.post('/fileMerge', async (req: FastifyRequest, res: FastifyReply) => {
     try {
       await validateRoot(fastify, req.session.rootId)
-      const data = req.body as Files_merge
+      const data = req.body as FilesMerge
       const result = await mergeFileChunk(data)
-      return createRequestReturn(200, result as Files_return, '')
+      return createRequestReturn(200, result as FilesReturn, '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
     }
@@ -38,17 +38,17 @@ export interface Files_chunk {
   fileSlices: Buffer
 }
 
-export interface Files_merge {
+export interface FilesMerge {
   uuid: string
-  mediaType: 'images' | 'videos' | 'files'
+  // mediaType: 'images' | 'videos' | 'files'
   fileType: string // 'txt'/'jpg'...
 }
 
-export interface Files_return {
+export interface FilesReturn {
   name: string
   url: string
   size: number
-  // media_class: 'images' | 'videos' | 'files'
-  // file_type: string // 'txt'/'jpg'...
-  // duration?: number
+  mediaClass: 'images' | 'videos' | 'files'
+  fileType: string // 'txt'/'jpg'...
+  duration?: number
 }

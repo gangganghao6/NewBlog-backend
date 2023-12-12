@@ -21,6 +21,7 @@
     "dayjs": "^1.11.5",
     "dotenv": "^16.0.2",
     "fastify": "^4.5.3",
+    "file-type": "^18.7.0",
     "get-video-duration": "^4.1.0",
     "ip2region": "^2.3.0",
     "lodash": "^4.17.21",

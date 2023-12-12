@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { Stream } from 'stream'
+import { fileTypeFromBuffer } from 'file-type'
 
 export async function createHash(buffer: crypto.BinaryLike): Promise<string> {
   const fsHash = crypto.createHash('md5')
@@ -14,4 +15,14 @@ export async function streamToBuffer(stream: Stream): Promise<Buffer> {
     stream.on('data', (data) => buffers.push(data))
     stream.on('end', () => resolve(Buffer.concat(buffers)))
   })
+}
+export async function getMediaType(buffer: Buffer): Promise<string> {
+  const mediaType = await fileTypeFromBuffer(buffer)
+  if (mediaType?.mime?.startsWith('image') === true) {
+    return 'images'
+  } else if (mediaType?.mime?.startsWith('video') === true) {
+    return 'videos'
+  } else {
+    return 'files'
+  }
 }
