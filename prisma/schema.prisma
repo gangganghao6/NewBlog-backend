@@ -249,12 +249,12 @@ model Chat {
   id          String   @id @default(uuid())
   ip          String
   location    String
-  userId      String   @unique
+  userId      String
   user        User?    @relation(fields: [userId], references: [id])
   createdTime DateTime @default(now())
   content     String?
   // media_class  String //image/video/file/text
   image       Image?
   video       Video?
-  File        File?
+  file        File?
 }

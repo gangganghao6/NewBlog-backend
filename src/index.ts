@@ -97,7 +97,12 @@ await fastify.register(fastifySession, {
     secure: false
   }
 })
-await fastify.register(fastifyWebsocket) // fastify.get('/', { websocket: true }, (connection, req) => {
+await fastify.register(fastifyWebsocket, {
+  options: {
+    clientTracking: true,
+    server: fastify.server
+  }
+}) // fastify.get('/', { websocket: true }, (connection, req) => {
 
 await fastify.register(fastifyRoutes)
 await fastify.register(fastifyMultipart, {
