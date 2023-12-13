@@ -35,7 +35,8 @@ export async function getChatAll(
     include: {
       image: true,
       video: true,
-      file: true
+      file: true,
+      user: true
     },
     skip: data.size * (data.page - 1),
     take: data.size

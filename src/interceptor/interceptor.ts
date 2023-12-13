@@ -35,13 +35,13 @@ async function registeInterceptor(fastify: FastifyInstance): Promise<void> {
       // return createRequestReturn(500, null, err.message)
     }
   )
-  await fastify.addHook(
-    'onSend',
-    async (req: FastifyRequest, res: FastifyReply, payload: string) => {
-      console.log(222)
-      return payload
-    }
-  )
+  // await fastify.addHook(
+  //   'onSend',
+  //   async (req: FastifyRequest, res: FastifyReply, payload: string) => {
+  //     console.log(222)
+  //     return payload
+  //   }
+  // )
 }
 
 export default registeInterceptor

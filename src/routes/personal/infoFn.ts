@@ -28,11 +28,33 @@ export async function getPersonalInfoAll(
   fastify: FastifyInstance
 ): Promise<any> {
   const missions = []
-  missions.push(fastify.prisma.personal.findFirst())
+  missions.push(
+    fastify.prisma.personal.findFirst({
+      include: {
+        comments: {
+          include: {
+            user: true
+          }
+        }
+      }
+    })
+  )
   missions.push(getProjectsAll(fastify))
   missions.push(getExperiencesAll(fastify))
   const result = await Promise.all(missions)
-  return { personal: result[0], projects: result[1], experiences: result[2] }
+  setImmediate(async () => {
+    await fastify.prisma.personal.update({
+      where: { id: result[0].id },
+      data: {
+        visitedCount: {
+          increment: 1
+        }
+      }
+    })
+  })
+  result[0].project = result[1]
+  result[0].experience = result[2]
+  return { ...result[0] }
   // const projects = await getProjectsAll(fastify)
   // const experiences = await getExperiencesAll(fastify)
   // const pays = await fastify.prisma.pay.findMany()

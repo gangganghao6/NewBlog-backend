@@ -5,6 +5,8 @@ import { FastifyInstance } from 'fastify'
 import os from 'os'
 import { getUserById } from './routes/users/userFn'
 import { getRootById } from './routes/base/rootFn'
+import lodash from 'lodash'
+const { isNil } = lodash
 
 let myFastify: FastifyInstance
 function generateRoutesLogs(fastify: any): void {
@@ -141,7 +143,7 @@ export async function validateRoot(
   if (process.env.NODE_ENV.trim() === 'dev') {
     return true
   }
-  if (id === null || id === undefined) throw new Error('管理员尚未登录')
+  if (isNil(id)) throw new Error('管理员尚未登录')
   const root = await getRootById(fastify, id)
   if (root === null) {
     throw new Error('管理员不存在')
