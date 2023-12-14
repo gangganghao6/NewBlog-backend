@@ -1,73 +1,107 @@
-import { FastifyRequest } from 'fastify'
+import { FastifyInstance, FastifyRequest } from 'fastify'
 import path from 'path'
-import fs from 'fs'
+import fs, { PathLike } from 'fs'
 import lodash from 'lodash'
 import { getVideoDurationInSeconds } from 'get-video-duration'
-import { createHash, getMediaType, streamToBuffer } from './utils'
+import util from 'util'
+import { pipeline } from 'stream'
+import { getMediaTypeFromFile, mergeFile } from './utils'
 import { getLocalIp, getProjectPath } from '../../utils'
-import { Files_chunk } from './file_chunk'
+import { FilesChunk, FilesMerge, FilesReturn, Md5Check } from './file_chunk'
+// import { Files_chunk } from './file_chunk'
 
+const pump = util.promisify(pipeline)
 const { isNil } = lodash
-const publicUrl =
-  process.env.NODE_ENV.trim() === 'dev' ? getLocalIp() : process.env.PUBLIC_URL
 
+const publicUrl =
+  (process.env.NODE_ENV.trim() === 'dev'
+    ? getLocalIp()
+    : process.env.PUBLIC_URL) +
+  ':' +
+  process.env.PORT
 const basePath = path.join(getProjectPath(), 'public')
-let temp: Files_chunk[] = []
+const tempInfo: any[] = []
+
+export async function md5Check(data: Md5Check): Promise<FilesReturn> {
+  const filesFolderPath = path.join(basePath, 'files')
+  const filesArr = fs.readdirSync(filesFolderPath)
+  const fileName = filesArr.find((file) => file.startsWith(data.md5))
+  if (!isNil(fileName)) {
+    const filePath = path.join(filesFolderPath, fileName)
+    const mediaType = await getMediaTypeFromFile(filePath)
+    const result: any = {
+      name: fileName,
+      url: `http://${publicUrl}:${process.env.PORT}/public/files/${fileName}`,
+      originalName: data.originalName,
+      mediaType,
+      fileType: data.fileType,
+      size: fs.statSync(filePath).size
+    }
+    if (mediaType === 'videos') {
+      result.duration = await getVideoDurationInSeconds(filePath) // 如果是视频，计算视频的时间长度
+    }
+    return result
+  } else {
+    throw new Error('文件不存在')
+  }
+}
 
 export async function uploadFileChunk(req: FastifyRequest): Promise<void> {
-  if (temp.length >= 100) {
-    temp = []
-    throw new Error('内存中的无效file_chunk数量过多，已全部释放，请重新上传')
-  }
-  let data: Files_chunk = {
-    uuid: '',
+  let data: FilesChunk = {
+    md5: '',
     totalSlicesNum: 0,
     currentSlicesNum: 0,
-    // fileType: '',
-    // media_class: 'files',
-    fileSlices: Buffer.of()
+    tempFilesPath: ''
   }
   const parts = await req.parts()
   for await (const part of parts) {
     if (!isNil(part.file)) {
-      data.fileSlices = await streamToBuffer(part.file) // 将文件流转为buffer
+      const tempFilePath = path.join(
+        basePath,
+        'temp',
+        `${data.md5}.${data.currentSlicesNum}`
+      )
+      data.tempFilesPath = tempFilePath
+      const writeStream = fs.createWriteStream(tempFilePath)
+      await pump(part.file, writeStream)
+      writeStream.close()
     } else {
       const info = JSON.parse((part as unknown as { value: string }).value)
       data = { ...data, ...info } // 将相应的信息添加到data中
     }
   }
-  temp.push(data)
+  tempInfo.push(data)
 }
 
-export async function mergeFileChunk(data: {
-  uuid: string
-  fileType: string
-  // mediaType: string
-}): Promise<any> {
-  const all: Buffer[] = temp
-    .filter((obj) => obj.uuid === data.uuid) // 将参数对应uuid的文件块过滤出来
-    .sort((a, b) => a.currentSlicesNum - b.currentSlicesNum) // 将文件块排好序
-    .map((obj) => obj.fileSlices as unknown as Buffer) // 提取出文件块的buffer数据
-  temp = temp.filter((obj) => obj.uuid !== data.uuid) // 删除该文件所有的块
-  const allBuffer = Buffer.concat(all) // 拼接buffer数据
-  const fileHash = await createHash(allBuffer) // 计算hash值
-  const mediaType = await getMediaType(allBuffer) // 计算文件类型
+export async function mergeFileChunk(
+  fastify: FastifyInstance,
+  data: FilesMerge
+): Promise<FilesReturn> {
+  const pathArr: PathLike[] = tempInfo
+    .filter((obj) => obj.md5 === data.md5)
+    .map((obj: any) => obj.tempFilesPath)
+    .sort(
+      (a: any, b: any) =>
+        parseInt(a.split('.').at(-1)!) - parseInt(b.split('.').at(-1)!)
+    )
 
-  const fileName = `${fileHash}.${data.fileType}` // 文件名
-
-  const filePath = path.join(basePath, mediaType, fileName) // 文件绝对路径
-  const fileUrl = `http://${publicUrl}:${process.env.PORT}/public/${mediaType}/${fileName}` // 文件网络路径
-  const fileExist = fs.existsSync(filePath)
-  if (!fileExist) {
-    fs.writeFileSync(filePath, allBuffer)
-  }
+  tempInfo.splice(
+    tempInfo.findIndex((obj) => obj.md5 === data.md5),
+    1
+  ) // 删除该文件所有的块
+  const fileName = `${data.md5}.${data.fileType}` // 文件名
+  const filePath = path.join(basePath, 'files', fileName)
+  const fileUrl = `http://${publicUrl}/public/files/${fileName}` // 文件网络路径
+  await mergeFile(fastify, pathArr, filePath) // 合并文件块
+  const mediaType = await getMediaTypeFromFile(filePath) // 计算文件类型
   const fileSize = fs.statSync(filePath).size
   let result: any = {
     name: fileName,
     url: fileUrl,
     size: fileSize,
     mediaType,
-    fileType: data.fileType
+    fileType: data.fileType,
+    originalName: data.originalName
   }
   if (mediaType === 'videos') {
     const duration = await getVideoDurationInSeconds(filePath) // 如果是视频，计算视频的时间长度

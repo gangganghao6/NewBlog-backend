@@ -92,16 +92,6 @@ function createLogStream(): Duplex {
       delete data.hostname
       data.time = dayjs(data.time).format('YYYY-MM-DD HH:mm:ss')
       const dataStr = JSON.stringify(data).replaceAll('\\n', '\n')
-      // if (!isNil(data.err)) {
-      //   const stack = decodeURIComponent(data.err.stack)
-      //   delete data.err
-      //   delete data.msg
-      //   console.log(JSON.stringify(data))
-      //   console.log("ERROR:" + stack)
-      //   errStream.write(JSON.stringify(data) + '\n')
-      //   logStream.write(JSON.stringify(data) + '\n')
-      //   errStream.write(`ERROR:${stack}\n`)
-      // } else
       if (data.level === 50) {
         console.log(dataStr)
         errStream.write(dataStr + '\n')
@@ -181,12 +171,15 @@ function initMkdir(): void {
   if (!fs.existsSync(`${path}\\public\\files`)) {
     fs.mkdirSync(`${path}\\public\\files`)
   }
-  if (!fs.existsSync(`${path}\\public\\images`)) {
-    fs.mkdirSync(`${path}\\public\\images`)
+  if (!fs.existsSync(`${path}\\public\\temp`)) {
+    fs.mkdirSync(`${path}\\public\\temp`)
   }
-  if (!fs.existsSync(`${path}\\public\\videos`)) {
-    fs.mkdirSync(`${path}\\public\\videos`)
-  }
+  // if (!fs.existsSync(`${path}\\public\\images`)) {
+  //   fs.mkdirSync(`${path}\\public\\images`)
+  // }
+  // if (!fs.existsSync(`${path}\\public\\videos`)) {
+  //   fs.mkdirSync(`${path}\\public\\videos`)
+  // }
 }
 
 function getLocalIp(): string {
