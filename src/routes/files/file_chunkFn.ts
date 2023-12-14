@@ -20,12 +20,12 @@ const publicUrl =
   ':' +
   process.env.PORT
 const basePath = path.join(getProjectPath(), 'public')
-const tempInfo: any[] = []
+let tempInfo: any[] = []
 
-export async function md5Check(data: Md5Check): Promise<FilesReturn> {
+export async function md5Check(md5: string, data: Md5Check): Promise<FilesReturn> {
   const filesFolderPath = path.join(basePath, 'files')
   const filesArr = fs.readdirSync(filesFolderPath)
-  const fileName = filesArr.find((file) => file.startsWith(data.md5))
+  const fileName = filesArr.find((file) => file.startsWith(md5))
   if (!isNil(fileName)) {
     const filePath = path.join(filesFolderPath, fileName)
     const mediaType = await getMediaTypeFromFile(filePath)
@@ -46,20 +46,21 @@ export async function md5Check(data: Md5Check): Promise<FilesReturn> {
   }
 }
 
-export async function uploadFileChunk(req: FastifyRequest): Promise<void> {
+export async function uploadFileChunk(md5: string, req: FastifyRequest): Promise<void> {
   let data: FilesChunk = {
-    md5: '',
+    md5,
     totalSlicesNum: 0,
     currentSlicesNum: 0,
     tempFilesPath: ''
   }
-  const parts = await req.parts()
-  for await (const part of parts) {
+  const parts = req.parts()
+
+  for await (const part of parts) {    
     if (!isNil(part.file)) {
       const tempFilePath = path.join(
         basePath,
         'temp',
-        `${data.md5}.${data.currentSlicesNum}`
+        `${md5}.${data.currentSlicesNum}.temp`
       )
       data.tempFilesPath = tempFilePath
       const writeStream = fs.createWriteStream(tempFilePath)
@@ -75,21 +76,19 @@ export async function uploadFileChunk(req: FastifyRequest): Promise<void> {
 
 export async function mergeFileChunk(
   fastify: FastifyInstance,
+  md5: string,
   data: FilesMerge
 ): Promise<FilesReturn> {
   const pathArr: PathLike[] = tempInfo
-    .filter((obj) => obj.md5 === data.md5)
+    .filter((obj) => obj.md5 === md5)
     .map((obj: any) => obj.tempFilesPath)
     .sort(
       (a: any, b: any) =>
-        parseInt(a.split('.').at(-1)!) - parseInt(b.split('.').at(-1)!)
+        parseInt(a.split('.').at(-2)!) - parseInt(b.split('.').at(-2)!)
     )
 
-  tempInfo.splice(
-    tempInfo.findIndex((obj) => obj.md5 === data.md5),
-    1
-  ) // 删除该文件所有的块
-  const fileName = `${data.md5}.${data.fileType}` // 文件名
+  tempInfo = tempInfo.filter((obj) => obj.md5 !== md5) // 删除该文件所有的块
+  const fileName = `${md5}.${data.fileType}` // 文件名
   const filePath = path.join(basePath, 'files', fileName)
   const fileUrl = `http://${publicUrl}/public/files/${fileName}` // 文件网络路径
   await mergeFile(fastify, pathArr, filePath) // 合并文件块

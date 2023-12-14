@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn, validateRoot } from '../../utils'
 import { mergeFileChunk, uploadFileChunk, md5Check } from './file_chunkFn'
 import { PathLike } from 'fs'
+import { deleteTempFilesByMd5 } from './utils'
 
 export default function (
   fastify: FastifyInstance,
@@ -9,32 +10,38 @@ export default function (
   done: any
 ): void {
   fastify.post('/md5Check', async (req: FastifyRequest, res: FastifyReply) => {
+    const { md5 } = req.query as { md5: string }
     try {
       await validateRoot(fastify, req.session.rootId)
       const data = req.body as Md5Check
-      const result = await md5Check(data)
+      const result = await md5Check(md5, data)
       return createRequestReturn(200, result, '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
     }
   })
   fastify.post('/fileChunk', async (req: FastifyRequest, res: FastifyReply) => {
+    const { md5 } = req.query as { md5: string }
     try {
       await validateRoot(fastify, req.session.rootId)
-      await uploadFileChunk(req)
+      await uploadFileChunk(md5, req)
       return createRequestReturn(200, null, '')
     } catch (e) {
+      deleteTempFilesByMd5(md5)
       return createRequestReturn(500, null, (e as Error).message)
     }
   })
   fastify.post('/fileMerge', async (req: FastifyRequest, res: FastifyReply) => {
+    const { md5 } = req.query as { md5: string }
     try {
       await validateRoot(fastify, req.session.rootId)
       const data = req.body as FilesMerge
-      const result = await mergeFileChunk(fastify, data)
+      const result = await mergeFileChunk(fastify, md5, data)
       return createRequestReturn(200, result, '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
+    } finally {
+      deleteTempFilesByMd5(md5)
     }
   })
   done()
