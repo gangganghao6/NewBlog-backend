@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn, validateRoot } from '../../utils'
 import { mergeFileChunk, uploadFileChunk, md5Check } from './file_chunkFn'
-import { PathLike } from 'fs'
 import { deleteTempFilesByMd5 } from './utils'
+import { FilesMergeRequest, FilesMergeReturn, Md5CheckRequest, Md5CheckReturn } from './file_chunk.d'
 
 export default function (
   fastify: FastifyInstance,
@@ -13,8 +13,8 @@ export default function (
     const { md5 } = req.query as { md5: string }
     try {
       await validateRoot(fastify, req.session.rootId)
-      const data = req.body as Md5Check
-      const result = await md5Check(md5, data)
+      const data = req.body as Md5CheckRequest
+      const result: Md5CheckReturn = await md5Check(md5, data)
       return createRequestReturn(200, result, '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
@@ -27,7 +27,7 @@ export default function (
       await uploadFileChunk(md5, req)
       return createRequestReturn(200, null, '')
     } catch (e) {
-      deleteTempFilesByMd5(md5)
+      deleteTempFilesByMd5(fastify, md5)
       return createRequestReturn(500, null, (e as Error).message)
     }
   })
@@ -35,41 +35,14 @@ export default function (
     const { md5 } = req.query as { md5: string }
     try {
       await validateRoot(fastify, req.session.rootId)
-      const data = req.body as FilesMerge
-      const result = await mergeFileChunk(fastify, md5, data)
+      const data = req.body as FilesMergeRequest
+      const result: FilesMergeReturn = await mergeFileChunk(fastify, md5, data)
       return createRequestReturn(200, result, '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
     } finally {
-      deleteTempFilesByMd5(md5)
+      deleteTempFilesByMd5(fastify, md5)
     }
   })
   done()
-}
-export interface Md5Check {
-  md5: string
-  originalName: string
-  fileType: string
-}
-export interface FilesChunk {
-  md5: string
-  totalSlicesNum: number
-  currentSlicesNum: number
-  tempFilesPath: PathLike
-}
-
-export interface FilesMerge {
-  md5: string
-  fileType: string // 'txt'/'jpg'...
-  originalName: string
-}
-
-export interface FilesReturn {
-  name: string
-  url: string
-  size: number
-  originalName: string
-  mediaClass: 'images' | 'videos' | 'files'
-  fileType: string // 'txt'/'jpg'...
-  duration?: number
 }

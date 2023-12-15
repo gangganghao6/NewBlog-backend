@@ -1,31 +1,10 @@
-import crypto from 'crypto'
-import {
-  fileTypeFromFile,
-} from 'file-type'
 import fs, { WriteStream, type PathLike } from 'fs'
 import { FastifyInstance } from 'fastify'
 import path from 'path'
 import { getProjectPath } from 'src/utils'
 const basePath = path.join(getProjectPath(), 'public')
 
-export async function createHash(buffer: crypto.BinaryLike): Promise<string> {
-  const fsHash = crypto.createHash('md5')
-  fsHash.update(buffer)
-  return fsHash.digest('hex')
-}
-
-export async function getMediaTypeFromFile(url: string): Promise<string> {
-  const mediaType = await fileTypeFromFile(url)
-  if (mediaType?.mime?.startsWith('image') === true) {
-    return 'images'
-  } else if (mediaType?.mime?.startsWith('video') === true) {
-    return 'videos'
-  } else {
-    return 'files'
-  }
-}
 export async function mergeFile(
-  fastify: FastifyInstance,
   arr: PathLike[],
   target: string
 ): Promise<any> {
@@ -47,12 +26,16 @@ async function mergeFileInner(path: PathLike, writeStream: WriteStream): Promise
   })
 }
 
-export function deleteTempFilesByMd5(md5: string): void {
+export function deleteTempFilesByMd5(fastify: FastifyInstance, md5: string): void {
   const tempFolderPath = path.join(basePath, 'temp')
   const files = fs.readdirSync(tempFolderPath)
   files.forEach((file) => {
     if (file.startsWith(md5)) {
-      fs.rmSync(`${tempFolderPath}\\${file}`)
+      fs.rm(path.join(tempFolderPath, file), (err) => {
+        if (err) {
+          fastify.log.error(err)
+        }
+      })
     }
   })
 }
