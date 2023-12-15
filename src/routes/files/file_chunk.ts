@@ -2,7 +2,12 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn, validateRoot } from '../../utils'
 import { mergeFileChunk, uploadFileChunk, md5Check } from './file_chunkFn'
 import { deleteTempFilesByMd5 } from './utils'
-import { FilesMergeRequest, FilesMergeReturn, Md5CheckRequest, Md5CheckReturn } from './file_chunk.d'
+import {
+  FilesMergeRequest,
+  FilesMergeReturn,
+  Md5CheckRequest,
+  Md5CheckReturn
+} from './file_chunk.d'
 
 export default function (
   fastify: FastifyInstance,

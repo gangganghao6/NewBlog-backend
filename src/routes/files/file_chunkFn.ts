@@ -7,7 +7,13 @@ import util from 'util'
 import { pipeline } from 'stream'
 import { mergeFile } from './utils'
 import { getLocalIp, getProjectPath } from '../../utils'
-import { FilesChunkRequest, FilesMergeRequest, FilesMergeReturn, Md5CheckRequest, Md5CheckReturn } from './file_chunk.d'
+import {
+  FilesChunkRequest,
+  FilesMergeRequest,
+  FilesMergeReturn,
+  Md5CheckRequest,
+  Md5CheckReturn
+} from './file_chunk.d'
 
 const pump = util.promisify(pipeline)
 const { isNil } = lodash
@@ -21,9 +27,14 @@ const publicUrl =
 const basePath = path.join(getProjectPath(), 'public')
 let tempInfo: any[] = []
 
-export async function md5Check(md5: string, data: Md5CheckRequest): Promise<Md5CheckReturn> {
+export async function md5Check(
+  md5: string,
+  data: Md5CheckRequest
+): Promise<Md5CheckReturn> {
   const filesFolderPath = path.join(basePath, 'files')
-  const fileName = fs.readdirSync(filesFolderPath).find((file) => file.startsWith(md5))
+  const fileName = fs
+    .readdirSync(filesFolderPath)
+    .find((file) => file.startsWith(md5))
   if (!isNil(fileName)) {
     const mediaType = data.fileType.split('/')[0]
     const result: Md5CheckReturn = {
@@ -36,7 +47,9 @@ export async function md5Check(md5: string, data: Md5CheckRequest): Promise<Md5C
       size: data.size
     }
     if (mediaType === 'video') {
-      result.duration = await getVideoDurationInSeconds(path.join(filesFolderPath, fileName)) // 如果是视频，计算视频的时间长度
+      result.duration = await getVideoDurationInSeconds(
+        path.join(filesFolderPath, fileName)
+      ) // 如果是视频，计算视频的时间长度
     }
     return result
   } else {
@@ -44,8 +57,11 @@ export async function md5Check(md5: string, data: Md5CheckRequest): Promise<Md5C
   }
 }
 
-export async function uploadFileChunk(md5: string, req: FastifyRequest): Promise<void> {
-  let data: FilesChunkRequest & { tempFilesPath: PathLike, md5: string } = {
+export async function uploadFileChunk(
+  md5: string,
+  req: FastifyRequest
+): Promise<void> {
+  let data: FilesChunkRequest & { tempFilesPath: PathLike; md5: string } = {
     md5,
     totalSlicesNum: 0,
     currentSlicesNum: 0,
