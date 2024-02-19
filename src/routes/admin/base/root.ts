@@ -2,7 +2,11 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import jwt from 'jsonwebtoken'
 import { rootLogin, rootModify, rootRegist, getRootById } from './rootFn'
 import { Root } from '../../../types/model'
-import { createRequestReturn, promisifyJwtSign, validateRoot } from '../../../utils'
+import {
+  createRequestReturn,
+  promisifyJwtSign,
+  validateRoot
+} from '../../../utils'
 // const myJwtSign = promisifyJwtSign(jwt)
 export default function (
   fastify: FastifyInstance,
@@ -22,7 +26,7 @@ export default function (
       req.session.adminId = result.id
       // const token = await myJwtSign({ id: result.id, account: result.account, email: result.email }, process.env.JWT_KEY)
       // res.setCookie('token', token)
-      return createRequestReturn(200, result as RootLoginReturn, '')
+      return createRequestReturn(200, result, '')
     }
   )
   fastify.post(
@@ -55,9 +59,9 @@ export default function (
   )
   fastify.post('/auth', {}, async (req: FastifyRequest, res: FastifyReply) => {
     const adminId = req.session.adminId
-    console.log(adminId);
+    console.log(adminId)
     const result = await getRootById(fastify, adminId)
-    
+
     if (result === null) {
       throw new Error('未登录或登录失效')
     }
@@ -74,20 +78,20 @@ export interface RootLogin {
 export interface RootLoginReturn {
   id: string
   account: string
-  email: string,
+  email: string
   name: string
 }
 
 export interface RootRegist {
   account: string
   password: string
-  email: string,
+  email: string
   name: string
 }
 
 export interface RootModify {
   id: string
   newPassword: string
-  oldPassword: string,
+  oldPassword: string
   name: string
 }

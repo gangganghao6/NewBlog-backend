@@ -29,7 +29,7 @@ export async function rootLogin(
   //     password
   //   },
   // })
-  return await fastify.prisma.root.findFirst({
+  return (await fastify.prisma.root.findFirst({
     where: RootWhereInput,
     select: {
       id: true,
@@ -37,7 +37,7 @@ export async function rootLogin(
       email: true,
       name: true
     }
-  }) as RootLoginReturn
+  })) as RootLoginReturn
 }
 
 export async function rootRegist(
@@ -120,6 +120,6 @@ export async function getRootById(
   id: string
 ): Promise<any> {
   return await fastify.prisma.root.findUnique({
-    where: { id: id === undefined ? '' : id },
+    where: { id: id === undefined ? '' : id }
   })
 }

@@ -13,21 +13,28 @@ const authLists = JSON.parse(
     'utf-8'
   )
 )
-const ADMIN_NO_AUTH_ROUTES = ['/base/root/login', '/base/root/regist', '/base/root/auth'].map(e => `/admin${e}`)
-const FRONT_NO_AUTH_ROUTES = ['/users/login', '/users/regist'].map(e => `/front${e}`)
+const ADMIN_NO_AUTH_ROUTES = [
+  '/base/root/login',
+  '/base/root/regist',
+  '/base/root/auth'
+].map((e) => `/admin${e}`)
+const FRONT_NO_AUTH_ROUTES = ['/users/login', '/users/regist'].map(
+  (e) => `/front${e}`
+)
 async function registeInterceptor(fastify: FastifyInstance): Promise<void> {
   await fastify.addHook(
     'onRequest',
     async (req: FastifyRequest, res: FastifyReply) => {
-      let url = req.url.replaceAll('/api', '')
+      const url = req.url.replaceAll('/api', '')
       try {
         if (url.startsWith('/admin')) {
-          !ADMIN_NO_AUTH_ROUTES.includes(url) && await validateRoot(fastify, req.session.adminId)
+          !ADMIN_NO_AUTH_ROUTES.includes(url) &&
+            (await validateRoot(fastify, req.session.adminId))
         } else if (url.startsWith('/front')) {
-          !FRONT_NO_AUTH_ROUTES.includes(url) && await validateUser(fastify, req.session.userId)
+          !FRONT_NO_AUTH_ROUTES.includes(url) &&
+            (await validateUser(fastify, req.session.userId))
         }
-      }
-      catch (e: any) {
+      } catch (e: any) {
         res.statusCode = 401
         res.send({ code: 401, data: null, message: '未登录' })
       }

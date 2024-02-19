@@ -12,7 +12,8 @@ let myFastify: FastifyInstance
 function generateRoutesLogs(fastify: any): void {
   myFastify = fastify
   myFastify.log.info(
-    `Progress running in ${getProjectPath()} folder, mode:${process.env.NODE_ENV
+    `Progress running in ${getProjectPath()} folder, mode:${
+      process.env.NODE_ENV
     }`
   )
   const obj: any = []
@@ -101,7 +102,7 @@ function createLogStream(): Duplex {
       callback()
     },
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    read(): void { }
+    read(): void {}
   })
   return inoutStream
 }
@@ -209,8 +210,8 @@ function getProjectPath(): string {
   return process.cwd()
 }
 function promisifyJwtSign(jwt: any): any {
-  return (data: any, secret: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
+  return async (data: any, secret: string): Promise<string> => {
+    return await new Promise((resolve, reject) => {
       jwt.sign(data, secret, (err: any, token: string) => {
         if (err) {
           reject(err)

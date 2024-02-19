@@ -51,7 +51,7 @@ const FasitfyConfig = {
     //       }
     //     }
     //   }
-  },
+  }
   // http2: true,
   // https: {
   //   allowHTTP1: true,
@@ -93,7 +93,7 @@ await fastify.register(fastifySession, {
   cookieName: 'sessionId',
   secret: 'a secret with minimum length of 32 characters',
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 7,//token有效期为7天
+    maxAge: 1000 * 60 * 60 * 24 * 7, // token有效期为7天
     sameSite: 'lax',
     secure: false
   }
