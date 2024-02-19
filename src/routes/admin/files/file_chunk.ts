@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { createRequestReturn, validateRoot } from '../../utils'
+import { createRequestReturn, validateRoot } from '../../../utils'
 import { mergeFileChunk, uploadFileChunk, md5Check } from './file_chunkFn'
 import { deleteTempFilesByMd5 } from './utils'
 import {

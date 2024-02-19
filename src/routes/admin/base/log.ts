@@ -4,8 +4,8 @@ import {
   getUserVisitAnalysis,
   postUserVisitLog
 } from './logFn'
-import { createRequestReturn, validateRoot } from '../../utils'
-import { UserVisit } from '../../types/model'
+import { createRequestReturn, validateRoot } from '../../../utils'
+import { UserVisit } from '../../../types/model'
 
 export default function (
   fastify: FastifyInstance,

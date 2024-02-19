@@ -393,3 +393,10 @@ export async function sendMail(
   })
   fastify.log.info(JSON.stringify(info))
 }
+export async function getBlogType(fastify: FastifyInstance): Promise<any> {
+  return await fastify.prisma.blog.findMany({
+    select: {
+      type: true
+    }
+  })
+}

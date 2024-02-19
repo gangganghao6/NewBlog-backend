@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { deleteComment, postComment } from './commentsFn'
-import { createRequestReturn, validateRoot, validateUser } from '../../utils'
+import { createRequestReturn, validateRoot, validateUser } from '../../../utils'
 
 export default function (
   fastify: FastifyInstance,

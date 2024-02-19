@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { createRequestReturn, validateRoot } from '../../utils'
+import { createRequestReturn, validateRoot } from '../../../utils'
 import { deleteExperience, postExperience, putExperience } from './experienceFn'
-import { Experience, Image } from '../../types/model'
+import { Experience, Image } from '../../../types/model'
 
 export default function (
   fastify: FastifyInstance,

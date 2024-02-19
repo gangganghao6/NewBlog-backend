@@ -5,9 +5,9 @@ import {
   getChatAll,
   sendMessage
 } from './chatFn'
-import { createRequestReturn, validateRoot, validateUser } from '../../utils'
+import { createRequestReturn, validateRoot, validateUser } from '../../../utils'
 import IP2Region from 'ip2region'
-import { Chat, File, Image, Video } from '../../types/model'
+import { Chat, File, Image, Video } from '../../../types/model'
 
 // eslint-disable-next-line new-cap,@typescript-eslint/ban-ts-comment
 // @ts-expect-error

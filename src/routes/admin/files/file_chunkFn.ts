@@ -6,7 +6,7 @@ import { getVideoDurationInSeconds } from 'get-video-duration'
 import util from 'util'
 import { pipeline } from 'stream'
 import { mergeFile } from './utils'
-import { getLocalIp, getProjectPath } from '../../utils'
+import { getLocalIp, getProjectPath } from '../../../utils'
 import {
   FilesChunkRequest,
   FilesMergeRequest,

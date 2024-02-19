@@ -10,6 +10,7 @@ export declare module 'fastify' {
   }
 
   interface Session {
+    [x: string]: any
     userId?: string
     rootId?: string
   }
@@ -32,6 +33,7 @@ declare global {
       EMAIL_SMTP_HOST: string
       EMAIL_SMTP_PORT: string
       NODE_ENV: string
+      JWT_SECRET: string
     }
   }
 }

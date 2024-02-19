@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { getGithubAll, getGithubById, updateGithub } from './githubFn'
-import { createRequestReturn } from '../../utils'
-import { Github } from '../../types/model'
+import { createRequestReturn } from '../../../utils'
+import { Github } from '../../../types/model'
 
 export default function (
   fastify: FastifyInstance,

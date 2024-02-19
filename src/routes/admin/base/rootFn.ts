@@ -1,12 +1,12 @@
 import { Prisma } from '@prisma/client'
 import { FastifyInstance } from 'fastify'
-import { RootLogin, RootModify, RootRegist } from './root'
+import { RootLogin, RootLoginReturn, RootModify, RootRegist } from './root'
 import CryptoJS from 'crypto-js'
 
 export async function rootLogin(
   fastify: FastifyInstance,
   data: RootLogin
-): Promise<any> {
+): Promise<RootLoginReturn> {
   const password = CryptoJS.AES.decrypt(
     data.password,
     process.env.CRYPTO_KEY
@@ -23,14 +23,21 @@ export async function rootLogin(
       }
     ]
   })
+  // const accountResult = await fastify.prisma.root.findFirst({
+  //   where: {
+  //     account: data.account === undefined ? '' : data.account,
+  //     password
+  //   },
+  // })
   return await fastify.prisma.root.findFirst({
     where: RootWhereInput,
     select: {
       id: true,
       account: true,
-      email: true
+      email: true,
+      name: true
     }
-  })
+  }) as RootLoginReturn
 }
 
 export async function rootRegist(
@@ -44,18 +51,20 @@ export async function rootRegist(
   const RootWhereInput = Prisma.validator<Prisma.RootCreateInput>()({
     email: data.email,
     account: data.account,
-    password
+    password,
+    name: data.name
   })
   const exist = await fastify.prisma.root.findFirst({
     where: {
       OR: [
         { email: data.email === undefined ? '' : data.email },
-        { account: data.account === undefined ? '' : data.account }
+        { account: data.account === undefined ? '' : data.account },
+        { name: data.name === undefined ? '' : data.name }
       ]
     }
   })
   if (exist !== null) {
-    throw new Error('账号或邮箱已存在')
+    throw new Error('账号、邮箱或名字已存在')
   }
   const result = await fastify.prisma.root.create({
     data: RootWhereInput
@@ -65,7 +74,8 @@ export async function rootRegist(
     select: {
       id: true,
       account: true,
-      email: true
+      email: true,
+      name: true
     }
   })
 }
@@ -110,6 +120,6 @@ export async function getRootById(
   id: string
 ): Promise<any> {
   return await fastify.prisma.root.findUnique({
-    where: { id }
+    where: { id: id === undefined ? '' : id },
   })
 }

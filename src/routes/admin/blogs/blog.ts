@@ -1,7 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { createRequestReturn, validateRoot } from '../../utils'
-import { deleteBlog, getBlog, getBlogList, postBlog, putBlog } from './blogFn'
-import { Blog, Image } from '../../types/model'
+import { createRequestReturn, validateRoot } from '../../../utils'
+import { deleteBlog, getBlog, getBlogList, getBlogType, postBlog, putBlog } from './blogFn'
+import { Blog, Image } from '../../../types/model'
+import dayjs from 'dayjs'
 
 export default function (
   fastify: FastifyInstance,
@@ -28,22 +29,25 @@ export default function (
     }
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
+    console.log(req.query);
+    
+    // try {
       const query = req.query as {
         size: string
         page: string
         type?: string
+        'time[]'?: [string, string]
       }
       const data = {
         ...query,
         size: parseInt(query.size, 10),
-        page: parseInt(query.page, 10)
+        page: parseInt(query.page, 10),
       }
       const result = await getBlogList(fastify, data)
       return createRequestReturn(200, result as Blog[], '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    // } catch (e) {
+    //   return createRequestReturn(500, null, (e as Error).message)
+    // }
   })
   fastify.delete(
     '/blog/:id',
@@ -65,6 +69,14 @@ export default function (
       const data = req.body as CreateBlog
       const result = await putBlog(fastify, data, id)
       return createRequestReturn(200, result as Blog, '')
+    } catch (e) {
+      return createRequestReturn(500, null, (e as Error).message)
+    }
+  })
+  fastify.get('/blogType', async (req: FastifyRequest, res: FastifyReply) => {
+    try {
+      const result = await getBlogType(fastify)
+      return createRequestReturn(200, result, '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
     }

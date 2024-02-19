@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import dotenv from 'dotenv'
 import path from 'path'
 // import dayjs from 'dayjs'
+import fs from 'fs'
 import { PrismaClient } from '@prisma/client'
 import fastifyCors from '@fastify/cors'
 import fastifyCookie from '@fastify/cookie'
@@ -50,7 +51,7 @@ const FasitfyConfig = {
     //       }
     //     }
     //   }
-  }
+  },
   // http2: true,
   // https: {
   //   allowHTTP1: true,
@@ -92,7 +93,7 @@ await fastify.register(fastifySession, {
   cookieName: 'sessionId',
   secret: 'a secret with minimum length of 32 characters',
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 30,
+    maxAge: 1000 * 60 * 60 * 24 * 7,//token有效期为7天
     sameSite: 'lax',
     secure: false
   }
@@ -121,6 +122,13 @@ await registeInterceptor(fastify)
 
 await registStatic(fastify)
 await registRoutes(fastify)
+
+// fastify.setErrorHandler(function (error, request, reply) {
+//   // Log error
+//   this.log.error(111,error)
+//   // Send error response
+//   reply.status(200).send({ ok: false })
+// })
 
 const start = async (): Promise<void> => {
   try {

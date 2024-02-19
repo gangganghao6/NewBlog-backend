@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { createRequestReturn, validateRoot } from '../../utils'
+import { createRequestReturn, validateRoot } from '../../../utils'
 import {
   deleteShareFile,
   getShareFileList,
@@ -7,7 +7,7 @@ import {
   putShareFile,
   uploadShareFile
 } from './share_fileFn'
-import { Image, ShareFile, Video } from '../../types/model'
+import { Image, ShareFile, Video } from '../../../types/model'
 
 export default function (
   fastify: FastifyInstance,

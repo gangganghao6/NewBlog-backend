@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { createRequestReturn, validateRoot } from '../../utils'
+import { createRequestReturn, validateRoot } from '../../../utils'
 import {
   deleteShuoshuo,
   getShuoshuo,
@@ -7,7 +7,7 @@ import {
   postShuoshuo,
   putShuoshuo
 } from './shuoshuoFn'
-import { Image, Shuoshuo, Video } from '../../types/model'
+import { Image, Shuoshuo, Video } from '../../../types/model'
 
 export default function (
   fastify: FastifyInstance,

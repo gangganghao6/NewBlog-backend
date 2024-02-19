@@ -3,8 +3,8 @@ import dayjs from 'dayjs'
 import { Duplex } from 'stream'
 import { FastifyInstance } from 'fastify'
 import os from 'os'
-import { getUserById } from './routes/users/userFn'
-import { getRootById } from './routes/base/rootFn'
+import { getUserById } from './routes/admin/users/userFn'
+import { getRootById } from './routes/admin/base/rootFn'
 import lodash from 'lodash'
 const { isNil } = lodash
 
@@ -12,8 +12,7 @@ let myFastify: FastifyInstance
 function generateRoutesLogs(fastify: any): void {
   myFastify = fastify
   myFastify.log.info(
-    `Progress running in ${getProjectPath()} folder, mode:${
-      process.env.NODE_ENV
+    `Progress running in ${getProjectPath()} folder, mode:${process.env.NODE_ENV
     }`
   )
   const obj: any = []
@@ -102,7 +101,7 @@ function createLogStream(): Duplex {
       callback()
     },
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    read(): void {}
+    read(): void { }
   })
   return inoutStream
 }
@@ -138,7 +137,7 @@ export async function validateRoot(
   if (root === null) {
     throw new Error('管理员不存在')
   } else {
-    fastify.log.info({ root_id: id })
+    fastify.log.info({ admin_id: id })
     return true
   }
 }
@@ -209,12 +208,25 @@ function getLocalIp(): string {
 function getProjectPath(): string {
   return process.cwd()
 }
-
+function promisifyJwtSign(jwt: any): any {
+  return (data: any, secret: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      jwt.sign(data, secret, (err: any, token: string) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(token)
+        }
+      })
+    })
+  }
+}
 export {
   generateRoutesLogs,
   createRequestReturn,
   createLogStream,
   initMkdir,
   getLocalIp,
-  getProjectPath
+  getProjectPath,
+  promisifyJwtSign
 }

@@ -29,6 +29,8 @@ model Image {
   shuoshuo     Shuoshuo?   @relation(fields: [shuoshuoId], references: [id])
   shareFileId  String?
   shareFile    ShareFile?  @relation(fields: [shareFileId], references: [id])
+  rootId       String?     @unique
+  root         Root?       @relation(fields: [rootId], references: [id])
 }
 
 model Video {
@@ -48,10 +50,14 @@ model Video {
 }
 
 model Root {
-  id       String @id @default(uuid())
-  account  String
-  password String
-  email    String
+  id               String   @id @default(uuid())
+  account          String
+  password         String
+  email            String
+  name             String
+  createdTime      DateTime @default(now())
+  lastModifiedTime DateTime @default(now())
+  image            Image?
 }
 
 model User {

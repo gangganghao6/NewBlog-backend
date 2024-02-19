@@ -11,8 +11,8 @@ import {
   getUserDetail,
   putUser
 } from './userFn'
-import { createRequestReturn, validateRoot, validateUser } from '../../utils'
-import { Pay, User } from '../../types/model'
+import { createRequestReturn, validateRoot, validateUser } from '../../../utils'
+import { Pay, User } from '../../../types/model'
 
 export default function (
   fastify: FastifyInstance,
