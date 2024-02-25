@@ -1,4 +1,6 @@
+import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
+import { removeObjNullUndefined } from 'src/utils'
 
 export async function uploadShareFile(
   fastify: FastifyInstance,
@@ -7,259 +9,151 @@ export async function uploadShareFile(
   return await fastify.prisma.shareFile.create({
     data: {
       ...data,
-      files: {
-        create: data.files
-      },
-      images: {
-        create: data.images
-      },
-      videos: {
-        create: data.videos.map((item: any) => {
-          return {
-            ...item,
+      ...(data.file && {
+        file: {
+          create: data.file
+        }
+      }),
+      ...(data.image && {
+        image: {
+          create: data.image
+        }
+      }),
+      ...(data.video && {
+        video: {
+          create: {
+            ...data.video,
             post: {
-              create: item.post
+              create: data.video.post
             }
           }
-        })
-      }
+        }
+      })
     },
     include: {
-      files: true,
-      images: true,
-      videos: {
+      file: true,
+      image: true,
+      video: {
         include: {
           post: true
         }
       }
     }
   })
-  // const mission = []
-  // const shareFileId = v4()
-  // switch (data.media_class) {
-  //   case 'images':
-  //     mission.push(
-  //       fastify.prisma.image.create({
-  //         data: {
-  //           sharefile_id: shareFileId,
-  //           name: data.image.name,
-  //           url: data.image.url,
-  //           size: data.image.size
-  //         }
-  //       })
-  //     )
-  //     break
-  //   case 'videos':
-  //     {
-  //       const videoId = v4()
-  //       mission.push(
-  //         fastify.prisma.image.create({
-  //           data: {
-  //             video_id: videoId,
-  //             name: data.video.post.name,
-  //             url: data.video.post.url,
-  //             size: data.video.post.size
-  //           }
-  //         })
-  //       )
-  //       mission.push(
-  //         fastify.prisma.video.create({
-  //           data: {
-  //             id: videoId,
-  //             sharefile_id: shareFileId,
-  //             name: data.video.name,
-  //             url: data.video.url,
-  //             size: data.video.size,
-  //             duration: data.video.duration
-  //           }
-  //         })
-  //       )
-  //     }
-  //     break
-  //   case 'files':
-  //     mission.push(
-  //       fastify.prisma.file.create({
-  //         data: {
-  //           name: data.file.name,
-  //           size: data.file.size,
-  //           url: data.file.url,
-  //           sharefile_id: shareFileId
-  //         }
-  //       })
-  //     )
-  //     break
-  // }
-  // mission.push(
-  //   fastify.prisma.shareFile.create({
-  //     data: {
-  //       id: shareFileId,
-  //       media_class: data.media_class,
-  //       type: data.type
-  //     }
-  //   })
-  // )
-  // await fastify.prisma.$transaction(mission)
-  // return await getShareFile(fastify, shareFileId)
 }
 
 export async function deleteShareFile(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
-  const mission = []
-  const target = await fastify.prisma.shareFile.findUnique({
+  return await fastify.prisma.shareFile.delete({
     where: { id }
   })
-  mission.push(
-    fastify.prisma.shareFile.delete({
-      where: { id }
-    })
-  )
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  switch (target.media_class) {
-    case 'images':
-      mission.push(
-        fastify.prisma.image.deleteMany({
-          where: { sharefile_id: id }
-        })
-      )
-      break
-    case 'videos':
-      // eslint-disable-next-line no-case-declarations
-      const temp = await fastify.prisma.video.findFirst({
-        where: { sharefile_id: id }
-      })
-
-      mission.push(
-        fastify.prisma.image.deleteMany({
-          where: {
-            video_id: temp?.id
-          }
-        })
-      )
-      mission.push(
-        fastify.prisma.video.deleteMany({
-          where: { sharefile_id: id }
-        })
-      )
-      break
-    case 'files':
-      mission.push(
-        fastify.prisma.file.deleteMany({
-          where: { sharefile_id: id }
-        })
-      )
-      break
-  }
-  return await fastify.prisma.$transaction(mission)
 }
 
 export async function putShareFile(
   fastify: FastifyInstance,
-  data: any
+  { id, data }: any
 ): Promise<any> {
-  return await fastify.prisma.shareFile.update({
-    where: { id: data.id },
+  delete data?.file?.shareFileId
+  delete data?.image?.shareFileId
+  delete data?.video?.shareFileId
+  delete data?.file?.id
+  delete data?.image?.id
+  delete data?.video?.id
+  delete data?.video?.post?.id
+  delete data?.video?.post?.videoId
+  const targetShareFile = await getShareFile(fastify, id)
+
+  const result = await fastify.prisma.shareFile.update({
+    where: { id },
     data: {
-      type: data.type
+      name: data.name,
+      file: {
+        ...(targetShareFile?.file && { delete: true }),
+        ...(data.file && { create: removeObjNullUndefined(data.file) })
+      }
+      ,
+      image: {
+        ...(targetShareFile?.image && { delete: true }),
+        ...(data.image && { create: removeObjNullUndefined(data.image) })
+      }
+      ,
+      video: {
+        ...(targetShareFile?.video && { delete: true }),
+        ...(data.video && {
+          create: {
+            ...removeObjNullUndefined(data.video),
+            post: {
+              create: removeObjNullUndefined(data.video.post)
+            }
+          }
+        })
+      }
     }
   })
+  return result
 }
 
 export async function getShareFileList(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  let tempResult, tempCount
-  if (!('type' in data) || data.type === null) {
-    tempCount = await fastify.prisma.shareFile.count()
-    tempResult = await fastify.prisma.shareFile.findMany({
-      take: data.size,
-      skip: (data.page - 1) * data.size,
-      orderBy: {
-        created_time: data.sort
+  const countObj: any = {
+    where: {
+      id: {
+        contains: data.id
       },
-      select: {
-        id: true
+      name: {
+        contains: data.name
+      },
+      createdTime: data.createdTimeFrom && {
+        gte: dayjs(data.createdTimeFrom).add(8, 'hour').toDate(),
+        lte: dayjs(data.createdTimeTo).add(8, 'hour').toDate(),
+      },
+      lastModifiedTime: data.lastModifiedTimeFrom && {
+        gte: dayjs(data.lastModifiedTimeFrom).add(8, 'hour').toDate(),
+        lte: dayjs(data.lastModifiedTimeTo).add(8, 'hour').toDate(),
       }
-    })
-  } else {
-    tempCount = await fastify.prisma.shareFile.count({
-      where: {
-        type: {
-          equals: data.type
+    },
+  }
+  const searchObj: any = {
+    ...countObj,
+    take: data.size,
+    skip: (data.page - 1) * data.size,
+    orderBy: {
+      lastModifiedTime: data.sort
+    },
+    include: {
+      file: true,
+      image: true,
+      video: {
+        include: {
+          post: true
         }
       }
-    })
-    tempResult = await fastify.prisma.shareFile.findMany({
-      where: {
-        type: {
-          equals: data.type
-        }
-      },
-      take: data.size,
-      skip: (data.page - 1) * data.size,
-      orderBy: {
-        created_time: data.sort
-      },
-      select: {
-        id: true
-      }
-    })
+    }
   }
-  const finalResult: any[] = []
-  for (const temp of tempResult) {
-    finalResult.push(await getShareFile(fastify, temp.id))
-  }
-  return { result: finalResult, count: tempCount }
+  const result = await fastify.prisma.shareFile.findMany(searchObj)
+  const count = await fastify.prisma.shareFile.count(countObj)
+  return { result, count }
 }
-
 export async function getShareFile(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const data = (await fastify.prisma.shareFile.findUnique({
-    where: { id }
-  }))!
-  let result
-  switch (data.media_class) {
-    case 'images':
-      result = await fastify.prisma.image.findFirst({
-        where: {
-          sharefile_id: id
-        }
-      })
-      break
-    case 'videos':
-      {
-        const video = await fastify.prisma.video.findFirst({
-          where: {
-            sharefile_id: id
-          }
-        })
-        const post = await fastify.prisma.image.findFirst({
-          where: { video_id: video?.id }
-        })
-        result = {
-          ...video,
-          post
+  return await fastify.prisma.shareFile.findUnique({
+    where: { id },
+    include: {
+      file: true,
+      image: true,
+      video: {
+        include: {
+          post: true
         }
       }
-      break
-    case 'files':
-      result = await fastify.prisma.file.findFirst({
-        where: {
-          sharefile_id: id
-        }
-      })
-      break
-  }
-  return {
-    share_file: data,
-    file: result
-  }
+    }
+  })
 }
 
 export async function increaseShareFileDownload(

@@ -14,6 +14,7 @@ export interface Md5CheckReturn {
   url: string
   mediaType: string
   duration?: number
+  compressUrl?: string
 }
 
 export interface FilesChunkRequest {
@@ -40,4 +41,5 @@ export interface FilesMergeReturn {
   size: number
   url: string
   duration?: number
+  compressUrl?: string
 }

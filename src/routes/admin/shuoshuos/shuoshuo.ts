@@ -15,63 +15,44 @@ export default function (
   done: any
 ): void {
   fastify.post('/shuoshuo', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      await validateRoot(fastify, req.session.rootId)
-      const data = req.body as CreateShuoshuo
-      const result = await postShuoshuo(fastify, data)
-      return createRequestReturn(200, result as Shuoshuo, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    await validateRoot(fastify, req.session.rootId)
+    const data = req.body as CreateShuoshuo
+    const result = await postShuoshuo(fastify, data)
+    return createRequestReturn(200, result as Shuoshuo, '')
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      const data: any = req.query
-      data.size = parseInt(data.size, 10)
-      data.page = parseInt(data.page, 10)
-      const result = await getShuoshuoList(fastify, data)
-      return createRequestReturn(200, result as Shuoshuo[], '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    const data: any = req.query
+    data.size = parseInt(data.size, 10)
+    data.page = parseInt(data.page, 10)
+    const result = await getShuoshuoList(fastify, data)
+    return createRequestReturn(200, result as Shuoshuo[], '')
   })
   fastify.get(
     '/shuoshuo/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        const id = (req.params as { id: string }).id
-        const result = await getShuoshuo(fastify, id, true)
-        return createRequestReturn(200, result as Shuoshuo, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      const id = (req.params as { id: string }).id
+      const increase = (req.query as { increase: 'true' | 'false' }).increase === 'true'
+      const result = await getShuoshuo(fastify, id, increase)
+      return createRequestReturn(200, result as Shuoshuo, '')
     }
   )
   fastify.put(
     '/shuoshuo/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        await validateRoot(fastify, req.session.rootId)
-        const id = (req.params as { id: string }).id
-        const data = req.body
-        const result = await putShuoshuo(fastify, data, id)
-        return createRequestReturn(200, result as Shuoshuo, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      await validateRoot(fastify, req.session.rootId)
+      const id = (req.params as { id: string }).id
+      const data = req.body
+      const result = await putShuoshuo(fastify, data, id)
+      return createRequestReturn(200, result as Shuoshuo, '')
     }
   )
   fastify.delete(
     '/shuoshuo/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        await validateRoot(fastify, req.session.rootId)
-        const id = (req.params as { id: string }).id
-        const result = await deleteShuoshuo(fastify, id)
-        return createRequestReturn(200, result as never, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      await validateRoot(fastify, req.session.rootId)
+      const id = (req.params as { id: string }).id
+      const result = await deleteShuoshuo(fastify, id)
+      return createRequestReturn(200, result as never, '')
     }
   )
   done()

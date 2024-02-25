@@ -9,7 +9,6 @@ import {
   putBlog
 } from './blogFn'
 import { Blog, Image } from '../../../types/model'
-import dayjs from 'dayjs'
 
 export default function (
   fastify: FastifyInstance,
@@ -17,33 +16,29 @@ export default function (
   done: any
 ): void {
   fastify.post('/blog', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      await validateRoot(fastify, req.session.rootId)
-      const data = req.body as CreateBlog
-      const result = await postBlog(fastify, data)
-      return createRequestReturn(200, result as Blog, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    await validateRoot(fastify, req.session.rootId)
+    const data = req.body as CreateBlog
+    const result = await postBlog(fastify, data)
+    return createRequestReturn(200, result as Blog, '')
   })
   fastify.get('/blog/:id', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      const id = (req.params as { id: string }).id
-      const result = await getBlog(fastify, id, true)
-      return createRequestReturn(200, result, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    const id = (req.params as { id: string }).id
+    const increase = (req.query as { increase: 'true' | 'false' }).increase === 'true'
+    const result = await getBlog(fastify, id, increase)
+    return createRequestReturn(200, result, '')
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
-    console.log(req.query)
-
-    // try {
     const query = req.query as {
       size: string
       page: string
+      sort?: 'asc' | 'desc'
       type?: string
-      'time[]'?: [string, string]
+      title?: string
+      content?: string
+      createdTimeFrom?: string
+      createdTimeTo?: string
+      lastModifiedTimeFrom?: string
+      lastModifiedTimeTo?: string
     }
     const data = {
       ...query,
@@ -52,41 +47,26 @@ export default function (
     }
     const result = await getBlogList(fastify, data)
     return createRequestReturn(200, result as Blog[], '')
-    // } catch (e) {
-    //   return createRequestReturn(500, null, (e as Error).message)
-    // }
   })
   fastify.delete(
     '/blog/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        await validateRoot(fastify, req.session.rootId)
-        const id = (req.params as { id: string }).id
-        const result = await deleteBlog(fastify, id)
-        return createRequestReturn(200, result as Blog, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      await validateRoot(fastify, req.session.rootId)
+      const id = (req.params as { id: string }).id
+      const result = await deleteBlog(fastify, id)
+      return createRequestReturn(200, result as Blog, '')
     }
   )
   fastify.put('/blog/:id', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      await validateRoot(fastify, req.session.rootId)
-      const id = (req.params as { id: string }).id
-      const data = req.body as CreateBlog
-      const result = await putBlog(fastify, data, id)
-      return createRequestReturn(200, result as Blog, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    await validateRoot(fastify, req.session.rootId)
+    const id = (req.params as { id: string }).id
+    const data = req.body as CreateBlog
+    const result = await putBlog(fastify, data, id)
+    return createRequestReturn(200, result as Blog, '')
   })
   fastify.get('/blogType', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      const result = await getBlogType(fastify)
-      return createRequestReturn(200, result, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    const result = await getBlogType(fastify)
+    return createRequestReturn(200, result, '')
   })
   done()
 }

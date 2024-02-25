@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn, validateRoot } from '../../../utils'
-import { deleteExperience, postExperience, putExperience } from './experienceFn'
+import { deleteExperience, getExperience, getExperiencesList, postExperience, putExperience } from './experienceFn'
 import { Experience, Image } from '../../../types/model'
 
 export default function (
@@ -11,47 +11,61 @@ export default function (
   fastify.post(
     '/experience',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        await validateRoot(fastify, req.session.rootId)
-        const data = req.body as CreateExperience
-        const result = await postExperience(fastify, data)
-        return createRequestReturn(200, result as Experience, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      const data = req.body as CreateExperience
+      const result = await postExperience(fastify, data)
+      return createRequestReturn(200, result as Experience, '')
     }
   )
   fastify.put(
     '/experience/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        await validateRoot(fastify, req.session.rootId)
-        const data = req.body
-        const id = (req.params as { id: string }).id
-        const result = await putExperience(fastify, data, id)
-        return createRequestReturn(200, result as Experience, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      const data = req.body
+      const id = (req.params as { id: string }).id
+      const result = await putExperience(fastify, data, id)
+      return createRequestReturn(200, result as Experience, '')
     }
   )
   fastify.delete(
     '/experience/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        await validateRoot(fastify, req.session.rootId)
-        const id = (req.params as { id: string }).id
-        const result = await deleteExperience(fastify, id)
-        return createRequestReturn(200, result as never, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      const id = (req.params as { id: string }).id
+      const result = await deleteExperience(fastify, id)
+      return createRequestReturn(200, result as never, '')
     }
   )
+  fastify.get('/experience/list', async (req: FastifyRequest, res: FastifyReply) => {
+    const query = req.query as {
+      size: string
+      page: string
+      type?: string
+      sort?: string
+    }
+    const data = {
+      ...query,
+      size: parseInt(query.size, 10),
+      page: parseInt(query.page, 10)
+    }
+    const result = await getExperiencesList(fastify, data)
+    return createRequestReturn(200, result as ExperienceReturn[], '')
+  })
+  fastify.get('/experience/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    const id = (req.params as { id: string }).id
+    const result = await getExperience(fastify, id)
+    return createRequestReturn(200, result as ExperienceReturn[], '')
+  })
   done()
 }
 
 export interface CreateExperience {
+  company: string
+  duty: string
+  description: string
+  timeStart: Date
+  timeEnd?: Date
+  images?: Image[]
+}
+
+export interface ExperienceReturn {
   company: string
   duty: string
   description: string

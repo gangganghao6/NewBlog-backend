@@ -1,5 +1,7 @@
+import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
-import lodash from 'lodash'
+import lodash, { update } from 'lodash'
+import { removeObjNullUndefined } from 'src/utils'
 
 const { isNil } = lodash
 
@@ -7,88 +9,41 @@ export async function postShuoshuo(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  return await fastify.prisma.shuoshuo.create({
+  const postObj: any = {
     data: {
       content: data.content,
-      videos: {
-        create: data.videos.map((item: any) => {
-          return {
-            ...item,
-            post: {
-              create: item.post
+      ...(data?.videos?.length > 0 && {
+        videos: {
+          create: data.videos.map((item: any) => {
+            return {
+              ...item,
+              post: {
+                create: item.post
+              }
             }
-          }
-        })
-      },
-      images: {
-        create: data.images
-      }
+          })
+        }
+      }),
+      ...(data?.images?.length > 0 && {
+        images: {
+          create: data.images.map((item: any) => {
+            delete item.uid
+            return item
+          })
+        }
+      }),
     },
     include: {
+      comments: true,
       videos: {
         include: {
           post: true
         }
       },
-      images: true,
-      comments: true
+      images: true
     }
-  })
-  // const shuoshuoId = v4()
-  // const mission = []
-  // switch (data.media_class) {
-  //   case 'images':
-  //     for (const image of data.images) {
-  //       mission.push(
-  //         fastify.prisma.image.create({
-  //           data: {
-  //             name: image.name,
-  //             size: image.size,
-  //             url: image.url,
-  //             shuoshuo_id: shuoshuoId
-  //           }
-  //         })
-  //       )
-  //     }
-  //     break
-  //   case 'video': {
-  //     const videoId = v4()
-  //     mission.push(
-  //       fastify.prisma.image.create({
-  //         data: {
-  //           name: data.video.post.name,
-  //           url: data.video.post.url,
-  //           size: data.video.post.size,
-  //           video_id: videoId
-  //         }
-  //       })
-  //     )
-  //     mission.push(
-  //       fastify.prisma.video.create({
-  //         data: {
-  //           shuoshuo_id: shuoshuoId,
-  //           name: data.video.name,
-  //           url: data.video.url,
-  //           size: data.video.size,
-  //           duration: data.video.duration,
-  //           id: videoId
-  //         }
-  //       })
-  //     )
-  //     break
-  //   }
-  // }
-  // mission.push(
-  //   fastify.prisma.shuoshuo.create({
-  //     data: {
-  //       media_class: data.media_class,
-  //       content: data?.content,
-  //       id: shuoshuoId
-  //     }
-  //   })
-  // )
-  // await fastify.prisma.$transaction(mission)
-  // return await getShuoshuo(fastify, shuoshuoId)
+  }
+  return await fastify.prisma.shuoshuo.create(postObj)
 }
 
 export async function getShuoshuo(
@@ -125,41 +80,6 @@ export async function getShuoshuo(
       .catch((err) => fastify.log.error(err))
     // })
   }
-  // switch (shuoshuo.media_class) {
-  //   case 'images':
-  //     {
-  //       const images = await fastify.prisma.image.findMany({
-  //         where: {
-  //           shuoshuo_id: id
-  //         }
-  //       })
-  //       shuoshuo.images = images
-  //     }
-  //     break
-  //   case 'video':
-  //     {
-  //       const video = await fastify.prisma.video.findFirst({
-  //         where: {
-  //           shuoshuo_id: id
-  //         }
-  //       })
-  //       const post = await fastify.prisma.image.findFirst({
-  //         where: {
-  //           video_id: video?.id
-  //         }
-  //       })
-  //       shuoshuo.video = {
-  //         ...video,
-  //         post
-  //       }
-  //     }
-  //     break
-  // }
-  // shuoshuo.comments = await fastify.prisma.comment.findMany({
-  //   where: {
-  //     shuoshuo_id: id
-  //   }
-  // })
   return shuoshuo
 }
 
@@ -167,8 +87,26 @@ export async function getShuoshuoList(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const count = await fastify.prisma.shuoshuo.count()
-  const result = await fastify.prisma.shuoshuo.findMany({
+  const countObj = {
+    where: {
+      id: {
+        contains: data.id
+      },
+      content: {
+        contains: data.content
+      },
+      createdTime: data.createdTimeFrom && {
+        gte: dayjs(data.createdTimeFrom).add(8, 'hour').toDate(),
+        lte: dayjs(data.createdTimeTo).add(8, 'hour').toDate(),
+      },
+      lastModifiedTime: data.lastModifiedTimeFrom && {
+        gte: dayjs(data.lastModifiedTimeFrom).add(8, 'hour').toDate(),
+        lte: dayjs(data.lastModifiedTimeTo).add(8, 'hour').toDate(),
+      }
+    }
+  }
+  const searchObj = {
+    ...countObj,
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
@@ -183,11 +121,10 @@ export async function getShuoshuoList(
       images: true,
       comments: true
     }
-  })
-  // const result = []
-  // for (const obj of tempResult) {
-  //   result.push(await getShuoshuo(fastify, obj.id))
-  // }
+  }
+  const count = await fastify.prisma.shuoshuo.count(countObj)
+
+  const result = await fastify.prisma.shuoshuo.findMany(searchObj)
   return { result, count }
 }
 
@@ -198,47 +135,6 @@ export async function deleteShuoshuo(
   return await fastify.prisma.shuoshuo.delete({
     where: { id }
   })
-  // const shuoshuo = await getShuoshuo(fastify, id)
-  // const mission = []
-  // switch (shuoshuo.media_class) {
-  //   case 'images':
-  //     mission.push(
-  //       fastify.prisma.image.deleteMany({
-  //         where: {
-  //           shuoshuo_id: id
-  //         }
-  //       })
-  //     )
-  //     break
-  //   case 'video':
-  //     {
-  //       const video = await fastify.prisma.video.findFirst({
-  //         where: { shuoshuo_id: id }
-  //       })
-  //       mission.push(
-  //         fastify.prisma.video.delete({
-  //           where: { id: video?.id }
-  //         })
-  //       )
-  //       mission.push(
-  //         fastify.prisma.image.deleteMany({
-  //           where: { video_id: video?.id }
-  //         })
-  //       )
-  //     }
-  //     break
-  // }
-  // mission.push(
-  //   fastify.prisma.comment.deleteMany({
-  //     where: { shuoshuo_id: id }
-  //   })
-  // )
-  // mission.push(
-  //   fastify.prisma.shuoshuo.delete({
-  //     where: { id }
-  //   })
-  // )
-  // return await fastify.prisma.$transaction(mission)
 }
 
 export async function putShuoshuo(
@@ -250,21 +146,34 @@ export async function putShuoshuo(
     where: { id },
     data: {
       ...data,
+      lastModifiedTime: new Date(),
       videos: {
         deleteMany: {},
         create:
-          data?.videos?.map((item: any) => {
+          data?.videos?.map((e: any) => {
+            e = removeObjNullUndefined(e)
+            delete e.id
+            delete e.shuoshuoId
+            delete e.uid
+            delete e.post.videoId
+            delete e.post.uid
+            delete e.post.id
             return {
-              ...item,
+              ...e,
               post: {
-                create: item.post
+                create: removeObjNullUndefined(e.post)
               }
             }
           }) ?? []
       },
       images: {
         deleteMany: {},
-        create: data.images ?? []
+        create: data?.images?.map((e: any) => {
+          delete e.id
+          delete e.shuoshuoId
+          delete e.uid
+          return removeObjNullUndefined(e)
+        }) ?? []
       },
       comments: {
         deleteMany: {},
@@ -281,96 +190,4 @@ export async function putShuoshuo(
       comments: true
     }
   })
-  // const mission = []
-  // if ('content' in data) {
-  //   mission.push(
-  //     fastify.prisma.shuoshuo.update({
-  //       where: { id },
-  //       data: {
-  //         content: data.content
-  //       }
-  //     })
-  //   )
-  // }
-  // if ('images' in data && data.images !== null) {
-  //   mission.push(
-  //     fastify.prisma.image.deleteMany({
-  //       where: {
-  //         shuoshuo_id: id
-  //       }
-  //     })
-  //   )
-  //   for (const image of data.images) {
-  //     mission.push(
-  //       fastify.prisma.image.create({
-  //         data: {
-  //           name: image.name,
-  //           size: image.size,
-  //           url: image.url,
-  //           shuoshuo_id: id
-  //         }
-  //       })
-  //     )
-  //   }
-  // }
-  // if ('video' in data) {
-  //   const video = await fastify.prisma.video.findFirst({
-  //     where: { shuoshuo_id: id }
-  //   })
-  //   mission.push(
-  //     fastify.prisma.image.deleteMany({
-  //       where: {
-  //         video_id: video?.id
-  //       }
-  //     })
-  //   )
-  //   mission.push(
-  //     fastify.prisma.video.delete({
-  //       where: {
-  //         id: video?.id
-  //       }
-  //     })
-  //   )
-  //   const videoId = v4()
-  //   mission.push(
-  //     fastify.prisma.image.create({
-  //       data: {
-  //         name: data.video.post.name,
-  //         url: data.video.post.url,
-  //         size: data.video.post.size,
-  //         video_id: videoId
-  //       }
-  //     })
-  //   )
-  //   mission.push(
-  //     fastify.prisma.video.create({
-  //       data: {
-  //         id: videoId,
-  //         shuoshuo_id: id,
-  //         name: data.video.name,
-  //         url: data.video.url,
-  //         size: data.video.size,
-  //         duration: data.video.duration
-  //       }
-  //     })
-  //   )
-  // }
-  // if ('media_class' in data) {
-  //   mission.push(
-  //     fastify.prisma.shuoshuo.update({
-  //       where: { id },
-  //       data: {
-  //         media_class: data.media_class
-  //       }
-  //     })
-  //   )
-  // }
-  // mission.push(
-  //   fastify.prisma.shuoshuo.update({
-  //     where: { id },
-  //     data: { last_modified_time: new Date() }
-  //   })
-  // )
-  // await fastify.prisma.$transaction(mission)
-  // return await getShuoshuo(fastify, id)
 }

@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
 
 export async function createTodolist(
@@ -11,21 +12,46 @@ export async function createTodolist(
   })
 }
 
-export async function getTodolistAll(
+export async function getTodolistList(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const count = await fastify.prisma.todolist.count()
-  const result = await fastify.prisma.todolist.findMany({
+  const countObj = {
+    where: {
+      id: {
+        contains: data.id
+      },
+      title: {
+        contains: data.title
+      },
+      ...({ isDone: data.isDone === 'false' ? false : true }),
+      isDoneTime: data.isDoneTime && {
+        gte: dayjs(data.isDoneTime).add(8, 'hour').toDate(),
+        lte: dayjs(data.isDoneTime).add(32, 'hour').toDate(),
+      },
+      createdTime: data.createdTimeFrom && {
+        gte: dayjs(data.createdTimeFrom).add(8, 'hour').toDate(),
+        lte: dayjs(data.createdTimeTo).add(8, 'hour').toDate(),
+      },
+    }
+  }
+  const searchObj = {
+    ...countObj,
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
       createdTime: data.sort
     }
-  })
+  }
+  const count = await fastify.prisma.todolist.count(countObj)
+  const result = await fastify.prisma.todolist.findMany(searchObj)
   return { result, count }
 }
-
+export async function getTodolist(fastify: FastifyInstance, id: string): Promise<any> {
+  return await fastify.prisma.todolist.findUnique({
+    where: { id }
+  })
+}
 export async function putTodolist(
   fastify: FastifyInstance,
   data: any,

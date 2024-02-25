@@ -222,6 +222,14 @@ function promisifyJwtSign(jwt: any): any {
     })
   }
 }
+function removeObjNullUndefined(obj: any): any {
+  for (const key in obj) {
+    if (obj[key] === null || obj[key] === undefined) {
+      delete obj[key]
+    }
+  }
+  return obj
+}
 export {
   generateRoutesLogs,
   createRequestReturn,
@@ -229,5 +237,6 @@ export {
   initMkdir,
   getLocalIp,
   getProjectPath,
-  promisifyJwtSign
+  promisifyJwtSign,
+  removeObjNullUndefined
 }

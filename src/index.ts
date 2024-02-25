@@ -21,12 +21,14 @@ import {
   getLocalIp
 } from './utils.js'
 import { registRoutes, registStatic } from './routes.js'
+import 'dayjs/locale/zh-cn'
+import dayjs from 'dayjs'
 
 dotenv.config({
   path: '.env',
   override: true
 })
-
+dayjs.locale('zh-cn')
 initMkdir()
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error

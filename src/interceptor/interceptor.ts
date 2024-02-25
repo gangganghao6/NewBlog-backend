@@ -40,15 +40,15 @@ async function registeInterceptor(fastify: FastifyInstance): Promise<void> {
       }
     }
   )
-  await fastify.addHook(
-    'onError',
-    async (req: FastifyRequest, res: FastifyReply, err: FastifyError) => {
-      console.log(111)
+  // await fastify.addHook(
+  //   'onError',
+  //   async (req: FastifyRequest, res: FastifyReply, err: FastifyError) => {
+  //     console.log(111)
 
-      // await res.send(5555)
-      // return createRequestReturn(500, null, err.message)
-    }
-  )
+  //     // await res.send(5555)
+  //     // return createRequestReturn(500, null, err.message)
+  //   }
+  // )
   // await fastify.addHook(
   //   'onSend',
   //   async (req: FastifyRequest, res: FastifyReply, payload: string) => {

@@ -14,6 +14,7 @@ import {
   Md5CheckRequest,
   Md5CheckReturn
 } from './file_chunk.d'
+import sharp from 'sharp'
 
 const pump = util.promisify(pipeline)
 const { isNil } = lodash
@@ -39,17 +40,19 @@ export async function md5Check(
     const mediaType = data.fileType.split('/')[0]
     const result: Md5CheckReturn = {
       name: fileName,
-      url: `http://${publicUrl}/public/files/${fileName}`,
+      url: `http://${publicUrl}/public/files/${md5}.${data.fileSuffix}`,
       originalName: data.originalName,
       mediaType,
       fileType: data.fileType,
       fileSuffix: data.fileSuffix,
-      size: data.size
+      size: data.size,
+      compressUrl: `http://${publicUrl}/public/files/${md5}_compress.${data.fileSuffix}`
     }
     if (mediaType === 'video') {
       result.duration = await getVideoDurationInSeconds(
         path.join(filesFolderPath, fileName)
       ) // 如果是视频，计算视频的时间长度
+      delete result.compressUrl
     }
     return result
   } else {
@@ -118,6 +121,11 @@ export async function mergeFileChunk(
   }
   if (mediaType === 'video') {
     result.duration = await getVideoDurationInSeconds(filePath) // 如果是视频，计算视频的时间长度
+  }else if(mediaType === 'image'){
+    //使用sharp压缩图片
+    const compressPath = path.join(basePath, 'files', `${md5}_compress.${data.fileSuffix}`)
+    await sharp(filePath).resize(200).toFile(compressPath)
+    result.compressUrl = `http://${publicUrl}/public/files/${md5}_compress.${data.fileSuffix}`
   }
   return result
 }

@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn, validateRoot } from '../../../utils'
-import { getPersonalInfoAll, postPersonalInfo, putPersonalInfo } from './infoFn'
+import { getPersonalInfoAll, putPersonalInfo } from './infoFn'
 import { Personal } from '../../../types/model'
 
 export default function (
@@ -9,44 +9,18 @@ export default function (
   done: any
 ): void {
   fastify.get('/info', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      const exist = await fastify.prisma.personal.findFirst()
-      if (exist === null) {
-        return createRequestReturn(500, null, '个人页面未初始化')
-      }
-      const result = await getPersonalInfoAll(fastify)
-      return createRequestReturn(200, result as Personal, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
+    const increase = (req.query as { increase: 'true' | 'false' }).increase === 'true'
+    const exist = await fastify.prisma.personal.findFirst()
+    if (exist === null) {
+      throw new Error('个人页面未初始化')
     }
-  })
-  fastify.post('/info', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      await validateRoot(fastify, req.session.rootId)
-      const data = req.body as CreatePersonal
-      const exist = await fastify.prisma.personal.findFirst()
-      if (exist !== null) {
-        return createRequestReturn(500, null, '个人页面已初始化')
-      }
-      const result = await postPersonalInfo(fastify, data)
-      return createRequestReturn(200, result as Personal, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    const result = await getPersonalInfoAll(fastify, increase)
+    return createRequestReturn(200, result as Personal, '')
   })
   fastify.put('/info', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      await validateRoot(fastify, req.session.rootId)
-      const data = req.body as CreatePersonal
-      const exist = await fastify.prisma.personal.findFirst()
-      if (exist === null) {
-        return createRequestReturn(500, null, '个人页面未初始化')
-      }
-      const result = await putPersonalInfo(fastify, data)
-      return createRequestReturn(200, result as Personal, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    const data = req.body as CreatePersonal
+    const result = await putPersonalInfo(fastify, data)
+    return createRequestReturn(200, result as Personal, '')
   })
   done()
 }
@@ -62,5 +36,5 @@ export interface CreatePersonal {
   university: string
   home: string
   universityEndTime?: Date
-  readme: string
+  content: string
 }

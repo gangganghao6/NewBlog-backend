@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn, validateRoot } from '../../../utils'
 import {
   deleteShareFile,
+  getShareFile,
   getShareFileList,
   increaseShareFileDownload,
   putShareFile,
@@ -15,68 +16,55 @@ export default function (
   done: any
 ): void {
   fastify.post('/file', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      await validateRoot(fastify, req.session.rootId)
-      const data = req.body as CreateShareFile
-      const result = await uploadShareFile(fastify, data)
-      return createRequestReturn(200, result as ShareFileReturn, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    const data = req.body as CreateShareFile
+    const result = await uploadShareFile(fastify, data)
+    return createRequestReturn(200, result as ShareFileReturn, '')
   })
   fastify.delete(
     '/file/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        await validateRoot(fastify, req.session.rootId)
-        const id = (req.params as { id: string }).id
-        const result = await deleteShareFile(fastify, id)
-        return createRequestReturn(200, result, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      const id = (req.params as { id: string }).id
+      const result = await deleteShareFile(fastify, id)
+      return createRequestReturn(200, result, '')
     }
   )
   fastify.put('/file/:id', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      await validateRoot(fastify, req.session.rootId)
-      const id = (req.params as { id: string }).id
-      const type = (req.body as { type: string }).type
-      const result = await putShareFile(fastify, { id, type })
-      return createRequestReturn(200, result as ShareFile, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    const id = (req.params as { id: string }).id
+    const data = req.body
+    // const type = (req.body as { type: string }).type
+    const result = await putShareFile(fastify, { id, data })
+    return createRequestReturn(200, result as ShareFile, '')
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      const query = req.query as {
-        size: string
-        page: string
-        type?: string
-        sort?: string
-      }
-      const data = {
-        ...query,
-        size: parseInt(query.size, 10),
-        page: parseInt(query.page, 10)
-      }
-      const result = await getShareFileList(fastify, data)
-      return createRequestReturn(200, result as ShareFileReturn[], '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
+    const query = req.query as {
+      size: string
+      page: string
+      type?: string
+      sort?: string
     }
+    const data = {
+      ...query,
+      size: parseInt(query.size, 10),
+      page: parseInt(query.page, 10)
+    }
+    const result = await getShareFileList(fastify, data)
+    
+    return createRequestReturn(200, result as ShareFileReturn[], '')
   })
   fastify.get(
     '/download/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        const id = (req.params as { id: string }).id
-        const result = await increaseShareFileDownload(fastify, id)
-        return createRequestReturn(200, result as ShareFile, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      const id = (req.params as { id: string }).id
+      const result = await increaseShareFileDownload(fastify, id)
+      return createRequestReturn(200, result as ShareFile, '')
+    }
+  )
+  fastify.get(
+    '/file/:id',
+    async (req: FastifyRequest, res: FastifyReply) => {
+      const id = (req.params as { id: string }).id
+      const result = await getShareFile(fastify, id)
+      return createRequestReturn(200, result as ShareFile, '')
     }
   )
   done()
