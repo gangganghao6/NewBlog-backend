@@ -36,6 +36,8 @@ model Image {
   shareFile    ShareFile?  @relation(fields: [shareFileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   rootId       String?     @unique
   root         Root?       @relation(fields: [rootId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  baseInfoId   String?     @unique
+  baseInfo     BaseInfo?   @relation(fields: [baseInfoId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Video {
@@ -66,20 +68,22 @@ model Root {
   name             String
   createdTime      DateTime @default(now())
   lastModifiedTime DateTime @default(now())
+  lastLoginTime    DateTime @default(now())
   image            Image?
 }
 
 model User {
-  id           String      @id @default(uuid())
-  name         String
-  email        String
-  createdTime  DateTime    @default(now())
-  isBanned     Boolean     @default(false)
-  isSubscribed Boolean     @default(false)
-  userVisits   UserVisit[]
-  comments     Comment[]
-  chats        Chat[]
-  pays         Pay[]
+  id             String      @id @default(uuid())
+  name           String
+  email          String
+  createdTime    DateTime    @default(now())
+  lastActiveTime DateTime    @default(now())
+  isBanned       Boolean     @default(false)
+  isSubscribed   Boolean     @default(false)
+  userVisits     UserVisit[]
+  comments       Comment[]
+  chats          Chat[]
+  pays           Pay[]
 }
 
 model UserVisit {
@@ -104,7 +108,7 @@ model UserVisit {
   cpuArchitecture String?
   visitTime       DateTime @default(now())
   userId          String?
-  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user            User?    @relation(fields: [userId], references: [id])
 }
 
 model Comment {
@@ -112,7 +116,7 @@ model Comment {
   comment     String
   createdTime DateTime  @default(now())
   userId      String?
-  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user        User?     @relation(fields: [userId], references: [id])
   blogId      String?
   blog        Blog?     @relation(fields: [blogId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   shuoshuoId  String?
@@ -161,9 +165,9 @@ model Pay {
   closeTime   DateTime?
   paySuccess  Boolean   @default(false)
   isClose     Boolean   @default(false)
-  userId      String    @unique
+  userId      String
   user        User?     @relation(fields: [userId], references: [id])
-  blogId      String?   @unique
+  blogId      String?
   blog        Blog?     @relation(fields: [blogId], references: [id])
   personalId  String?   @unique
   personal    Personal? @relation(fields: [personalId], references: [id])
@@ -277,11 +281,21 @@ model Chat {
   ip          String
   location    String
   userId      String
-  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user        User?    @relation(fields: [userId], references: [id])
   createdTime DateTime @default(now())
   content     String?
   // media_class  String //image/video/file/text
   image       Image?
   video       Video?
   file        File?
+}
+
+model BaseInfo {
+  id               String   @id @default(uuid())
+  name             String?
+  description      String?
+  createdTime      DateTime @default(now())
+  lastModifiedTime DateTime @default(now())
+  recommendBlogIds String?
+  headImage        Image?
 }

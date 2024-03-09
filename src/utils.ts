@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { Duplex } from 'stream'
 import { FastifyInstance } from 'fastify'
 import os from 'os'
-import { getUserById } from './routes/admin/users/userFn'
+import { getUserDetail } from './routes/admin/users/userFn'
 import { getRootById } from './routes/admin/base/rootFn'
 import lodash from 'lodash'
 const { isNil } = lodash
@@ -107,41 +107,7 @@ function createLogStream(): Duplex {
   return inoutStream
 }
 
-export async function validateUser(
-  fastify: FastifyInstance,
-  id: string | null | undefined
-): Promise<boolean> {
-  if (process.env.NODE_ENV.trim() === 'dev') {
-    return true
-  }
-  if (id === null || id === undefined) throw new Error('用户尚未登录')
-  const user = await getUserById(fastify, id)
-  if (user === null) {
-    throw new Error('用户不存在')
-  } else if (user.is_banned === true) {
-    throw new Error('用户已被禁止登录')
-  } else {
-    fastify.log.info({ user_id: id })
-    return true
-  }
-}
 
-export async function validateRoot(
-  fastify: FastifyInstance,
-  id: string | null | undefined
-): Promise<boolean> {
-  if (process.env.NODE_ENV.trim() === 'dev') {
-    return true
-  }
-  if (isNil(id)) throw new Error('管理员尚未登录')
-  const root = await getRootById(fastify, id)
-  if (root === null) {
-    throw new Error('管理员不存在')
-  } else {
-    fastify.log.info({ admin_id: id })
-    return true
-  }
-}
 
 function initMkdir(): void {
   const path = getProjectPath()
