@@ -90,7 +90,14 @@ export async function getBlogList(
     include: {
       post: true,
       comments: true,
-      pays: true,
+      pays: {
+        where: {
+          paySuccess: true
+        },
+        orderBy: {
+          closeTime: 'desc'
+        },
+      },
     }
   }
   const count = await fastify.prisma.blog.count(countObj)
@@ -123,6 +130,12 @@ export async function getBlog(
         }
       },
       pays: {
+        where: {
+          paySuccess: true
+        },
+        orderBy: {
+          closeTime: 'desc'
+        },
         include: {
           user: true
         }

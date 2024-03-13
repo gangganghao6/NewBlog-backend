@@ -23,12 +23,12 @@ export default function (
   config: never,
   done: any
 ): void {
+
   fastify.get('/', { websocket: true }, async (connection, req) => {
-    await validateUser(fastify, req.session.userId)
     const userId = (req.query as { userId: string }).userId
+    connection.socket.send(JSON.stringify(createRequestReturn(200, { type: 'boardcast', onLineCount: fastify.websocketServer.clients.size }, '')))
     connection.socket.on('message', async (buf: Buffer) => {
       const data: any = JSON.parse(buf.toString()) as CreateChat
-
       const location: {
         country: string
         province: string
@@ -46,21 +46,17 @@ export default function (
     })
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      const data: any = req.query
-      data.size = parseInt(data.size, 10)
-      data.page = parseInt(data.page, 10)
-      const result = (await getChatAll(fastify, data)) as Chat[]
-      return createRequestReturn(200, result, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    const data: any = req.query
+    data.size = parseInt(data.size, 10)
+    data.page = parseInt(data.page, 10)
+    const result = (await getChatAll(fastify, data)) as Chat[]
+    return createRequestReturn(200, result, '')
   })
   fastify.delete(
     '/chat/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.rootId)
+        await validateRoot(fastify, req, res)
         const id = (req.params as { id: string }).id
         const result = (await deleteChat(fastify, id)) as { count: number }
         return createRequestReturn(200, result, '')

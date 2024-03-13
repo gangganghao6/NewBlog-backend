@@ -23,6 +23,12 @@ export async function sendMessage(
           id: data.userId
         }
       }
+    },
+    include: {
+      image: true,
+      video: true,
+      file: true,
+      user: true
     }
   })
 }
@@ -31,16 +37,20 @@ export async function getChatAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  return await fastify.prisma.chat.findMany({
+  const result = await fastify.prisma.chat.findMany({
     include: {
       image: true,
       video: true,
       file: true,
       user: true
     },
+    orderBy: {
+      createdTime: 'desc'
+    },
     skip: data.size * (data.page - 1),
     take: data.size
   })
+  return result.reverse()
 }
 
 // async function getChat(fastify: FastifyInstance, id: string): Promise<any> {

@@ -156,7 +156,7 @@ model Shuoshuo {
 
 model Pay {
   id          String    @id @default(uuid())
-  // type        String //blog/personal
+  message     String?
   payType     String //wechat/alipay
   money       Float     @default(0.0)
   orderId     String    @default(uuid())

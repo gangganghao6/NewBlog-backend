@@ -67,11 +67,11 @@ export default function (
   fastify.post('/auth', {}, async (req: FastifyRequest, res: FastifyReply) => {
     const userId = req.session.userId
     if (userId === null || userId === undefined) {
-      throw new Error('未登录')
+      return res.code(401).send('未登录')
     }
     const result = await getUserDetail(fastify, userId)
     if (result === null) {
-      throw new Error('登录失效')
+      return res.code(401).send('用户不存在')
     }
     return createRequestReturn(200, result as User, '')
   })
@@ -98,17 +98,13 @@ export default function (
       return createRequestReturn(200, result as Pay, '')
     }
   )
-  fastify.get(
+  fastify.post(
     '/pay/confirm',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        await validateUser(fastify, req, res)
-        const data = req.query as { outTradeNo: string }
-        const result = await confirmOrder(fastify, data)
-        return createRequestReturn(200, result as Pay, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      // await validateUser(fastify, req, res)
+      const data = req.body as { outTradeNo: string }
+      const result = await confirmOrder(fastify, data)
+      return createRequestReturn(200, result as Pay, '')
     }
   )
   fastify.get('/pay/list', async (req: FastifyRequest, res: FastifyReply) => {
@@ -142,7 +138,7 @@ export interface PutUser {
 
 export interface CreatePayOrder {
   userId: string
-  // type: 'blog' | 'personal'
+  isMobile: boolean
   blogId: string
   money: number
   payType: 'alipay' | 'wechat'

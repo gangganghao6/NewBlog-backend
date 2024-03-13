@@ -119,45 +119,48 @@ export async function createPayOrder(
     product_code: 'FAST_INSTANT_TRADE_PAY', // 产品码
     total_amount: data.money, // 商品金额
     subject: data.type === 'blog' ? '博客打赏' : '个人打赏', // 出售商品的标题
-    body: '谢谢喵~' // 出售商品的内容
+    body: '谢谢喵~', // 出售商品的内容,
+    // qr_pay_mode: 2
   }
-  const orderResult = alipaySdk.pageExec('alipay.trade.page.pay', {
+  const orderResult = alipaySdk.pageExec(`alipay.trade.${data?.isMobile ? 'wap' : 'page'}.pay`, {
     method: 'GET',
     bizContent,
-    returnUrl: `http://${(process.env.NODE_ENV.trim() === 'dev'
-      ? getLocalIp()
-      : process.env.PUBLIC_URL) +
-      ':' +
-      process.env.PORT as string}/api/users/pay/confirm`
+    // returnUrl: `http://${(process.env.NODE_ENV.trim() === 'dev'
+    //   ? getLocalIp()
+    //   : process.env.PUBLIC_URL) +
+    //   ':' +
+    //   process.env.PORT as string}/api/users/pay/confirm`
   });
-  if (data.blogId !== null && data.blogId !== undefined) {
-    const blog = await fastify.prisma.blog.findFirst({
-      where: {
-        id: data.blogId
-      }
-    })
-    if (blog !== null) {
-      await fastify.prisma.blog.update({
-        where: { id: blog.id },
-        data: {
-          pays: {
-            create: {
-              money: data.money,
-              orderId,
-              orderUrl: orderResult,
-              payType: data.payType,
-              user: {
-                connect: {
-                  id: data.userId
-                }
-              }
+  const blog = await fastify.prisma.blog.findFirst({
+    where: {
+      id: data.blogId
+    }
+  })
+  await fastify.prisma.blog.update({
+    where: { id: blog?.id },
+    data: {
+      pays: {
+        create: {
+          money: data.money,
+          message: data.message,
+          orderId,
+          orderUrl: orderResult,
+          payType: data.payType,
+          user: {
+            connect: {
+              id: data.userId
             }
           }
         }
-      })
+      }
     }
-  }
-  return orderResult
+  })
+  const resultPay = await fastify.prisma.pay.findFirst({
+    where: {
+      orderId
+    }
+  })
+  return resultPay
   // return await getPayById(fastify, payId)
 }
 
@@ -167,7 +170,7 @@ export async function confirmOrder(
 ): Promise<any> {
   const orderId = data.outTradeNo
   if (orderId === null || orderId === undefined) {
-    throw new Error('参数错误')
+    throw new Error('orderId为空')
   }
   const exist = await fastify.prisma.pay.findFirst({
     where: { orderId }
@@ -179,24 +182,16 @@ export async function confirmOrder(
       where: { orderId }
     })
   } else {
-    // eslint-disable-next-line new-cap,@typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    // eslint-disable-next-line new-cap
-    const formData = new AliPayForm.default()
-    formData.setMethod('get')
-    formData.addField('bizContent', {
-      out_rade_no: orderId
-    })
-    // 通过该接口主动查询订单状态
-    const orderUrl = await alipaySdk.exec(
-      'alipay.trade.query',
-      {},
-      { formData }
-    )
+    const orderUrl = alipaySdk.pageExec('alipay.trade.query', {
+      method: 'GET',
+      bizContent: { out_trade_no: orderId },
+    });
+
     const orderResult = await fetch(orderUrl, {
       method: 'GET'
     }).then(async (response) => await response.json())
-    const status = orderResult.alipayTrade_query_response.trade_status // WAIT_BUYER_PAY TRADE_CLOSED TRADE_SUCCESS TRADE_FINISHED
+
+    const status = orderResult.alipay_trade_query_response?.trade_status // WAIT_BUYER_PAY TRADE_CLOSED TRADE_SUCCESS TRADE_FINISHED
     if (status === 'TRADE_SUCCESS') {
       await fastify.prisma.pay.updateMany({
         where: { orderId },
@@ -205,6 +200,9 @@ export async function confirmOrder(
           closeTime: new Date(),
           paySuccess: true
         }
+      })
+      return await fastify.prisma.pay.findFirst({
+        where: { orderId }
       })
     } else if (status === 'TRADE_CLOSED') {
       await fastify.prisma.pay.updateMany({
@@ -215,6 +213,7 @@ export async function confirmOrder(
           paySuccess: false
         }
       })
+      throw new Error('订单已关闭')
     } else if (status === 'WAIT_BUYER_PAY') {
       await fastify.prisma.pay.updateMany({
         where: { orderId },
@@ -222,10 +221,11 @@ export async function confirmOrder(
           isClose: false
         }
       })
+      throw new Error('订单未支付')
+    } else {
+      throw new Error('订单不存在')
     }
-    return await fastify.prisma.pay.findFirst({
-      where: { orderId }
-    })
+
   }
 }
 
