@@ -23,7 +23,6 @@ import {
 import { registRoutes, registStatic } from './routes.js'
 import 'dayjs/locale/zh-cn'
 import dayjs from 'dayjs'
-import { validateUser } from './auth.js'
 
 dotenv.config({
   path: '.env',

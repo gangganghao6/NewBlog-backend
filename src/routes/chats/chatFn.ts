@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
 
 export async function sendMessage(
@@ -12,9 +13,18 @@ export async function sendMessage(
       image: {
         create: data.image
       },
-      video: {
-        create: data.video
-      },
+      ...(data.video && {
+        video: {
+          create: {
+            ...data.video,
+            post: {
+              create: {
+                ...data.video.post,
+              }
+            }
+          }
+        }
+      }),
       file: {
         create: data.file
       },
@@ -26,7 +36,11 @@ export async function sendMessage(
     },
     include: {
       image: true,
-      video: true,
+      video: {
+        include: {
+          post: true
+        }
+      },
       file: true,
       user: true
     }
@@ -37,20 +51,50 @@ export async function getChatAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const result = await fastify.prisma.chat.findMany({
+  
+  const countObj = {
+    where: {
+      id: {
+        contains: data.id
+      },
+      userId: {
+        contains: data.userId
+      },
+      user: {
+        email: {
+          contains: data.email
+        },
+        name: {
+          contains: data.name
+        }
+      },
+      createdTime: data.createdTimeFrom && {
+        gte: dayjs(data.createdTimeFrom).add(8, 'hour').toDate(),
+        lte: dayjs(data.createdTimeTo).add(32, 'hour').toDate(),
+      },
+    }
+  }
+  const searchObj = {
+    ...countObj,
+    orderBy: {
+      createdTime: data.sort
+    },
+    skip: data.size * (data.page - 1),
+    take: data.size,
     include: {
       image: true,
-      video: true,
+      video: {
+        include: {
+          post: true
+        }
+      },
       file: true,
       user: true
     },
-    orderBy: {
-      createdTime: 'desc'
-    },
-    skip: data.size * (data.page - 1),
-    take: data.size
-  })
-  return result.reverse()
+  }
+  const count = await fastify.prisma.chat.count(countObj)
+  const result = await fastify.prisma.chat.findMany(searchObj)
+  return { result: data.reverse ? result.reverse() : result, count }
 }
 
 // async function getChat(fastify: FastifyInstance, id: string): Promise<any> {
@@ -63,7 +107,24 @@ export async function getChatAll(
 //     }
 //   })
 // }
-
+export async function getChatDetail(
+  fastify: FastifyInstance,
+  id: string
+): Promise<any> {
+  return await fastify.prisma.chat.findUnique({
+    where: { id },
+    include: {
+      image: true,
+      video: {
+        include: {
+          post: true
+        }
+      },
+      file: true,
+      user: true
+    }
+  })
+}
 export async function deleteChat(
   fastify: FastifyInstance,
   id: string

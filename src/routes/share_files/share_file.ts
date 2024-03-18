@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn } from 'src/utils'
 import {
   deleteShareFile,
+  getRandomShareFile,
   getShareFile,
   getShareFileList,
   increaseShareFileDownload,
@@ -64,6 +65,13 @@ export default function (
     async (req: FastifyRequest, res: FastifyReply) => {
       const id = (req.params as { id: string }).id
       const result = await getShareFile(fastify, id)
+      return createRequestReturn(200, result as ShareFile, '')
+    }
+  )
+  fastify.get(
+    '/random-file',
+    async (req: FastifyRequest, res: FastifyReply) => {
+      const result = await getRandomShareFile(fastify)
       return createRequestReturn(200, result as ShareFile, '')
     }
   )

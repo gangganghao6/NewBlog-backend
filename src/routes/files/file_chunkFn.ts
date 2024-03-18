@@ -48,7 +48,7 @@ export async function md5Check(
       size: data.size,
       compressUrl: `http://${publicUrl}/public/files/${md5}_compress.${data.fileSuffix}`
     }
-    if (mediaType === 'video') {
+    if (mediaType !== 'image') {
       delete result.compressUrl
     }
     return result
@@ -121,7 +121,7 @@ export async function mergeFileChunk(
   }else if(mediaType === 'image'){
     //使用sharp压缩图片
     const compressPath = path.join(basePath, 'files', `${md5}_compress.${data.fileSuffix}`)
-    await sharp(filePath).resize(200).toFile(compressPath)
+    await sharp(filePath).resize(400).toFile(compressPath)
     result.compressUrl = `http://${publicUrl}/public/files/${md5}_compress.${data.fileSuffix}`
   }
   return result

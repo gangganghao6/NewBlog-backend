@@ -156,7 +156,17 @@ export async function getShareFile(
     }
   })
 }
-
+export async function getRandomShareFile(
+  fastify: FastifyInstance
+): Promise<any> {
+  const count = await fastify.prisma.shareFile.count()
+  const random = Math.floor(Math.random() * count)
+  const result = await fastify.prisma.shareFile.findMany({
+    take: 1,
+    skip: random
+  })
+  return result
+}
 export async function increaseShareFileDownload(
   fastify: FastifyInstance,
   id: string

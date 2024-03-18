@@ -1,10 +1,12 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 import {
+  closePayOrder,
   confirmOrder,
   createPayOrder,
   createUser,
   getPayAll,
+  getPayById,
   getUserAll,
   getUserByEmail,
   // getUserById,
@@ -75,19 +77,6 @@ export default function (
     }
     return createRequestReturn(200, result as User, '')
   })
-  // fastify.get(
-  //   '/detail/:id',
-  //   async (req: FastifyRequest, res: FastifyReply) => {
-  //     try {
-  //       await validateRoot(fastify, req.session.rootId)
-  //       const id = (req.params as { id: string }).id
-  //       const result = await getUserDetail(fastify, id)
-  //       return createRequestReturn(200, result as User, '')
-  //     } catch (e) {
-  //       return createRequestReturn(500, null, (e as Error).message)
-  //     }
-  //   }
-  // )
   fastify.post(
     '/pay/create',
     async (req: FastifyRequest, res: FastifyReply) => {
@@ -95,29 +84,35 @@ export default function (
       const userId = req.session.userId
       const data = req.body as CreatePayOrder
       const result = await createPayOrder(fastify, { userId, ...data })
+      setTimeout(async () => {
+        await closePayOrder(fastify, result.orderId)
+      }, 1000 * 60 * 10)
       return createRequestReturn(200, result as Pay, '')
     }
   )
-  fastify.post(
+  fastify.get(
     '/pay/confirm',
     async (req: FastifyRequest, res: FastifyReply) => {
       // await validateUser(fastify, req, res)
-      const data = req.body as { outTradeNo: string }
+      const data = req.query as { outTradeNo: string }
+      // const data = req.body as { outTradeNo: string }
       const result = await confirmOrder(fastify, data)
       return createRequestReturn(200, result as Pay, '')
     }
   )
   fastify.get('/pay/list', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      await validateRoot(fastify, req, res)
-      const data: any = req.query
-      data.page = parseInt(data.page, 10)
-      data.size = parseInt(data.size, 10)
-      const result = await getPayAll(fastify, data)
-      return createRequestReturn(200, result as Pay[], '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    await validateRoot(fastify, req, res)
+    const data: any = req.query
+    data.page = parseInt(data.page, 10)
+    data.size = parseInt(data.size, 10)
+    const result = await getPayAll(fastify, data)
+    return createRequestReturn(200, result as Pay[], '')
+  })
+  fastify.get('/pay/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
+    const id = (req.params as { id: string }).id
+    const result = await getPayById(fastify, id)
+    return createRequestReturn(200, result as Pay, '')
   })
   done()
 }

@@ -1,5 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import {
+  deleteUserVisit,
+  getUserVisit,
   getUserVisitAll,
   getUserVisitAnalysis,
   postUserVisitLog
@@ -14,31 +16,45 @@ export default function (
   done: any
 ): void {
   fastify.post('/url', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      const data: any = req.body as UserVisitCreate
-      const ip = req.ip
-      const userAgent = req.headers['user-agent']
-      await postUserVisitLog(fastify, {
-        data,
-        ip,
-        userAgent
-      })
-      return createRequestReturn(200, '', '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    const data: any = JSON.parse(req.body as string) as UserVisitCreate
+    const userId = req.session.userId
+    const ip = req.ip
+    const userAgent = req.headers['user-agent']
+
+    await postUserVisitLog(fastify, {
+      data,
+      ip,
+      userId,
+      userAgent
+    })
+
+    return createRequestReturn(200, '', '')
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-      await validateRoot(fastify, req.session.rootId)
-      const data: any = req.query
-      data.size = parseInt(data.size, 10)
-      data.page = parseInt(data.page, 10)
-      const result = await getUserVisitAll(fastify, data)
-      return createRequestReturn(200, result as UserVisitReturn, '')
-    } catch (e) {
-      return createRequestReturn(500, null, (e as Error).message)
-    }
+    await validateRoot(fastify, req, res)
+    const data: any = req.query
+    data.size = parseInt(data.size, 10)
+    data.page = parseInt(data.page, 10)
+    const result = await getUserVisitAll(fastify, data)
+    return createRequestReturn(200, result as UserVisitReturn, '')
+  })
+  fastify.post('/url/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
+    const id = (req.params as { id: string }).id
+    const result = await getUserVisitAll(fastify, id)
+    return createRequestReturn(200, result as UserVisitReturn, '')
+  })
+  fastify.get('/url/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
+    const id = (req.params as { id: string }).id
+    const result = await getUserVisit(fastify, id)
+    return createRequestReturn(200, result as UserVisitReturn, '')
+  })
+  fastify.delete('/url/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
+    const id = (req.params as { id: string }).id
+    const result = await deleteUserVisit(fastify, id)
+    return createRequestReturn(200, result as UserVisitReturn, '')
   })
   fastify.get('/analysis', async (req: FastifyRequest, res: FastifyReply) => {
     await validateRoot(fastify, req, res)
@@ -50,7 +66,7 @@ export default function (
 }
 
 export interface UserVisitCreate {
-  [index: number]: [{ user_id?: string; url: string }]
+  [index: number]: [{ url: string }]
 }
 
 export interface UserVisitReturn {

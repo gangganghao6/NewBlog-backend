@@ -3,12 +3,14 @@ import {
   deleteChat,
   deleteUserChatAll,
   getChatAll,
+  getChatDetail,
   sendMessage
 } from './chatFn'
 import { createRequestReturn } from 'src/utils'
 import { validateRoot, validateUser } from 'src/auth'
 import IP2Region from 'ip2region'
 import { Chat, File, Image, Video } from 'src/types/model'
+import { sendOnlineCount } from './utils'
 
 // eslint-disable-next-line new-cap,@typescript-eslint/ban-ts-comment
 // @ts-expect-error
@@ -26,7 +28,10 @@ export default function (
 
   fastify.get('/', { websocket: true }, async (connection, req) => {
     const userId = (req.query as { userId: string }).userId
-    connection.socket.send(JSON.stringify(createRequestReturn(200, { type: 'boardcast', onLineCount: fastify.websocketServer.clients.size }, '')))
+    sendOnlineCount(fastify)
+    connection.socket.on('close', () => {
+      sendOnlineCount(fastify)
+    })
     connection.socket.on('message', async (buf: Buffer) => {
       const data: any = JSON.parse(buf.toString()) as CreateChat
       const location: {
@@ -41,7 +46,7 @@ export default function (
 
       const result = (await sendMessage(fastify, data)) as Chat
       fastify.websocketServer.clients.forEach((obj) => {
-        obj.send(JSON.stringify(createRequestReturn(200, result, '')))
+        obj.send(JSON.stringify(createRequestReturn(200, { ...result, type: data.type }, '')))
       })
     })
   })
@@ -52,24 +57,25 @@ export default function (
     const result = (await getChatAll(fastify, data)) as Chat[]
     return createRequestReturn(200, result, '')
   })
+  fastify.get('/chat/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    const id = (req.params as { id: string }).id
+    const result = (await getChatDetail(fastify, id)) as Chat
+    return createRequestReturn(200, result, '')
+  })
   fastify.delete(
     '/chat/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
-      try {
-        await validateRoot(fastify, req, res)
-        const id = (req.params as { id: string }).id
-        const result = (await deleteChat(fastify, id)) as { count: number }
-        return createRequestReturn(200, result, '')
-      } catch (e) {
-        return createRequestReturn(500, null, (e as Error).message)
-      }
+      await validateRoot(fastify, req, res)
+      const id = (req.params as { id: string }).id
+      const result = (await deleteChat(fastify, id)) as { count: number }
+      return createRequestReturn(200, result, '')
     }
   )
   fastify.delete(
     '/user/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
       try {
-        await validateRoot(fastify, req.session.rootId)
+        await validateRoot(fastify, req, res)
         const id = (req.params as { id: string }).id
         const result = (await deleteUserChatAll(fastify, id)) as {
           count: number

@@ -22,18 +22,20 @@ export async function getGithubAll(
 export async function getGithubById(
   fastify: FastifyInstance,
   id: string,
-  update = false
+  update = true
 ): Promise<any> {
   const github = await fastify.prisma.github.findUnique({
-    where: { id }
+    where: { id },
   })
-  if (update && !isNil(github)) {
+  if (update) {
     // setImmediate(() => {
     void fastify.prisma.github
       .update({
         where: { id },
         data: {
-          visitedCount: github.visitedCount + 1
+          visitedCount: {
+            increment: 1
+          }
         }
       })
       .then()
@@ -47,8 +49,8 @@ export async function updateGithub(fastify: FastifyInstance): Promise<void> {
   try {
     fastify.log.info('Updating Github Data...')
     const mission = []
-    const personal = await getPersonalInfoAll(fastify)
-    const githubName: string = personal.personal.githubName
+    const personal = await fastify.prisma.personal.findFirst()
+    const githubName = personal?.githubName
     if (isNil(githubName)) {
       throw new Error('请先初始化个人信息')
     }

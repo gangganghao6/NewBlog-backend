@@ -125,11 +125,11 @@ export async function createPayOrder(
   const orderResult = alipaySdk.pageExec(`alipay.trade.${data?.isMobile ? 'wap' : 'page'}.pay`, {
     method: 'GET',
     bizContent,
-    // returnUrl: `http://${(process.env.NODE_ENV.trim() === 'dev'
-    //   ? getLocalIp()
-    //   : process.env.PUBLIC_URL) +
-    //   ':' +
-    //   process.env.PORT as string}/api/users/pay/confirm`
+    returnUrl: `http://${(process.env.NODE_ENV.trim() === 'dev'
+      ? getLocalIp()
+      : process.env.PUBLIC_URL) +
+      ':' +
+      process.env.PORT as string}/api/users/pay/confirm`
   });
   const blog = await fastify.prisma.blog.findFirst({
     where: {
@@ -168,7 +168,7 @@ export async function confirmOrder(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const orderId = data.outTradeNo
+  const orderId = data.outTradeNo || data.out_trade_no
   if (orderId === null || orderId === undefined) {
     throw new Error('orderId为空')
   }
@@ -228,13 +228,60 @@ export async function confirmOrder(
 
   }
 }
-
+export async function closePayOrder(
+  fastify: FastifyInstance,
+  outTradeNo: string
+): Promise<any> {
+  try {
+    await confirmOrder(fastify, { outTradeNo })
+  } catch (e) {
+    await fastify.prisma.pay.updateMany({
+      where: {
+        orderId: outTradeNo,
+        paySuccess: false
+      },
+      data: {
+        isClose: true,
+        closeTime: new Date()
+      }
+    })
+  }
+}
 export async function getPayAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const count = await fastify.prisma.pay.count()
+  
+  const countObj = {
+    where: {
+      id: {
+        contains: data.id
+      },
+      blogId: {
+        contains: data.blogId
+      },
+      isClose: data.isClose === undefined ? undefined : data.isClose === 'false' ? false : true,
+      paySuccess: data.paySuccess === undefined ? undefined : data.paySuccess === 'false' ? false : true,
+      user: {
+        id: {
+          contains: data.userId
+        },
+        email: {
+          contains: data.email
+        },
+        name: {
+          contains: data.name
+        }
+      },
+      createdTime: data.createdTimeFrom && {
+        gte: dayjs(data.createdTimeFrom).add(8, 'hour').toDate(),
+        lte: dayjs(data.createdTimeTo).add(32, 'hour').toDate(),
+      }
+    }
+  }
+  const count = await fastify.prisma.pay.count(countObj)
   const result = await fastify.prisma.pay.findMany({
+    ...countObj,
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
@@ -245,14 +292,7 @@ export async function getPayAll(
       blog: true,
       personal: true
     }
-    // select: {
-    //   id: true
-    // }
   })
-  // const result = []
-  // for (const obj of tempResult) {
-  //   result.push(await getPayById(fastify, obj.id))
-  // }
   return { result, count }
 }
 

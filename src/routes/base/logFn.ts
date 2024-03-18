@@ -12,7 +12,7 @@ const query = new IP2Region.default({
 
 export async function postUserVisitLog(
   fastify: FastifyInstance,
-  data: { data: any[]; ip: string; userAgent: any }
+  data: { data: any[]; ip: string; userAgent: any, userId: string | undefined }
 ): Promise<any> {
   const result = parser(data.userAgent)
   const location: {
@@ -21,34 +21,39 @@ export async function postUserVisitLog(
     city: string
     isp: string
   } = query.search(data.ip)
-  for (const obj of data.data) {
-    void fastify.prisma.userVisit
-      .create({
-        data: {
-          ip: data.ip,
-          country: location.country === '' ? null : location.country,
-          province: location.province === '' ? null : location.province,
-          city: location.city === '' ? null : location.city,
-          isp: location.isp === '' ? null : location.isp,
-          url: obj.url,
-          userAgent: data.userAgent,
-          userId: obj.user_id,
-          browserName: result.browser.name,
-          browserVersion: result.browser.version,
-          browserMajor: result.browser.major,
-          engineName: result.engine.name,
-          engineVersion: result.engine.version,
-          osName: result.os.name,
-          osVersion: result.os.version,
-          deviceVendor: result.device.vendor,
-          deviceModel: result.device.model,
-          deviceType: result.device.type,
-          cpuArchitecture: result.cpu.architecture
-        }
-      })
-      .then()
-      .catch((err) => fastify.log.error(err))
-  }
+
+  void fastify.prisma.userVisit
+    .create({
+      data: {
+        ip: data.ip,
+        country: location.country === '' ? null : location.country,
+        province: location.province === '' ? null : location.province,
+        city: location.city === '' ? null : location.city,
+        isp: location.isp === '' ? null : location.isp,
+        url: data.data.url,
+        userAgent: data.userAgent,
+        browserName: result.browser.name,
+        browserVersion: result.browser.version,
+        browserMajor: result.browser.major,
+        engineName: result.engine.name,
+        engineVersion: result.engine.version,
+        osName: result.os.name,
+        osVersion: result.os.version,
+        deviceVendor: result.device.vendor,
+        deviceModel: result.device.model,
+        deviceType: result.device.type,
+        cpuArchitecture: result.cpu.architecture,
+        ...(data.userId && {
+          user: {
+            connect: {
+              id: data.userId
+            }
+          }
+        })
+      },
+    })
+    .then()
+    .catch((err) => fastify.log.error(err))
   return null
 }
 
@@ -56,20 +61,74 @@ export async function getUserVisitAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const count = await fastify.prisma.userVisit.count()
+  const countObj = {
+    where: {
+      url: {
+        contains: data.url
+      },
+      id: {
+        contains: data.id
+      },
+      ...((data.userId || data.userName || data.email) && {
+        user: {
+          id: {
+            contains: data.userId
+          },
+          name: {
+            contains: data.userName
+          },
+          email: {
+            contains: data.email
+          }
+        }
+      }),
+      visitTime: data.visitTimeFrom && {
+        gte: dayjs(data.visitTimeFrom).add(8, 'hour').toDate(),
+        lte: dayjs(data.visitTimeTo).add(32, 'hour').toDate(),
+      },
+    }
+  }
+  const count = await fastify.prisma.userVisit.count(countObj)
   const result = await fastify.prisma.userVisit.findMany({
+    ...countObj,
     take: data.size,
     skip: (data.page - 1) * data.size,
     orderBy: {
       visitTime: data.sort
+    },
+    include: {
+      user: true
     }
   })
   return { result, count }
 }
-
-export async function getUserVisitAnalysis(
-  fastify: FastifyInstance
+export async function getUserVisit(
+  fastify: FastifyInstance,
+  id: string
 ): Promise<any> {
+  return fastify.prisma.userVisit.findUnique({
+    where: {
+      id
+    },
+    include: {
+      user: true
+    }
+  })
+}
+export async function deleteUserVisit(
+  fastify: FastifyInstance,
+  id: string
+): Promise<any> {
+  return fastify.prisma.userVisit.delete({
+    where: {
+      id
+    }
+  })
+}
+export async function
+  getUserVisitAnalysis(
+    fastify: FastifyInstance
+  ): Promise<any> {
   const browserNames: any = {}
   const engineNames: any = {}
   const osNames: any = {}
