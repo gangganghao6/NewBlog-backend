@@ -1,19 +1,11 @@
 import { FastifyInstance } from 'fastify'
-import AliPaySdk from 'alipay-sdk'
-import AliPayForm from 'alipay-sdk/lib/form.js'
+
+// import AliPayForm from 'alipay-sdk/lib/form.js'
 import { v4 } from 'uuid'
 import dayjs from 'dayjs'
 import { getLocalIp } from 'src/utils'
 
-// eslint-disable-next-line new-cap,@typescript-eslint/ban-ts-comment
-// @ts-expect-error
-// eslint-disable-next-line new-cap
-const alipaySdk = new AliPaySdk.default({
-  appId: process.env.ALIPAY_APPID, // 自己的id
-  gateway: 'https://openapi-sandbox.dl.alipaydev.com/gateway.do', // 这是支付宝官网沙箱测试网关
-  privateKey: process.env.ALIPAY_PRIVATEKEY,
-  alipayPublicKey: process.env.ALIPAY_PUBLICKEY
-})
+
 
 // export async function getUserDetail(
 //   fastify: FastifyInstance,
@@ -122,7 +114,7 @@ export async function createPayOrder(
     body: '谢谢喵~', // 出售商品的内容,
     // qr_pay_mode: 2
   }
-  const orderResult = alipaySdk.pageExec(`alipay.trade.${data?.isMobile ? 'wap' : 'page'}.pay`, {
+  const orderResult = fastify.alipaySdk.pageExec(`alipay.trade.${data?.isMobile ? 'wap' : 'page'}.pay`, {
     method: 'GET',
     bizContent,
     returnUrl: `http://${(process.env.NODE_ENV.trim() === 'dev'
@@ -182,7 +174,7 @@ export async function confirmOrder(
       where: { orderId }
     })
   } else {
-    const orderUrl = alipaySdk.pageExec('alipay.trade.query', {
+    const orderUrl = fastify.alipaySdk.pageExec('alipay.trade.query', {
       method: 'GET',
       bizContent: { out_trade_no: orderId },
     });

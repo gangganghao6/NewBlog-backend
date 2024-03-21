@@ -157,14 +157,28 @@ export async function getShareFile(
   })
 }
 export async function getRandomShareFile(
-  fastify: FastifyInstance
+  fastify: FastifyInstance,
+  size: number
 ): Promise<any> {
   const count = await fastify.prisma.shareFile.count()
-  const random = Math.floor(Math.random() * count)
-  const result = await fastify.prisma.shareFile.findMany({
-    take: 1,
-    skip: random
-  })
+  const result = []
+  for (let i = 0; i < size; i++) {
+    const random = Math.floor(Math.random() * count)
+    const sharefile = await fastify.prisma.shareFile.findFirst({
+      take: 1,
+      skip: random,
+      include: {
+        file: true,
+        image: true,
+        video: {
+          include: {
+            post: true
+          }
+        }
+      }
+    })
+    result.push(sharefile)
+  }
   return result
 }
 export async function increaseShareFileDownload(
@@ -175,19 +189,15 @@ export async function increaseShareFileDownload(
     where: { id }
   })
   if (sharefile !== null) {
-    setImmediate(() => {
-      void fastify.prisma.shareFile
-        .update({
-          where: { id },
-          data: {
-            downloadCount: {
-              increment: 1
-            }
+    await fastify.prisma.shareFile
+      .update({
+        where: { id },
+        data: {
+          downloadCount: {
+            increment: 1
           }
-        })
-        .then()
-        .catch((err) => fastify.log.error(err))
-    })
+        }
+      })
   }
   return null
 }

@@ -88,13 +88,16 @@ export async function getProjectsList(fastify: FastifyInstance, data: any = { pa
     }
   }
   let tempResult = await fastify.prisma.project.findMany(searchObj)
-  tempResult = tempResult.filter((item: any) => {
-    if (item.timeEnd) {
-      return dayjs(data.time).isBefore(dayjs(item.timeEnd))
-    } else {
-      return true
-    }
-  })
+  if (data.time) {
+    tempResult = tempResult.filter((item: any) => {
+      if (item.timeEnd) {
+        return dayjs(data.time).isBefore(dayjs(item.timeEnd))
+      } else {
+        return true
+      }
+    })
+  }
+
   const result = tempResult.slice((data.page - 1) * data.size, data.page * data.size)
   return { result, count: tempResult.length }
 }

@@ -85,13 +85,15 @@ export async function getExperiencesList(
     }
   }
   let tempResult = await fastify.prisma.experience.findMany(searchObj)
-  tempResult = tempResult.filter((item: any) => {
-    if (item.timeEnd) {
-      return dayjs(data.time).isBefore(dayjs(item.timeEnd))
-    } else {
-      return true
-    }
-  })
+  if (data.time) {
+    tempResult = tempResult.filter((item: any) => {
+      if (item.timeEnd) {
+        return dayjs(data.time).isBefore(dayjs(item.timeEnd))
+      } else {
+        return true
+      }
+    })
+  }
   const result = tempResult.slice((data.page - 1) * data.size, data.page * data.size)
   return { result, count: tempResult.length }
 }

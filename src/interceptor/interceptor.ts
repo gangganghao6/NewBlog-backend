@@ -4,10 +4,7 @@ import {
   FastifyRequest,
   FastifyError
 } from 'fastify'
-import { getProjectPath } from 'src/utils'
-import { validateRoot, validateUser } from 'src/auth'
-import fs from 'fs'
-import path from 'path'
+import { postUserVisitLog } from 'src/routes/base/logFn'
 // const authLists = JSON.parse(
 //   fs.readFileSync(
 //     path.join(getProjectPath(), 'src/interceptor/authLists.json'),
@@ -24,21 +21,15 @@ import path from 'path'
 // )
 async function registeInterceptor(fastify: FastifyInstance): Promise<void> {
   await fastify.addHook(
-    'onRequest',
+    'onResponse',
     async (req: FastifyRequest, res: FastifyReply) => {
-      // const url = req.url.replaceAll('/api', '')
-      // try {
-      //   if (url.startsWith('/admin')) {
-      //     !ADMIN_NO_AUTH_ROUTES.includes(url) &&
-      //       (await validateRoot(fastify, req.session.adminId))
-      //   } else if (url.startsWith('/front')) {
-      //     !FRONT_NO_AUTH_ROUTES.includes(url) &&
-      //       (await validateUser(fastify, req.session.userId))
-      //   }
-      // } catch (e: any) {
-      //   res.statusCode = 401
-      //   res.send({ code: 401, data: null, message: '未登录' })
-      // }
+      if(req.url.startsWith('/public')) return
+      await postUserVisitLog(fastify, {
+        data: { url: req.headers.referer },
+        ip: req.ip,
+        userId: req.session.userId,
+        userAgent: req.headers['user-agent']
+      })
     }
   )
   // await fastify.addHook(

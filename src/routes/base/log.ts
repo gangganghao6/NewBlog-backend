@@ -15,21 +15,21 @@ export default function (
   config = {},
   done: any
 ): void {
-  fastify.post('/url', async (req: FastifyRequest, res: FastifyReply) => {
-    const data: any = JSON.parse(req.body as string) as UserVisitCreate
-    const userId = req.session.userId
-    const ip = req.ip
-    const userAgent = req.headers['user-agent']
+  // fastify.post('/url', async (req: FastifyRequest, res: FastifyReply) => {
+  //   const data: any = JSON.parse(req.body as string) as UserVisitCreate
+  //   const userId = req.session.userId
+  //   const ip = req.ip
+  //   const userAgent = req.headers['user-agent']
 
-    await postUserVisitLog(fastify, {
-      data,
-      ip,
-      userId,
-      userAgent
-    })
+  //   await postUserVisitLog(fastify, {
+  //     data,
+  //     ip,
+  //     userId,
+  //     userAgent
+  //   })
 
-    return createRequestReturn(200, '', '')
-  })
+  //   return createRequestReturn(200, '', '')
+  // })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
     await validateRoot(fastify, req, res)
     const data: any = req.query

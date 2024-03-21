@@ -49,7 +49,7 @@ export default function (
       page: parseInt(query.page, 10)
     }
     const result = await getShareFileList(fastify, data)
-    
+
     return createRequestReturn(200, result as ShareFileReturn[], '')
   })
   fastify.get(
@@ -71,7 +71,8 @@ export default function (
   fastify.get(
     '/random-file',
     async (req: FastifyRequest, res: FastifyReply) => {
-      const result = await getRandomShareFile(fastify)
+      const size = (req.query as { size: string }).size
+      const result = await getRandomShareFile(fastify, Number(size) || 1)
       return createRequestReturn(200, result as ShareFile, '')
     }
   )

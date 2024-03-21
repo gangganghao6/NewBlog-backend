@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client'
+import AlipaySdk from 'alipay-sdk'
 
 export declare module 'fastify' {
   interface FastifyInstance {
-    prisma: PrismaClient
+    prisma: PrismaClient,
+    alipaySdk: AlipaySdk
   }
 
   interface ProcessEnv {

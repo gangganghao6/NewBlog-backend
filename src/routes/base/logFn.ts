@@ -12,7 +12,7 @@ const query = new IP2Region.default({
 
 export async function postUserVisitLog(
   fastify: FastifyInstance,
-  data: { data: any[]; ip: string; userAgent: any, userId: string | undefined }
+  data: { data: { url: string }; ip: string; userAgent: any, userId: string | undefined }
 ): Promise<any> {
   const result = parser(data.userAgent)
   const location: {

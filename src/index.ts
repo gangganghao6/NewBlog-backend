@@ -1,8 +1,6 @@
 import Fastify from 'fastify'
 import dotenv from 'dotenv'
 import path from 'path'
-// import dayjs from 'dayjs'
-import fs from 'fs'
 import { PrismaClient } from '@prisma/client'
 import fastifyCors from '@fastify/cors'
 import fastifyCookie from '@fastify/cookie'
@@ -12,6 +10,7 @@ import fastifyStatic from '@fastify/static'
 import fastifyRoutes from '@fastify/routes'
 import fastifyCompress from '@fastify/compress'
 import fastifyWebsocket from '@fastify/websocket'
+import AliPaySdk from 'alipay-sdk'
 import registeInterceptor from './interceptor/interceptor.js'
 import {
   generateRoutesLogs,
@@ -67,8 +66,15 @@ const FasitfyConfig = {
 }
 export const fastify = Fastify(FasitfyConfig)
 const prisma = new PrismaClient()
-await prisma.$queryRaw`PRAGMA journal_mode=WAL`
+// await prisma.$queryRaw`PRAGMA journal_mode=WAL`
+await prisma.$queryRaw`PRAGMA journal_mode=delete`
 fastify.prisma = prisma
+fastify.alipaySdk = new AliPaySdk({
+  appId: process.env.ALIPAY_APPID, // 自己的id
+  gateway: 'https://openapi-sandbox.dl.alipaydev.com/gateway.do', // 这是支付宝官网沙箱测试网关
+  privateKey: process.env.ALIPAY_PRIVATEKEY,
+  alipayPublicKey: process.env.ALIPAY_PUBLICKEY
+})
 
 await fastify.register(fastifyCors, {
   // origin: [`${getNetworkIp()}:${parseInt(process.env.FRONT_PORT)}`],
@@ -91,7 +97,6 @@ await fastify.register(fastifyStatic, {
 })
 await fastify.register(fastifyCookie)
 await fastify.register(fastifySession, {
-  // request.session.destroy(next) request.session.user = {name: 'max'}
   cookieName: 'sessionId',
   secret: 'a secret with minimum length of 32 characters',
   cookie: {
