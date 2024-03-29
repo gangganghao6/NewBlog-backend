@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
-import lodash, { update } from 'lodash'
+import lodash, { includes, update } from 'lodash'
 import { removeObjNullUndefined } from 'src/utils'
 
 const { isNil } = lodash
@@ -62,7 +62,11 @@ export async function getShuoshuo(
         }
       },
       images: true,
-      comments: true
+      comments: {
+        include: {
+          user: true
+        }
+      }
     }
   })
   if (update && !isNil(shuoshuo)) {
@@ -119,7 +123,11 @@ export async function getShuoshuoList(
         }
       },
       images: true,
-      comments: true
+      comments: {
+        include: {
+          user: true
+        }
+      }
     }
   }
   const count = await fastify.prisma.shuoshuo.count(countObj)
@@ -188,6 +196,45 @@ export async function putShuoshuo(
       },
       images: true,
       comments: true
+    }
+  })
+}
+export async function createShuoshuoComment(
+  fastify: FastifyInstance,
+  data: {
+    shuoshuoId: string
+    comment: string
+    userId: string
+  }
+): Promise<any> {
+  return await fastify.prisma.shuoshuo.update({
+    where: { id: data.shuoshuoId },
+    data: {
+      comments: {
+        create: {
+          comment: data.comment,
+          user: {
+            connect: {
+              id: data.userId
+            }
+          }
+        }
+      }
+    }
+  })
+}
+export async function deleteShuoshuoComment(
+  fastify: FastifyInstance,
+  data: any
+): Promise<any> {
+  return await fastify.prisma.shuoshuo.update({
+    where: { id: data.shuoshuoId },
+    data: {
+      comments: {
+        delete: {
+          id: data.commentId
+        }
+      }
     }
   })
 }

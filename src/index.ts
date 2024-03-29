@@ -20,14 +20,14 @@ import {
   getLocalIp
 } from './utils.js'
 import { registRoutes, registStatic } from './routes.js'
-import 'dayjs/locale/zh-cn'
-import dayjs from 'dayjs'
+// import 'dayjs/locale/zh-cn'
+// import dayjs from 'dayjs'
 
 dotenv.config({
   path: '.env',
   override: true
 })
-dayjs.locale('zh-cn')
+// dayjs.locale('zh-cn')
 initMkdir()
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
@@ -66,8 +66,8 @@ const FasitfyConfig = {
 }
 export const fastify = Fastify(FasitfyConfig)
 const prisma = new PrismaClient()
+await prisma.$queryRaw`PRAGMA journal_mode=WAL`
 // await prisma.$queryRaw`PRAGMA journal_mode=WAL`
-await prisma.$queryRaw`PRAGMA journal_mode=delete`
 fastify.prisma = prisma
 fastify.alipaySdk = new AliPaySdk({
   appId: process.env.ALIPAY_APPID, // 自己的id
@@ -92,7 +92,7 @@ await fastify.register(fastifyStatic, {
 })
 await fastify.register(fastifyStatic, {
   root: path.join(getProjectPath(), 'frontdist'), // 前端代理
-  prefix: '/',
+  prefix: '/frontdist',
   decorateReply: false
 })
 await fastify.register(fastifyCookie)
@@ -125,11 +125,11 @@ await fastify.register(fastifyMultipart, {
   }
 }) // await req.file()
 
+
 await registeInterceptor(fastify)
 
 await registStatic(fastify)
 await registRoutes(fastify)
-
 // fastify.setErrorHandler(function (error, request, reply) {
 //   // Log error
 //   this.log.error(111,error)

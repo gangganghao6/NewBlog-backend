@@ -1,7 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn } from 'src/utils'
-import { getPersonalInfoAll, putPersonalInfo } from './infoFn'
+import { createPersonalComment, deletePersonalComment, getPersonalInfoAll, putPersonalInfo } from './infoFn'
 import { Personal } from 'src/types/model'
+import { validateBoth, validateUser } from 'src/auth'
 
 export default function (
   fastify: FastifyInstance,
@@ -21,6 +22,19 @@ export default function (
     const data = req.body as CreatePersonal
     const result = await putPersonalInfo(fastify, data)
     return createRequestReturn(200, result as Personal, '')
+  })
+  fastify.post('/personalcomment', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateUser(fastify, req, res)
+    const data = req.body as any
+    const userId = req.session.userId
+    const result = await createPersonalComment(fastify, { userId, ...data })
+    return createRequestReturn(200, result, '')
+  })
+  fastify.delete('/personalcomment', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateBoth(fastify, req, res)
+    const data = req.body as any
+    const result = await deletePersonalComment(fastify, data)
+    return createRequestReturn(200, result, '')
   })
   done()
 }

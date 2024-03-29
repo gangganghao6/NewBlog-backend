@@ -169,7 +169,7 @@ model Pay {
   user        User?     @relation(fields: [userId], references: [id])
   blogId      String?
   blog        Blog?     @relation(fields: [blogId], references: [id])
-  personalId  String?   @unique
+  personalId  String?
   personal    Personal? @relation(fields: [personalId], references: [id])
 }
 

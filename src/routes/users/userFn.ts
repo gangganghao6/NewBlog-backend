@@ -123,30 +123,53 @@ export async function createPayOrder(
       ':' +
       process.env.PORT as string}/api/users/pay/confirm`
   });
-  const blog = await fastify.prisma.blog.findFirst({
-    where: {
-      id: data.blogId
-    }
-  })
-  await fastify.prisma.blog.update({
-    where: { id: blog?.id },
-    data: {
-      pays: {
-        create: {
-          money: data.money,
-          message: data.message,
-          orderId,
-          orderUrl: orderResult,
-          payType: data.payType,
-          user: {
-            connect: {
-              id: data.userId
+  if (data.type === 'blog') {
+    const blog = await fastify.prisma.blog.findFirst({
+      where: {
+        id: data.blogId
+      }
+    })
+    await fastify.prisma.blog.update({
+      where: { id: blog?.id },
+      data: {
+        pays: {
+          create: {
+            money: data.money,
+            message: data.message,
+            orderId,
+            orderUrl: orderResult,
+            payType: data.payType,
+            user: {
+              connect: {
+                id: data.userId
+              }
             }
           }
         }
       }
-    }
-  })
+    })
+  } else if (data.type === 'personal') {
+    const personal = await fastify.prisma.personal.findFirst()
+    await fastify.prisma.personal.update({
+      where: { id: personal?.id },
+      data: {
+        pays: {
+          create: {
+            money: data.money,
+            message: data.message,
+            orderId,
+            orderUrl: orderResult,
+            payType: data.payType,
+            user: {
+              connect: {
+                id: data.userId
+              }
+            }
+          }
+        }
+      }
+    })
+  }
   const resultPay = await fastify.prisma.pay.findFirst({
     where: {
       orderId
@@ -243,7 +266,7 @@ export async function getPayAll(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  
+
   const countObj = {
     where: {
       id: {

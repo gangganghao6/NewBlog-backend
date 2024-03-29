@@ -177,7 +177,7 @@ export async function getRandomShareFile(
         }
       }
     })
-    result.push(sharefile)
+    sharefile?.id && result.push(sharefile)
   }
   return result
 }
