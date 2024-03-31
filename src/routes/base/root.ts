@@ -1,5 +1,4 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import jwt from 'jsonwebtoken'
 import { rootLogin, rootModify, rootRegist, getRootById } from './rootFn'
 import { Root } from 'src/types/model'
 import {

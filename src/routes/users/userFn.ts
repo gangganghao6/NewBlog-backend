@@ -149,9 +149,8 @@ export async function createPayOrder(
       }
     })
   } else if (data.type === 'personal') {
-    const personal = await fastify.prisma.personal.findFirst()
     await fastify.prisma.personal.update({
-      where: { id: personal?.id },
+      where: { id: data.personalId },
       data: {
         pays: {
           create: {

@@ -124,8 +124,8 @@ function initMkdir(): void {
   if (!fs.existsSync(`${path}\\log\\error`)) {
     fs.mkdirSync(`${path}\\log\\error`)
   }
-  if (!fs.existsSync(`${path}\\database`)) {
-    fs.mkdirSync(`${path}\\database`)
+  if (!fs.existsSync(`${path}\\prisma\\database`)) {
+    fs.mkdirSync(`${path}\\prisma\\database`)
     throw new Error('需要运行 npm run prisma 命令以创建数据库文件')
   }
   if (!fs.existsSync(`${path}\\public`)) {

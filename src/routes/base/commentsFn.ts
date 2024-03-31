@@ -1,69 +1,35 @@
 import { FastifyInstance } from 'fastify'
-import { CommentsCreate } from './comments'
 import lodash from 'lodash'
+import { CommentsCreate, CommentsDelete } from './comments'
+import { createBlogComment, deleteBlogComment } from 'src/routes/blogs/blogFn'
+import { createShuoshuoComment, deleteShuoshuoComment } from 'src/routes/shuoshuos/shuoshuoFn'
+import { createPersonalComment, deletePersonalComment } from 'src/routes/personal/infoFn'
 
 const { isNil } = lodash
 export async function postComment(
   fastify: FastifyInstance,
   data: CommentsCreate
 ): Promise<any> {
-  const commentObj: any = {
-    data: {
-      comment: data.comment,
-      user: {
-        connect: {
-          id: data.userId
-        }
-      }
-    },
-    include: {
-      user: true
-    }
+  const params = { comment: data.comment, userId: data.userId }
+  if (data.blogId) {
+    return await createBlogComment(fastify, { blogId: data?.blogId, ...params })
+  } else if (data.shuoshuoId) {
+    return await createShuoshuoComment(fastify, { shuoshuoId: data?.shuoshuoId, ...params })
+  } else if (data.personalId) {
+    return await createPersonalComment(fastify, { personalId: data.personalId, ...params })
   }
-  if (!isNil(data.personalId)) {
-    commentObj.data.personal = {
-      connect: {
-        id: data.personalId
-      }
-    }
-  } else if (!isNil(data.blogId)) {
-    commentObj.data.blog = {
-      connect: {
-        id: data.blogId
-      }
-    }
-  } else if (!isNil(data.shuoshuoId)) {
-    commentObj.data.shuoshuo = {
-      connect: {
-        id: data.shuoshuoId
-      }
-    }
-  }
-  return await fastify.prisma.comment.create(commentObj)
 }
 
 export async function deleteComment(
   fastify: FastifyInstance,
-  id: string
+  data: CommentsDelete
 ): Promise<any> {
-  return await fastify.prisma.comment.delete({
-    where: { id }
-  })
-  // return await fastify.prisma.comment.update({
-  //   where: { id },
-  //   data: {
-  //     user: {
-  //       disconnect: true
-  //     },
-  //     blog: {
-  //       disconnect: true
-  //     },
-  //     personal: {
-  //       disconnect: true
-  //     },
-  //     shuoshuo: {
-  //       disconnect: true
-  //     }
-  //   }
-  // })
+  const params = { commentId: data.commentId }
+  if (data.blogId) {
+    return await deleteBlogComment(fastify, { blogId: data?.blogId, ...params })
+  } else if (data.shuoshuoId) {
+    return await deleteShuoshuoComment(fastify, { shuoshuoId: data?.shuoshuoId, ...params })
+  } else if (data.personalId) {
+    return await deletePersonalComment(fastify, { personalId: data.personalId, ...params })
+  }
 }

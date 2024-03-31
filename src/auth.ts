@@ -11,7 +11,6 @@ export async function validateUser(
     // if (process.env.NODE_ENV.trim() === 'dev') {
     //     return void 0
     // }
-    console.log(1,req.headers);
     if (req.headers.referer?.includes('/admin')) {
         return void 0
     }

@@ -1,9 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn } from 'src/utils'
 import {
-  createShuoshuoComment,
   deleteShuoshuo,
-  deleteShuoshuoComment,
   getShuoshuo,
   getShuoshuoList,
   postShuoshuo,
@@ -57,19 +55,6 @@ export default function (
       return createRequestReturn(200, result as never, '')
     }
   )
-  fastify.post('/shuoshuocomment', async (req: FastifyRequest, res: FastifyReply) => {
-    await validateUser(fastify, req, res)
-    const data = req.body as any
-    const userId = req.session.userId
-    const result = await createShuoshuoComment(fastify, { userId, ...data })
-    return createRequestReturn(200, result, '')
-  })
-  fastify.delete('/shuoshuocomment', async (req: FastifyRequest, res: FastifyReply) => {
-    await validateBoth(fastify, req, res)
-    const data = req.body as any
-    const result = await deleteShuoshuoComment(fastify, data)
-    return createRequestReturn(200, result, '')
-  })
   done()
 }
 

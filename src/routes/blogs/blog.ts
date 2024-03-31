@@ -2,9 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn } from 'src/utils'
 import { validateBoth, validateRoot, validateUser } from 'src/auth'
 import {
-  createBlogComment,
   deleteBlog,
-  deleteBlogComment,
   getBlog,
   getBlogList,
   getBlogType,
@@ -69,19 +67,6 @@ export default function (
   })
   fastify.get('/blogType', async (req: FastifyRequest, res: FastifyReply) => {
     const result = await getBlogType(fastify)
-    return createRequestReturn(200, result, '')
-  })
-  fastify.post('/blogcomment', async (req: FastifyRequest, res: FastifyReply) => {
-    await validateUser(fastify, req, res)
-    const data = req.body as any
-    const userId = req.session.userId
-    const result = await createBlogComment(fastify, { userId, ...data })
-    return createRequestReturn(200, result, '')
-  })
-  fastify.delete('/blogcomment', async (req: FastifyRequest, res: FastifyReply) => {
-    await validateBoth(fastify, req, res)
-    const data = req.body as any
-    const result = await deleteBlogComment(fastify, data)
     return createRequestReturn(200, result, '')
   })
   done()

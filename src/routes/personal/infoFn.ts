@@ -73,12 +73,14 @@ export async function createPersonalComment(
   fastify: FastifyInstance,
   data: {
     comment: string
-    userId: string
+    userId: string,
+    personalId: string
   }
 ): Promise<any> {
-  const personal = await fastify.prisma.personal.findFirst()
+  // const personal = await fastify.prisma.personal.findFirst()
+
   return await fastify.prisma.personal.update({
-    where: { id: personal.id },
+    where: { id: data.personalId },
     data: {
       comments: {
         create: {
@@ -97,9 +99,9 @@ export async function deletePersonalComment(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  const personal = await fastify.prisma.personal.findFirst()
+  // const personal = await fastify.prisma.personal.findFirst()
   return await fastify.prisma.personal.update({
-    where: { id: personal.id },
+    where: { id: data?.personalId },
     data: {
       comments: {
         delete: {
