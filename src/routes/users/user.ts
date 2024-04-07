@@ -9,13 +9,14 @@ import {
   getPayById,
   getUserAll,
   getUserByEmail,
-  // getUserById,
   getUserDetail,
   putUser
 } from './userFn'
 import { createRequestReturn } from 'src/utils'
 import { Pay, User } from 'src/types/model'
 import { validateRoot, validateUser } from 'src/auth'
+import lodash from 'lodash'
+const { isNil } = lodash
 export default function (
   fastify: FastifyInstance,
   config: never,
@@ -31,6 +32,14 @@ export default function (
       return createRequestReturn(500, null, '登录失败')
     }
   })
+  fastify.post(
+    '/logout',
+    {},
+    async (req: FastifyRequest, res: FastifyReply): Promise<any> => {
+      req.session.userId = null
+      return createRequestReturn(200, null, '')
+    }
+  )
   fastify.post('/regist', async (req: FastifyRequest, res: FastifyReply) => {
     const data = req.body as { email: string; name: string }
     const exist = await getUserByEmail(fastify, data.email)
@@ -69,13 +78,24 @@ export default function (
   fastify.post('/auth', {}, async (req: FastifyRequest, res: FastifyReply) => {
     const userId = req.session.userId
     if (userId === null || userId === undefined) {
-      return res.code(401).send('未登录')
+      throw new Error('登录失效')
     }
     const result = await getUserDetail(fastify, userId)
     if (result === null) {
-      return res.code(401).send('用户不存在')
+      throw new Error('账号不存在')
     }
     return createRequestReturn(200, result as User, '')
+  })
+  fastify.put('/subscribe', async (req: FastifyRequest, res: FastifyReply) => {
+    // await validateUser(fastify, req, res)
+    const userId = req.session.userId
+    if (isNil(userId)){
+      await validateUser(fastify, req, res)
+    }
+    const data = req.body as PutUser
+
+    await putUser(fastify, { isSubscribed: data.isSubscribed }, userId)
+    return createRequestReturn(200, null, '')
   })
   fastify.post(
     '/pay/create',

@@ -22,7 +22,7 @@ export async function validateUser(
     if (user === null) {
         create401Response(res, '用户不存在')
     } else if (user.isBanned === true) {
-        create401Response(res, '用户已被封禁')
+        create500Response(res, '用户已被封禁')
     } else {
         fastify.log.info({ userId: id })
     }
@@ -66,7 +66,7 @@ export async function validateBoth(
     if (isNil(user) && isNil(admin)) {
         create401Response(res, '用户或管理员不存在')
     } else if (user?.isBanned === true) {
-        create401Response(res, '用户已被封禁')
+        create500Response(res, '用户已被封禁')
     } else {
         fastify.log.info({ userId, adminId })
     }
@@ -74,5 +74,10 @@ export async function validateBoth(
 const create401Response = (res: FastifyReply, msg: string) => {
     res.statusCode = 401
     res.send({ code: 401, data: null, message: msg ?? '未登录' })
+    throw new Error(msg || '未登录')
+}
+const create500Response = (res: FastifyReply, msg: string) => {
+    res.statusCode = 500
+    res.send({ code: 500, data: null, message: msg ?? '未登录' })
     throw new Error(msg || '未登录')
 }

@@ -13,8 +13,8 @@ export declare module 'fastify' {
 
   interface Session {
     [x: string]: any
-    userId?: string
-    rootId?: string
+    userId?: string | null
+    adminId?: string | null
   }
 }
 declare global {

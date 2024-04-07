@@ -42,6 +42,7 @@ export async function putUser(
   data: any,
   id: string
 ): Promise<any> {
+  
   return await fastify.prisma.user.update({
     where: { id },
     data

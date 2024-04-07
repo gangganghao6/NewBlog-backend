@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { deleteComment, postComment } from './commentsFn'
+import { deleteComment, getCommentsList, postComment } from './commentsFn'
 import { createRequestReturn } from 'src/utils'
 import { validateRoot, validateUser } from 'src/auth'
 export default function (
@@ -14,6 +14,18 @@ export default function (
       data.userId = req.session.userId
       const result = await postComment(fastify, data)
       return createRequestReturn(200, result as Comment, '')
+    } catch (e) {
+      return createRequestReturn(500, null, (e as Error).message)
+    }
+  })
+  fastify.get('/comment/list', async (req: FastifyRequest, res: FastifyReply) => {
+    try {
+      // await validateUser(fastify, req, res)
+      const data: any = req.query
+      data.size = parseInt(data.size, 10)
+      data.page = parseInt(data.page, 10)
+      const result = await getCommentsList(fastify, data)
+      return createRequestReturn(200, result as Comment[], '')
     } catch (e) {
       return createRequestReturn(500, null, (e as Error).message)
     }

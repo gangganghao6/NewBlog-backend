@@ -21,23 +21,26 @@ export async function putBaseInfo(
   })
 }
 export async function getBaseInfo(fastify: FastifyInstance): Promise<any> {
-  const result = await fastify.prisma.baseInfo.findFirst({
+  const blogsCount = await fastify.prisma.blog.count()
+  const commentsCount = await fastify.prisma.comment.count()
+  let result = await fastify.prisma.baseInfo.findFirst({
     include: {
       headImage: true
     }
   })
   if (!result) {
-    return await fastify.prisma.baseInfo.create({
+    result = await fastify.prisma.baseInfo.create({
       data: {
         name: '',
         description: ''
-      }, include: {
+      },
+      include: {
         headImage: true
       }
     })
-  } else {
-    return result
   }
+  result = { ...result, blogsCount, commentsCount }
+  return result
 }
 export async function getSummaryInfo(fastify: FastifyInstance): Promise<any> {
   const blogCount = await fastify.prisma.blog.count()

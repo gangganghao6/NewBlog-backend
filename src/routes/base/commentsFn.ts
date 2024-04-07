@@ -33,3 +33,23 @@ export async function deleteComment(
     return await deletePersonalComment(fastify, { personalId: data.personalId, ...params })
   }
 }
+export async function getCommentsList(
+  fastify: FastifyInstance,
+  data: any
+): Promise<any> {
+  const countObj = {
+  }
+  const count = await fastify.prisma.comment.count(countObj)
+  const result = await fastify.prisma.comment.findMany({
+    ...countObj,
+    take: data.size,
+    skip: (data.page - 1) * data.size,
+    orderBy: {
+      createdTime: data.sort
+    },
+    include: {
+      user: true
+    }
+  })
+  return { result, count }
+}
