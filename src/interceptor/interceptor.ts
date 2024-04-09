@@ -10,7 +10,7 @@ async function registeInterceptor(fastify: FastifyInstance): Promise<void> {
   await fastify.addHook(//记录用户访问日志
     'onResponse',
     async (req: FastifyRequest, res: FastifyReply) => {
-      if (!req.url.startsWith('/public') && req.headers.referer) {
+      if (!req.url.startsWith('/public') && req.headers.referer && !req.headers.referer?.includes('/admin')) {
         void postUserVisitLog(fastify, {
           data: { url: req.headers.referer },
           ip: req.ip,

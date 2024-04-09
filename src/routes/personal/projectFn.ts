@@ -1,11 +1,13 @@
 import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
 import { removeObjNullUndefined } from 'src/utils'
+import { updateBaseInfoLastModified } from 'src/routes/base/infoFn'
 
 export async function postProject(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.project.create({
     data: {
       name: data.name,
@@ -107,6 +109,7 @@ export async function putProject(
   data: any,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.project.update({
     where: { id },
     data: {
@@ -133,6 +136,7 @@ export async function deleteProject(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.project.delete({
     where: { id }
   })

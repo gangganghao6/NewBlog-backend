@@ -1,10 +1,13 @@
 import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
+import { updateBaseInfoLastModified } from 'src/routes/base/infoFn'
+import { updateUserLastActiveTime } from 'src/routes/users/userFn'
 
 export async function sendMessage(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
+  await updateUserLastActiveTime(fastify, data.userId)
   return await fastify.prisma.chat.create({
     data: {
       content: data.content,
@@ -129,6 +132,7 @@ export async function deleteChat(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.chat.delete({
     where: { id }
   })
@@ -138,6 +142,7 @@ export async function deleteUserChatAll(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.chat.deleteMany({
     where: { userId: id }
   })

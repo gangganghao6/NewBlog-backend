@@ -40,9 +40,18 @@ export async function getBaseInfo(fastify: FastifyInstance): Promise<any> {
     })
   }
   result = { ...result, blogsCount, commentsCount }
+  await fastify.prisma.baseInfo.update({
+    where: { id: result.id },
+    data: {
+      visitedCount: {
+        increment: 1
+      }
+    }
+  })
   return result
 }
 export async function getSummaryInfo(fastify: FastifyInstance): Promise<any> {
+  const baseInfo = await getBaseInfo(fastify)
   const blogCount = await fastify.prisma.blog.count()
   const blogVisitedCount = await fastify.prisma.blog.aggregate({
     _sum: {
@@ -74,7 +83,7 @@ export async function getSummaryInfo(fastify: FastifyInstance): Promise<any> {
     }
   })
   const commentCount = await fastify.prisma.comment.count()
-  const visitedCount = await fastify.prisma.userVisit.count()
+  const visitedLogCount = await fastify.prisma.userVisit.count()
   const todoListCount = await fastify.prisma.todolist.count()
   const chatCount = await fastify.prisma.chat.count()
   const userCount = await fastify.prisma.user.count()
@@ -90,9 +99,17 @@ export async function getSummaryInfo(fastify: FastifyInstance): Promise<any> {
     githubVisitedCount: githubVisitedCount?._sum?.visitedCount || 0,
     payMoneyCount: payMoneyCount?._sum?.money || 0,
     commentCount,
-    visitedCount,
+    visitedLogCount,
+    visitedCount: baseInfo.visitedCount,
     todoListCount,
     chatCount,
     userCount
   }
+}
+export async function updateBaseInfoLastModified(fastify: FastifyInstance) {
+  await fastify.prisma.baseInfo.updateMany({
+    data: {
+      lastModifiedTime: new Date()
+    }
+  })
 }

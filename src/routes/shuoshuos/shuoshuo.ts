@@ -21,6 +21,7 @@ export default function (
     return createRequestReturn(200, result as Shuoshuo, '')
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const data: any = req.query
     data.size = parseInt(data.size, 10)
     data.page = parseInt(data.page, 10)
@@ -30,6 +31,7 @@ export default function (
   fastify.get(
     '/shuoshuo/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const id = (req.params as { id: string }).id
       const increase = (req.query as { increase: 'true' | 'false' }).increase === 'true'
       const result = await getShuoshuo(fastify, id, increase)

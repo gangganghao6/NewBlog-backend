@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn } from 'src/utils'
 import { getPersonalInfoAll, putPersonalInfo } from './infoFn'
 import { Personal } from 'src/types/model'
-import { validateBoth, validateUser } from 'src/auth'
+import { validateBoth, validateRoot, validateUser } from 'src/auth'
 
 export default function (
   fastify: FastifyInstance,
@@ -10,6 +10,7 @@ export default function (
   done: any
 ): void {
   fastify.get('/info', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const increase = (req.query as { increase: 'true' | 'false' }).increase === 'true'
     const exist = await fastify.prisma.personal.findFirst()
     if (exist === null) {
@@ -19,6 +20,7 @@ export default function (
     return createRequestReturn(200, result as Personal, '')
   })
   fastify.put('/info', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const data = req.body as CreatePersonal
     const result = await putPersonalInfo(fastify, data)
     return createRequestReturn(200, result as Personal, '')

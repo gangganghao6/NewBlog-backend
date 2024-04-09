@@ -5,17 +5,6 @@ import { v4 } from 'uuid'
 import dayjs from 'dayjs'
 import { getLocalIp } from 'src/utils'
 
-
-
-// export async function getUserDetail(
-//   fastify: FastifyInstance,
-//   id: string
-// ): Promise<any> {
-//   return await fastify.prisma.user.findUnique({
-//     where: { id }
-//   })
-// }
-
 export async function getUserByEmail(
   fastify: FastifyInstance,
   email: string
@@ -42,7 +31,7 @@ export async function putUser(
   data: any,
   id: string
 ): Promise<any> {
-  
+  await updateUserLastActiveTime(fastify, id)
   return await fastify.prisma.user.update({
     where: { id },
     data
@@ -106,6 +95,7 @@ export async function createPayOrder(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
+  await updateUserLastActiveTime(fastify, data.userId)
   const orderId = v4()
   const bizContent = {
     out_trade_no: orderId, // 订单号
@@ -323,12 +313,14 @@ export async function getPayById(
       personal: true
     }
   })
-  // result.user = await getUserById(fastify, id)
-  // if (result?.type === 'blog') {
-  //   try {
-  //     result.blog = await getBlog(fastify, result.blogId)
-  //   } catch (e) {
-  //     result.blog = null
-  //   }
-  // }
+}
+export async function updateUserLastActiveTime(fastify: FastifyInstance, userId: string) {
+  return await fastify.prisma.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      lastActiveTime: new Date()
+    }
+  })
 }

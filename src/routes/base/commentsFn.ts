@@ -4,6 +4,8 @@ import { CommentsCreate, CommentsDelete } from './comments'
 import { createBlogComment, deleteBlogComment } from 'src/routes/blogs/blogFn'
 import { createShuoshuoComment, deleteShuoshuoComment } from 'src/routes/shuoshuos/shuoshuoFn'
 import { createPersonalComment, deletePersonalComment } from 'src/routes/personal/infoFn'
+import { updateBaseInfoLastModified } from './infoFn'
+import { updateUserLastActiveTime } from 'src/routes/users/userFn'
 
 const { isNil } = lodash
 export async function postComment(
@@ -11,6 +13,7 @@ export async function postComment(
   data: CommentsCreate
 ): Promise<any> {
   const params = { comment: data.comment, userId: data.userId }
+  await updateUserLastActiveTime(fastify, data.userId)
   if (data.blogId) {
     return await createBlogComment(fastify, { blogId: data?.blogId, ...params })
   } else if (data.shuoshuoId) {
@@ -25,6 +28,7 @@ export async function deleteComment(
   data: CommentsDelete
 ): Promise<any> {
   const params = { commentId: data.commentId }
+  await updateBaseInfoLastModified(fastify)
   if (data.blogId) {
     return await deleteBlogComment(fastify, { blogId: data?.blogId, ...params })
   } else if (data.shuoshuoId) {

@@ -2,11 +2,13 @@ import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
 import { gte } from 'lodash'
 import { removeObjNullUndefined } from 'src/utils'
+import { updateBaseInfoLastModified } from 'src/routes/base/infoFn'
 
 export async function postExperience(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.experience.create({
     data: {
       company: data.company,
@@ -103,6 +105,7 @@ export async function putExperience(
   data: any,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.experience.update({
     where: { id },
     data: {
@@ -129,6 +132,7 @@ export async function deleteExperience(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.experience.delete({
     where: { id }
   })

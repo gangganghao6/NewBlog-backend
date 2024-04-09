@@ -23,12 +23,14 @@ export default function (
     return createRequestReturn(200, result as Blog, '')
   })
   fastify.get('/blog/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const id = (req.params as { id: string }).id
     const increase = (req.query as { increase: 'true' | 'false' }).increase === 'true'
     const result = await getBlog(fastify, id, increase)
     return createRequestReturn(200, result, '')
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const query = req.query as {
       size: string
       page: string
@@ -39,7 +41,8 @@ export default function (
       createdTimeFrom?: string
       createdTimeTo?: string
       lastModifiedTimeFrom?: string
-      lastModifiedTimeTo?: string
+      lastModifiedTimeTo?: string,
+      isFuzzy?: boolean
     }
     const data = {
       ...query,

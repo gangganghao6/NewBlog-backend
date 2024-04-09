@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
 import lodash, { includes, update } from 'lodash'
 import { removeObjNullUndefined } from 'src/utils'
+import { updateBaseInfoLastModified } from 'src/routes/base/infoFn'
 
 const { isNil } = lodash
 
@@ -9,6 +10,7 @@ export async function postShuoshuo(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   const postObj: any = {
     data: {
       content: data.content,
@@ -71,7 +73,7 @@ export async function getShuoshuo(
   })
   if (update && !isNil(shuoshuo)) {
     // setImmediate(() => {
-    fastify.prisma.shuoshuo
+    await fastify.prisma.shuoshuo
       .update({
         where: { id },
         data: {
@@ -140,6 +142,7 @@ export async function deleteShuoshuo(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.shuoshuo.delete({
     where: { id }
   })
@@ -150,6 +153,7 @@ export async function putShuoshuo(
   data: any,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.shuoshuo.update({
     where: { id },
     data: {

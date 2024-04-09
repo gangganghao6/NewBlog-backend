@@ -143,7 +143,6 @@ model Blog {
 
 model Shuoshuo {
   id               String    @id @default(uuid())
-  // media_class        String //images/videos/texts
   content          String?
   createdTime      DateTime  @default(now())
   lastModifiedTime DateTime  @default(now())
@@ -298,4 +297,5 @@ model BaseInfo {
   lastModifiedTime DateTime @default(now())
   recommendBlogIds String?
   headImage        Image?
+  visitedCount     Int      @default(0)
 }

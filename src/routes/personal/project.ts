@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn } from 'src/utils'
 import { deleteProject, getProject, getProjectsList, postProject, putProject } from './projectFn'
 import { Image, Project } from 'src/types/model'
+import { validateRoot } from 'src/auth'
 
 export default function (
   fastify: FastifyInstance,
@@ -9,6 +10,7 @@ export default function (
   done: any
 ): void {
   fastify.post('/project', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const data = req.body as CreateProject
     const result = await postProject(fastify, data)
     return createRequestReturn(200, result as Project, '')
@@ -16,6 +18,7 @@ export default function (
   fastify.put(
     '/project/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const data = req.body as CreateProject
       const id = (req.params as { id: string }).id
       const result = await putProject(fastify, data, id)
@@ -25,12 +28,14 @@ export default function (
   fastify.delete(
     '/project/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const id = (req.params as { id: string }).id
       const result = await deleteProject(fastify, id)
       return createRequestReturn(200, result as never, '')
     }
   )
   fastify.get('/project/list', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const query = req.query as {
       size: string
       page: string
@@ -46,6 +51,7 @@ export default function (
     return createRequestReturn(200, result as ProjectReturn[], '')
   })
   fastify.get('/project/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const id = (req.params as { id: string }).id
     const result = await getProject(fastify, id)
     return createRequestReturn(200, result as ProjectReturn[], '')

@@ -38,12 +38,12 @@ export default function (
     const result = await getUserVisitAll(fastify, data)
     return createRequestReturn(200, result as UserVisitReturn, '')
   })
-  fastify.post('/url/:id', async (req: FastifyRequest, res: FastifyReply) => {
-    await validateRoot(fastify, req, res)
-    const id = (req.params as { id: string }).id
-    const result = await getUserVisitAll(fastify, id)
-    return createRequestReturn(200, result as UserVisitReturn, '')
-  })
+  // fastify.post('/url/:id', async (req: FastifyRequest, res: FastifyReply) => {
+  //   await validateRoot(fastify, req, res)
+  //   const id = (req.params as { id: string }).id
+  //   const result = await getUserVisitAll(fastify, id)
+  //   return createRequestReturn(200, result as UserVisitReturn, '')
+  // })
   fastify.get('/url/:id', async (req: FastifyRequest, res: FastifyReply) => {
     await validateRoot(fastify, req, res)
     const id = (req.params as { id: string }).id

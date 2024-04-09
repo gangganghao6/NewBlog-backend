@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 import parser from 'ua-parser-js'
 import IP2Region from 'ip2region'
 import dayjs from 'dayjs'
+import { updateBaseInfoLastModified } from './infoFn'
 
 // eslint-disable-next-line new-cap,@typescript-eslint/ban-ts-comment
 // @ts-expect-error
@@ -119,6 +120,7 @@ export async function deleteUserVisit(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return fastify.prisma.userVisit.delete({
     where: {
       id

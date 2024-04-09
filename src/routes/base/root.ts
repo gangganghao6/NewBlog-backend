@@ -4,6 +4,7 @@ import { Root } from 'src/types/model'
 import {
   createRequestReturn,
 } from 'src/utils'
+import { validateRoot } from 'src/auth'
 export default function (
   fastify: FastifyInstance,
   options = {},
@@ -44,6 +45,7 @@ export default function (
     '/modify',
     {},
     async (req: FastifyRequest, res: FastifyReply): Promise<any> => {
+      await validateRoot(fastify, req, res)
       const data = req.body as RootModify
       const result = await rootModify(fastify, data)
       return createRequestReturn(200, result as Root, '')

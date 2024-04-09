@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { createRequestReturn } from 'src/utils'
 import { deleteExperience, getExperience, getExperiencesList, postExperience, putExperience } from './experienceFn'
 import { Experience, Image } from 'src/types/model'
+import { validateRoot } from 'src/auth'
 
 export default function (
   fastify: FastifyInstance,
@@ -11,6 +12,7 @@ export default function (
   fastify.post(
     '/experience',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const data = req.body as CreateExperience
       const result = await postExperience(fastify, data)
       return createRequestReturn(200, result as Experience, '')
@@ -19,6 +21,7 @@ export default function (
   fastify.put(
     '/experience/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const data = req.body
       const id = (req.params as { id: string }).id
       const result = await putExperience(fastify, data, id)
@@ -28,12 +31,14 @@ export default function (
   fastify.delete(
     '/experience/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const id = (req.params as { id: string }).id
       const result = await deleteExperience(fastify, id)
       return createRequestReturn(200, result as never, '')
     }
   )
   fastify.get('/experience/list', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const query = req.query as {
       size: string
       page: string
@@ -49,6 +54,7 @@ export default function (
     return createRequestReturn(200, result as ExperienceReturn[], '')
   })
   fastify.get('/experience/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const id = (req.params as { id: string }).id
     const result = await getExperience(fastify, id)
     return createRequestReturn(200, result as ExperienceReturn[], '')

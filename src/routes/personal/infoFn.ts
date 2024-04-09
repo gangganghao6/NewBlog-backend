@@ -2,13 +2,14 @@ import { FastifyInstance } from 'fastify'
 import { getExperiencesList } from './experienceFn'
 import { getProjectsList } from './projectFn'
 import lodash from 'lodash'
-import user from '../users/user'
+import { updateBaseInfoLastModified } from 'src/routes/base/infoFn'
 const { isNil } = lodash
 
 export async function putPersonalInfo(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   const exist = await fastify.prisma.personal.findFirst()
   if (isNil(exist)) {
     await fastify.prisma.personal.create({
@@ -77,8 +78,6 @@ export async function createPersonalComment(
     personalId: string
   }
 ): Promise<any> {
-  // const personal = await fastify.prisma.personal.findFirst()
-
   return await fastify.prisma.personal.update({
     where: { id: data.personalId },
     data: {
@@ -99,7 +98,6 @@ export async function deletePersonalComment(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
-  // const personal = await fastify.prisma.personal.findFirst()
   return await fastify.prisma.personal.update({
     where: { id: data?.personalId },
     data: {

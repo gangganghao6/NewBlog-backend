@@ -1,10 +1,12 @@
 import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
+import { updateBaseInfoLastModified } from 'src/routes/base/infoFn'
 
 export async function createTodolist(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.todolist.create({
     data: {
       title: data.title
@@ -57,6 +59,7 @@ export async function putTodolist(
   data: any,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.todolist.update({
     where: { id },
     data
@@ -67,6 +70,7 @@ export async function deleteTodolist(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.todolist.delete({
     where: { id }
   })

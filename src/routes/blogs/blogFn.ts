@@ -3,6 +3,8 @@ import nodemailer from 'nodemailer'
 import lodash from 'lodash'
 import comments from '../base/comments'
 import dayjs from 'dayjs'
+import { updateBaseInfoLastModified } from 'src/routes/base/infoFn'
+import { updateUserLastActiveTime } from '../users/userFn'
 const { isNil } = lodash
 
 export async function postBlog(
@@ -32,8 +34,9 @@ export async function postBlog(
       }
     }
   })
+  await updateBaseInfoLastModified(fastify)
   if (process.env.NODE_ENV.trim() === 'prod') {
-    void checkSubscribe(fastify)
+    await checkSubscribe(fastify)
       .then((str) => {
         const title: string = result.title
         const content: string = result.content
@@ -55,17 +58,29 @@ export async function getBlogList(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
+  const isFuzzy = data.isFuzzy === 'true';
+
   const countObj: any = {
     where: {
-      id: {
-        contains: data.id
-      },
-      title: {
-        contains: data.title
-      },
-      content: {
-        contains: data.content
-      },
+      ...(isFuzzy && {
+        OR: [{
+          title: {
+            contains: data.title
+          }
+        }, {
+          content: {
+            contains: data.content
+          }
+        }]
+      }),
+      ...(!isFuzzy && {
+        id: {
+          contains: data.id
+        },
+        title: {
+          contains: data.title
+        },
+      }),
       type: {
         contains: data.type
       },
@@ -86,7 +101,6 @@ export async function getBlogList(
     orderBy: {
       lastModifiedTime: data.sort
     },
-
     include: {
       post: true,
       comments: true,
@@ -151,6 +165,7 @@ export async function deleteBlog(
   const result = await fastify.prisma.blog.delete({
     where: { id },
   })
+  await updateBaseInfoLastModified(fastify)
   return result
 }
 
@@ -163,7 +178,7 @@ export async function putBlog(
   delete data.post.blogPostId
   delete data.post.id
   data.post.size = parseInt(data.post.size, 10)
-
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.blog.update({
     where: { id },
     data: {

@@ -1,11 +1,13 @@
 import dayjs from 'dayjs'
 import { FastifyInstance } from 'fastify'
 import { removeObjNullUndefined } from 'src/utils'
+import { updateBaseInfoLastModified } from 'src/routes/base/infoFn'
 
 export async function uploadShareFile(
   fastify: FastifyInstance,
   data: any
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.shareFile.create({
     data: {
       ...data,
@@ -46,6 +48,7 @@ export async function deleteShareFile(
   fastify: FastifyInstance,
   id: string
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   return await fastify.prisma.shareFile.delete({
     where: { id }
   })
@@ -55,6 +58,7 @@ export async function putShareFile(
   fastify: FastifyInstance,
   { id, data }: any
 ): Promise<any> {
+  await updateBaseInfoLastModified(fastify)
   delete data?.file?.shareFileId
   delete data?.image?.shareFileId
   delete data?.video?.shareFileId

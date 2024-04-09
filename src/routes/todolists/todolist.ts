@@ -8,6 +8,7 @@ import {
   putTodolist
 } from './todolistFn'
 import { Todolist } from 'src/types/model'
+import { validateRoot } from 'src/auth'
 
 export default function (
   fastify: FastifyInstance,
@@ -15,11 +16,13 @@ export default function (
   done: any
 ): void {
   fastify.post('/todolist', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const data = req.body as { title: string }
     const result = await createTodolist(fastify, data)
     return createRequestReturn(200, result as Todolist, '')
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const data: any = req.query
     data.page = parseInt(data.page, 10)
     data.size = parseInt(data.size, 10)
@@ -29,6 +32,7 @@ export default function (
   fastify.put(
     '/todolist/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const id = (req.params as { id: string }).id
       const data = req.body as PutTodolist
       const result = await putTodolist(fastify, data, id)
@@ -38,12 +42,14 @@ export default function (
   fastify.delete(
     '/todolist/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const id = (req.params as { id: string }).id
       const result = await deleteTodolist(fastify, id)
       return createRequestReturn(200, result as never, '')
     }
   )
   fastify.get('/todolist/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const id = (req.params as { id: string }).id
     const result = await getTodolist(fastify, id)
     return createRequestReturn(200, result as Todolist, '')

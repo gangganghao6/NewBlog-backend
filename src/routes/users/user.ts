@@ -10,7 +10,8 @@ import {
   getUserAll,
   getUserByEmail,
   getUserDetail,
-  putUser
+  putUser,
+  updateUserLastActiveTime
 } from './userFn'
 import { createRequestReturn } from 'src/utils'
 import { Pay, User } from 'src/types/model'
@@ -25,6 +26,7 @@ export default function (
   fastify.post('/login', async (req: FastifyRequest, res: FastifyReply) => {
     const email = (req.body as { email: string }).email
     const result = await getUserByEmail(fastify, email)
+    await updateUserLastActiveTime(fastify, result.id)
     if (result !== null) {
       req.session.userId = result.id
       return createRequestReturn(200, result as UserLoginReturn, '')
@@ -51,22 +53,20 @@ export default function (
     return createRequestReturn(200, result as UserLoginReturn, '')
   })
   fastify.get('/user/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const id = (req.params as { id: string }).id
     const result = await getUserDetail(fastify, id)
     return createRequestReturn(200, result as UserLoginReturn, '')
   })
   fastify.put('/user/:id', async (req: FastifyRequest, res: FastifyReply) => {
-    // try {
-    //   await validateRoot(fastify, req.session.rootId)
-    // } catch (e) {
-    //   await validateUser(fastify, req.session.userId)
-    // }
+    await validateRoot(fastify, req, res)
     const data = req.body as PutUser
     const id = (req.params as { id: string }).id
     const result = await putUser(fastify, data, id)
     return createRequestReturn(200, result as UserLoginReturn, '')
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const data: any = req.query
     data.page = parseInt(data.page, 10)
     data.size = parseInt(data.size, 10)
@@ -115,7 +115,6 @@ export default function (
     async (req: FastifyRequest, res: FastifyReply) => {
       // await validateUser(fastify, req, res)
       const data = req.query as { outTradeNo: string }
-      // const data = req.body as { outTradeNo: string }
       const result = await confirmOrder(fastify, data)
       return createRequestReturn(200, result as Pay, '')
     }

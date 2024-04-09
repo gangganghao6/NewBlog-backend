@@ -10,6 +10,7 @@ import {
   uploadShareFile
 } from './share_fileFn'
 import { Image, ShareFile, Video } from 'src/types/model'
+import { validateRoot } from 'src/auth'
 
 export default function (
   fastify: FastifyInstance,
@@ -17,6 +18,7 @@ export default function (
   done: any
 ): void {
   fastify.post('/file', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const data = req.body as CreateShareFile
     const result = await uploadShareFile(fastify, data)
     return createRequestReturn(200, result as ShareFileReturn, '')
@@ -24,12 +26,14 @@ export default function (
   fastify.delete(
     '/file/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const id = (req.params as { id: string }).id
       const result = await deleteShareFile(fastify, id)
       return createRequestReturn(200, result, '')
     }
   )
   fastify.put('/file/:id', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const id = (req.params as { id: string }).id
     const data = req.body
     // const type = (req.body as { type: string }).type
@@ -37,6 +41,7 @@ export default function (
     return createRequestReturn(200, result as ShareFile, '')
   })
   fastify.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
+    await validateRoot(fastify, req, res)
     const query = req.query as {
       size: string
       page: string
@@ -55,6 +60,7 @@ export default function (
   fastify.get(
     '/download/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const id = (req.params as { id: string }).id
       const result = await increaseShareFileDownload(fastify, id)
       return createRequestReturn(200, result as ShareFile, '')
@@ -63,6 +69,7 @@ export default function (
   fastify.get(
     '/file/:id',
     async (req: FastifyRequest, res: FastifyReply) => {
+      await validateRoot(fastify, req, res)
       const id = (req.params as { id: string }).id
       const result = await getShareFile(fastify, id)
       return createRequestReturn(200, result as ShareFile, '')
