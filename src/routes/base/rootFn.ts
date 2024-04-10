@@ -77,6 +77,7 @@ export async function rootRegist(
   const result = await fastify.prisma.root.create({
     data: RootWhereInput
   })
+  // await fastify.prisma.
   return await fastify.prisma.root.findUnique({
     where: { id: result.id },
     select: {

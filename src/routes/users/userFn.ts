@@ -220,12 +220,12 @@ export async function confirmOrder(
       })
       throw new Error('订单已关闭')
     } else if (status === 'WAIT_BUYER_PAY') {
-      await fastify.prisma.pay.updateMany({
-        where: { orderId },
-        data: {
-          isClose: false
-        }
-      })
+      // await fastify.prisma.pay.updateMany({
+      //   where: { orderId },
+      //   data: {
+      //     isClose: false
+      //   }
+      // })
       throw new Error('订单未支付')
     } else {
       throw new Error('订单不存在')

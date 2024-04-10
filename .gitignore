@@ -34,3 +34,4 @@ alipay
 /public/*
 .eslintcache
 /frontdist/*
+prisma/database

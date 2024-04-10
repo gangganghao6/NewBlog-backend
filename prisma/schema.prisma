@@ -293,6 +293,7 @@ model BaseInfo {
   id               String   @id @default(uuid())
   name             String?
   description      String?
+  isAdminRegisted  Boolean  @default(false)
   createdTime      DateTime @default(now())
   lastModifiedTime DateTime @default(now())
   recommendBlogIds String?

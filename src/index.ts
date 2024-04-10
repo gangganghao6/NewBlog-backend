@@ -77,7 +77,6 @@ fastify.alipaySdk = new AliPaySdk({
 })
 
 await fastify.register(fastifyCors, {
-  // origin: [`${getNetworkIp()}:${parseInt(process.env.FRONT_PORT)}`],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 })
@@ -130,13 +129,6 @@ await registeInterceptor(fastify)
 
 await registStatic(fastify)
 await registRoutes(fastify)
-// fastify.setErrorHandler(function (error, request, reply) {
-//   // Log error
-//   this.log.error(111,error)
-//   // Send error response
-//   reply.status(200).send({ ok: false })
-// })
-
 const start = async (): Promise<void> => {
   try {
     await fastify.listen({

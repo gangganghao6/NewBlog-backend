@@ -89,7 +89,7 @@ export default function (
   fastify.put('/subscribe', async (req: FastifyRequest, res: FastifyReply) => {
     // await validateUser(fastify, req, res)
     const userId = req.session.userId
-    if (isNil(userId)){
+    if (isNil(userId)) {
       await validateUser(fastify, req, res)
     }
     const data = req.body as PutUser
@@ -105,7 +105,11 @@ export default function (
       const data = req.body as CreatePayOrder
       const result = await createPayOrder(fastify, { userId, ...data })
       setTimeout(async () => {
-        await closePayOrder(fastify, result.orderId)
+        try {
+          await confirmOrder(fastify, { outTradeNo: result.orderId })
+        } catch {
+          await closePayOrder(fastify, result.orderId)
+        }
       }, 1000 * 60 * 10)
       return createRequestReturn(200, result as Pay, '')
     }
