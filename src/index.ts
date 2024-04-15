@@ -66,7 +66,7 @@ const FasitfyConfig = {
 }
 export const fastify = Fastify(FasitfyConfig)
 const prisma = new PrismaClient()
-await prisma.$queryRaw`PRAGMA journal_mode=WAL`
+// await prisma.$queryRaw`PRAGMA journal_mode=WAL`
 // await prisma.$queryRaw`PRAGMA journal_mode=WAL`
 fastify.prisma = prisma
 fastify.alipaySdk = new AliPaySdk({

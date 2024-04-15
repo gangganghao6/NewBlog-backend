@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -128,7 +128,7 @@ model Comment {
 model Blog {
   id               String    @id @default(uuid())
   title            String
-  content          String
+  content          String    @db.Text
   type             String
   createdTime      DateTime  @default(now())
   lastModifiedTime DateTime  @default(now())
@@ -143,7 +143,7 @@ model Blog {
 
 model Shuoshuo {
   id               String    @id @default(uuid())
-  content          String?
+  content          String?   @db.Text
   createdTime      DateTime  @default(now())
   lastModifiedTime DateTime  @default(now())
   visitedCount     Int       @default(0)
@@ -159,7 +159,7 @@ model Pay {
   payType     String //wechat/alipay
   money       Float     @default(0.0)
   orderId     String    @default(uuid())
-  orderUrl    String
+  orderUrl    String    @db.Text
   createdTime DateTime  @default(now())
   closeTime   DateTime?
   paySuccess  Boolean   @default(false)
@@ -235,7 +235,7 @@ model Personal {
   university        String?
   universityEndTime DateTime?
   home              String?
-  content           String?
+  content           String?   @db.Text
   visitedCount      Int       @default(0)
   createdTime       DateTime  @default(now())
   lastModifiedTime  DateTime  @default(now())
@@ -282,7 +282,7 @@ model Chat {
   userId      String
   user        User?    @relation(fields: [userId], references: [id])
   createdTime DateTime @default(now())
-  content     String?
+  content     String?  @db.Text
   // media_class  String //image/video/file/text
   image       Image?
   video       Video?
