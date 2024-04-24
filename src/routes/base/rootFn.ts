@@ -30,6 +30,9 @@ export async function rootLogin(
       id: true,
     }
   })
+  if(tempResult === null){
+    throw new Error('账号或密码错误')
+  }
   const result = await fastify.prisma.root.update({
     where: {
       id: tempResult.id
@@ -62,6 +65,10 @@ export async function rootRegist(
     password,
     name: data.name
   })
+  const rootHasRegisted = await fastify.prisma.root.findFirst();
+  if(rootHasRegisted !== null){
+    throw new Error('已存在管理员账号')
+  }
   const exist = await fastify.prisma.root.findFirst({
     where: {
       OR: [
