@@ -13,6 +13,7 @@ export async function putBaseInfo(
       name: data.name,
       description: data.description,
       recommendBlogIds: data.recommendBlogIds,
+      lastModifiedTime: new Date(),
       headImage: {
         ...(baseInfo.headImage && { delete: true }),
         ...({ create: removeObjNullUndefined(data.headImage) })
