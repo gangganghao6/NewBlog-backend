@@ -26,12 +26,12 @@ export default function (
   fastify.post('/login', async (req: FastifyRequest, res: FastifyReply) => {
     const email = (req.body as { email: string }).email
     const result = await getUserByEmail(fastify, email)
-    await updateUserLastActiveTime(fastify, result.id)
     if (result !== null) {
+      await updateUserLastActiveTime(fastify, result.id)
       req.session.userId = result.id
       return createRequestReturn(200, result as UserLoginReturn, '')
     } else {
-      return createRequestReturn(500, null, '登录失败')
+      throw new Error('登录失败')
     }
   })
   fastify.post(
