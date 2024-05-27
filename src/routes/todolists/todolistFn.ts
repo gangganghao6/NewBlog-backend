@@ -7,8 +7,6 @@ export async function createTodolist(
   data: any
 ): Promise<any> {
   await updateBaseInfoLastModified(fastify)
-  console.log(data);
-  
   return await fastify.prisma.todolist.create({
     data: {
       title: data.title,

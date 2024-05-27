@@ -32,6 +32,7 @@
   "scripts": {
     "lint": "eslint src --ext .ts --cache --fix",
     "dev": "set NODE_ENV=dev&&pnpm prisma&&tsx watch src/index.ts",
+    "prod": "set NODE_ENV=prod&&pnpm prisma&&tsx watch src/index.ts",
     "build": "rollup -c",
     "run": "set NODE_ENV=prod&&yarn build&&node dist/index.js",
     "prisma": "prisma format&&npx prisma migrate dev --name init",
